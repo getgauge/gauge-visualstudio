@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<VSTemplate Version="3.0.0" Type="Project" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" xmlns:sdk="http://schemas.microsoft.com/developer/vstemplate-sdkextension/2010">
+  <TemplateData>
+    <Name>Gauge Test Project</Name>
+    <Description>Gauge Test Project</Description>
+    <Icon>Gauge.VisualStudio.Template.ico</Icon>
+    <ProjectType>CSharp</ProjectType>
+    <SortOrder>5</SortOrder>
+    <TemplateID>1ea0c40f-babd-472e-9029-1c0a90b7fd92</TemplateID>
+    <CreateNewFolder>true</CreateNewFolder>
+    <DefaultName>Gauge Spec</DefaultName>
+    <ProvideDefaultName>true</ProvideDefaultName>
+    <LocationField>Enabled</LocationField>
+    <EnableLocationBrowseButton>true</EnableLocationBrowseButton>
+  </TemplateData>
+  <TemplateContent>
+    <Project File="Gauge.Spec.csproj" ReplaceParameters="true">
+      <ProjectItem ReplaceParameters="true" TargetFileName="Properties\AssemblyInfo.cs">AssemblyInfo.cs</ProjectItem>
+      <ProjectItem ReplaceParameters="true" OpenInEditor="true">StepImplementation.cs</ProjectItem>
+      <ProjectItem ReplaceParameters="true" TargetFileName="packages.config">packages.config</ProjectItem>
+      <ProjectItem ReplaceParameters="true" TargetFileName="hello_world.spec">hello_world.spec</ProjectItem>
+    </Project>
+  </TemplateContent>
+</VSTemplate>
