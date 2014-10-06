@@ -1,6 +1,6 @@
 ﻿using System;
-$if$ ($targetframeworkversion$ >= 3.5)using System.Linq;
-$endif$using Gauge.CSharp.Lib;
+using System.Linq;
+using Gauge.CSharp.Lib;
 using Gauge.CSharp.Lib.Attribute;
 
 namespace $safeprojectname$
@@ -25,8 +25,7 @@ namespace $safeprojectname$
             table.GetColumnNames().ForEach(Console.Write);
             var rows = table.GetRows();
             // typeof(rows) = List<List<string>> i.e a 2-dimensional representation of a table.
-            $if$ ($targetframeworkversion$ >= 3.5)rows.ForEach(list => Console.WriteLine(list.Aggregate((a, b) => string.Format("{0}|{1}", a, b))));
-            $endif$
+            rows.ForEach(list => Console.WriteLine(list.Aggregate((a, b) => string.Format("{0}|{1}", a, b))));
         }
 	}
 }
