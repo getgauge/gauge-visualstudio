@@ -18,7 +18,6 @@
       <ProjectItem ReplaceParameters="true" TargetFileName="Properties\AssemblyInfo.cs">AssemblyInfo.cs</ProjectItem>
       <ProjectItem ReplaceParameters="true" OpenInEditor="true">StepImplementation.cs</ProjectItem>
       <ProjectItem ReplaceParameters="true" TargetFileName="packages.config">packages.config</ProjectItem>
-      <ProjectItem ReplaceParameters="true" TargetFileName="hello_world.spec">hello_world.spec</ProjectItem>
     </Project>
   </TemplateContent>
 </VSTemplate>
