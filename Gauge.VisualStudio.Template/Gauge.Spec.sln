@@ -1,5 +1,5 @@
 ﻿Microsoft Visual Studio Solution File, Format Version 12.00
-Project("$guid2$") = "$safeprojectname$", "$safeprojectname$\$safeprojectname$.csproj", "$guid1$"
+Project("$guid2$") = "$safeprojectname$", "$safeprojectname$.csproj", "$guid1$"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
