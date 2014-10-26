@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauge.VisualStudio.Template
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauge.VSIX", "Gauge.visx\Gauge.VSIX.csproj", "{FEE4DB7D-7C9F-4BC5-8C28-2CAA52D44DDF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauge.VisualStudio", "GaugePlugin\Gauge.VisualStudio.csproj", "{E2686B26-FAC1-4CF3-9A1B-4161E980BD3D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{FEE4DB7D-7C9F-4BC5-8C28-2CAA52D44DDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FEE4DB7D-7C9F-4BC5-8C28-2CAA52D44DDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FEE4DB7D-7C9F-4BC5-8C28-2CAA52D44DDF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2686B26-FAC1-4CF3-9A1B-4161E980BD3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2686B26-FAC1-4CF3-9A1B-4161E980BD3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2686B26-FAC1-4CF3-9A1B-4161E980BD3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2686B26-FAC1-4CF3-9A1B-4161E980BD3D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
