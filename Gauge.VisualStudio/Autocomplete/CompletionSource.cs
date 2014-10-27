@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Linq;
+using System.Windows.Documents;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Utilities;
@@ -35,12 +37,7 @@ namespace Gauge.VisualStudio.AutoComplete
                 if (_disposed)
                     throw new ObjectDisposedException("GaugeCompletionSource");
 
-                var completions = new List<Completion>
-                {
-                        new Completion("Foo"),
-                        new Completion("Bar"),
-                        new Completion("Blah")
-                };
+                var completions = new List<Completion>(Steps.GetAll().Select(x => new Completion(x)));
 
                 var snapshot = _buffer.CurrentSnapshot;
                 var snapshotPoint = session.GetTriggerPoint(snapshot);
