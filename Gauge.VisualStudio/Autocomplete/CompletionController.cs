@@ -2,6 +2,7 @@
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Language.Intellisense;
@@ -70,7 +71,10 @@ namespace Gauge.VisualStudio.AutoComplete
                             handled = StartSession();
                             break;
                         case VSConstants.VSStd2KCmdID.TYPECHAR:
-                            if (GetTypeChar(pvaIn) == '*')
+                            var lineText = TextView.Caret.Position.BufferPosition.GetContainingLine().GetText().Trim();
+                            var stepRegex = new Regex(@"^(\*\s?\w*)$", RegexOptions.Compiled);
+                            //the current character isn't yet available in the buffer!, add it to the text to check
+                            if (stepRegex.IsMatch(string.Format("{0}{1}",lineText, GetTypeChar(pvaIn))))
                             {
                                 StartSession();
                             }
