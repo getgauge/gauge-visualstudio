@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
-using System.Windows.Documents;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Utilities;
@@ -37,7 +36,7 @@ namespace Gauge.VisualStudio.AutoComplete
                 if (_disposed)
                     throw new ObjectDisposedException("GaugeCompletionSource");
 
-                var completions = new List<Completion>(Steps.GetAll().Select(x => new Completion(x)));
+                var completions =new List<Completion>(Steps.GetAll().Select(x => new Completion(string.Format("* {0}", x))));
 
                 var snapshot = _buffer.CurrentSnapshot;
                 var snapshotPoint = session.GetTriggerPoint(snapshot);
@@ -55,7 +54,7 @@ namespace Gauge.VisualStudio.AutoComplete
 
                 var applicableTo = snapshot.CreateTrackingSpan(new SnapshotSpan(start, triggerPoint), SpanTrackingMode.EdgeInclusive);
 
-                completionSets.Add(new CompletionSet("All", "All", applicableTo, completions, null));
+                completionSets.Add(new CompletionSet("Gauge", "Gauge", applicableTo, completions, null));
             }
 
             public void Dispose()

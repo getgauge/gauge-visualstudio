@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Language.Intellisense;
@@ -68,6 +69,13 @@ namespace Gauge.VisualStudio.AutoComplete
                         case VSConstants.VSStd2KCmdID.COMPLETEWORD:
                             handled = StartSession();
                             break;
+                        case VSConstants.VSStd2KCmdID.TYPECHAR:
+                            if (GetTypeChar(pvaIn) == '*')
+                            {
+                                StartSession();
+                            }
+                            Filter();                                
+                            break;
                         case VSConstants.VSStd2KCmdID.RETURN:
                             handled = Complete(false);
                             break;
@@ -101,6 +109,11 @@ namespace Gauge.VisualStudio.AutoComplete
                 }
 
                 return hresult;
+            }
+
+            private static char GetTypeChar(IntPtr pvaIn)
+            {
+                return (char)(ushort)Marshal.GetObjectForNativeVariant(pvaIn);
             }
 
             private void Filter()

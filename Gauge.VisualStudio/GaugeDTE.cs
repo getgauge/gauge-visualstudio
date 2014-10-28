@@ -33,9 +33,11 @@ namespace Gauge.VisualStudio
         public IClassifier GetClassifier(ITextBuffer buffer)
         {
             DTE = (DTE)ServiceProvider.GetService(typeof(DTE));
-            foreach (Project project in DTE.Solution.Projects)
+            var projects = DTE.Solution.Projects;
+
+            for (var i = 1; i <= projects.Count; i++)
             {
-                var vsProject = project.Object as VSLangProj.VSProject;
+                var vsProject = projects.Item(i).Object as VSLangProj.VSProject;
                 if (vsProject == null || vsProject.References.Find("Gauge.CSharp.Lib") == null) continue;
                 var gaugeProject = vsProject.Project;
                 if (ApiConnections.ContainsKey(SlugifyName(vsProject.Project)))
@@ -47,7 +49,6 @@ namespace Gauge.VisualStudio
 
                 var apiConnection = new GaugeApiConnection(new TcpClientWrapper(openPort));
                 ApiConnections.Add(SlugifyName(gaugeProject), apiConnection);
-                Debug.WriteLine("project: {0}, port: {1}", SlugifyName(gaugeProject), openPort);
             }
             return null;
         }
