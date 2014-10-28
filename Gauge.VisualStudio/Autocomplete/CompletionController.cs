@@ -91,23 +91,6 @@ namespace Gauge.VisualStudio.AutoComplete
                 if (!handled)
                     hresult = Next.Exec(pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
 
-                if (!ErrorHandler.Succeeded(hresult)) return hresult;
-                if (pguidCmdGroup != VSConstants.VSStd2K) return hresult;
-                switch ((VSConstants.VSStd2KCmdID)nCmdID)
-                {
-                    case VSConstants.VSStd2KCmdID.TYPECHAR:
-//                        char ch = GetTypeChar(pvaIn);
-//                        if (ch == ' ')
-//                            StartSession();
-//                        else 
-                        if (_currentSession != null)
-                            Filter();
-                        break;
-                    case VSConstants.VSStd2KCmdID.BACKSPACE:
-                        Filter();
-                        break;
-                }
-
                 return hresult;
             }
 
