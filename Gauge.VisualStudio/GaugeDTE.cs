@@ -18,7 +18,8 @@ namespace Gauge.VisualStudio
 {
 
     [Export(typeof(IClassifierProvider))]
-    [ContentType("spec")]
+    [Order(Before = "default")]
+    [ContentType(GaugeContentTypeDefinitions.GaugeContentType)]
     internal class GaugeDTEProvider : IClassifierProvider, IDisposable
     {
         public static DTE DTE { get; private set; }
@@ -34,7 +35,6 @@ namespace Gauge.VisualStudio
         {
             DTE = (DTE)ServiceProvider.GetService(typeof(DTE));
             var projects = DTE.Solution.Projects;
-
             for (var i = 1; i <= projects.Count; i++)
             {
                 var vsProject = projects.Item(i).Object as VSLangProj.VSProject;
@@ -83,6 +83,7 @@ namespace Gauge.VisualStudio
             gaugeProcess.Start();
             gaugeProcess.WaitForExit(5000); //timeout = 5 seconds to launch gauge
 
+            //TODO: Check process exitcode and handle failure
             ChildProcesses.Add(gaugeProcess);
         }
 

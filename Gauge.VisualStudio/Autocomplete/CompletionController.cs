@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using EnvDTE;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Language.Intellisense;
@@ -17,7 +19,7 @@ namespace Gauge.VisualStudio.AutoComplete
     public class CompletionController
     {
         [Export(typeof(IVsTextViewCreationListener))]
-        [ContentType("spec")]
+        [ContentType(GaugeContentTypeDefinitions.GaugeContentType)]
         [TextViewRole(PredefinedTextViewRoles.Interactive)]
         internal sealed class VsTextViewCreationListener : IVsTextViewCreationListener
         {
@@ -30,7 +32,6 @@ namespace Gauge.VisualStudio.AutoComplete
             public void VsTextViewCreated(IVsTextView textViewAdapter)
             {
                 var view = _adaptersFactory.GetWpfTextView(textViewAdapter);
-                Debug.Assert(view != null);
 
                 var filter = new CommandFilter(view, _completionBroker);
 
@@ -89,6 +90,17 @@ namespace Gauge.VisualStudio.AutoComplete
                         case VSConstants.VSStd2KCmdID.CANCEL:
                             handled = Cancel();
                             break;
+                    }
+                    if ((VSConstants.VSStd97CmdID) nCmdID == VSConstants.VSStd97CmdID.GotoDefn)
+                    {
+                        var lineText = TextView.Caret.Position.BufferPosition.GetContainingLine().GetText().Trim();
+                        var codeElements = GaugeDTEProvider.DTE.Solution.Projects.Item(1).CodeModel.CodeElements;
+                        var elements = new List<CodeElement>();
+                        for (var i = 0; i < codeElements.Count; i++)
+                        {
+                            if(codeElements.Item(i).Kind==vsCMElement.vsCMElementFunction)
+                                elements.Add(codeElements.Item(i));
+                        }
                     }
                 }
 

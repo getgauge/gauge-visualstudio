@@ -11,7 +11,7 @@ namespace Gauge.VisualStudio.AutoComplete
     public class CompletionSource
     {
         [Export(typeof(ICompletionSourceProvider))]
-        [ContentType("spec")]
+        [ContentType(GaugeContentTypeDefinitions.GaugeContentType)]
         [Name("gaugeCompletion")]
         class GaugeCompletionSourceProvider : ICompletionSourceProvider
         {
@@ -25,7 +25,7 @@ namespace Gauge.VisualStudio.AutoComplete
         {
             private readonly ITextBuffer _buffer;
             private bool _disposed;
-
+            
             public GaugeCompletionSource(ITextBuffer buffer)
             {
                 _buffer = buffer;
@@ -35,6 +35,8 @@ namespace Gauge.VisualStudio.AutoComplete
             {
                 if (_disposed)
                     throw new ObjectDisposedException("GaugeCompletionSource");
+                var projectItem = GaugeDTEProvider.DTE.ActiveDocument.ProjectItem;
+                var kind = GaugeDTEProvider.DTE.ActiveDocument.Type;
 
                 var completions =new List<Completion>(Steps.GetAll().Select(x => new Completion(string.Format("* {0}", x))));
 

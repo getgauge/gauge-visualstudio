@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
-    <Identity Id="GaugePlugin.ThoughtWorks.9b0c8daa-d048-488a-b6b0-e11d72a3b8b4" Version="1.0" Language="en-US" Publisher="ThoughtWorks" />
+    <Identity Id="GaugePlugin.ThoughtWorks.9b0c8daa-d048-488a-b6b0-e11d72a3b8b4" Version="0.0.2.0" Language="en-US" Publisher="ThoughtWorks" />
     <DisplayName>GaugePlugin</DisplayName>
     <Description>This is a sample classifier extension to the Visual Studio Editor.</Description>
   </Metadata>
