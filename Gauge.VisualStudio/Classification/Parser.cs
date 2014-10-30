@@ -14,9 +14,9 @@ namespace Gauge.VisualStudio.Classification
         private static readonly Regex SpecHeadingRegex = new Regex(@"(\#.*)$", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
         private static readonly Regex SpecHeadingRegexAlt = new Regex(@".+[\n\r]=+", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
 
-        private static readonly Regex StepRegex = new Regex(@"\W+(\*.+)");
+        private static readonly Regex StepRegex = new Regex(@"[ ]*\*([\w ]*(?<stat>""[\w ]+"")*(?<dyn>\<[\w ]+\>)*)*", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
 
-        private static readonly Regex TagsRegex = new Regex(@"\s*tags\s*:\s*(?<tag>[\w\s]+)(,(?<tag>[\w\s]+))*");
+        private static readonly Regex TagsRegex = new Regex(@"\s*tags\s*:\s*(?<tag>[\w\s]+)(,(?<tag>[\w\s]+))*", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
 
         public static List<Token> ParseMarkdownParagraph(string text, int offset = 0)
         {
@@ -43,7 +43,9 @@ namespace Gauge.VisualStudio.Classification
             Scenario,
             Step,
             Tag,
-            TagValue
+            TagValue,
+            StaticParameter,
+            DynamicParameter
         }
 
         public struct Token
@@ -91,6 +93,14 @@ namespace Gauge.VisualStudio.Classification
             foreach (Match match in matches)
             {
                 yield return new Token(TokenType.Step, new Span(match.Index, match.Length));
+                foreach (Capture capture in match.Groups["stat"].Captures)
+                {
+                    yield return new Token(TokenType.StaticParameter, new Span(capture.Index, capture.Length));    
+                }
+                foreach (Capture capture in match.Groups["dyn"].Captures)
+                {
+                    yield return new Token(TokenType.DynamicParameter, new Span(capture.Index, capture.Length));    
+                }
             }
         }
 

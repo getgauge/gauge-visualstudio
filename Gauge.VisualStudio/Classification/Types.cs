@@ -31,6 +31,16 @@ namespace Gauge.VisualStudio.Classification
         internal static ClassificationTypeDefinition GaugeStepDefinition = null;
 
         [Export]
+        [Name("gauge.static_param")]
+        [BaseDefinition("gauge.step")]
+        internal static ClassificationTypeDefinition GaugeStaticParamDefinition = null;
+
+        [Export]
+        [Name("gauge.dynamic_param")]
+        [BaseDefinition("gauge.step")]
+        internal static ClassificationTypeDefinition GaugeDynamicParamDefinition = null;
+
+        [Export]
         [Name("gauge.comment")]
         [BaseDefinition("gauge")]
         internal static ClassificationTypeDefinition GaugeCommentDefinition = null;

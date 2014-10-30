@@ -48,6 +48,34 @@ namespace Gauge.VisualStudio.Classification
                 ForegroundColor = Colors.Teal;
             }
         }
+        
+        [Export(typeof(EditorFormatDefinition))]
+        [ClassificationType(ClassificationTypeNames = "gauge.static_param")]
+        [Name("gauge.static_param")]
+        [DisplayName("Gauge Static Parameter")]
+        [UserVisible(true)]
+        sealed class GaugeStaticParamFormat : ClassificationFormatDefinition
+        {
+            public GaugeStaticParamFormat()
+            {
+                IsBold = true;
+                ForegroundColor = Colors.Orange;
+            }
+        }
+
+        [Export(typeof(EditorFormatDefinition))]
+        [ClassificationType(ClassificationTypeNames = "gauge.dynamic_param")]
+        [Name("gauge.dynamic_param")]
+        [DisplayName("Gauge Dynamic Parameter")]
+        [UserVisible(true)]
+        sealed class GaugeDynamicParamFormat : ClassificationFormatDefinition
+        {
+            public GaugeDynamicParamFormat()
+            {
+                IsBold = true;
+                ForegroundColor = Colors.BlueViolet;
+            }
+        }
 
         [Export(typeof(EditorFormatDefinition))]
         [ClassificationType(ClassificationTypeNames = "gauge.tag")]
