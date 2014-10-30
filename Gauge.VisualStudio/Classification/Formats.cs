@@ -16,8 +16,8 @@ namespace Gauge.VisualStudio.Classification
         {
             public GaugeSpecificationFormat()
             {
-                FontRenderingSize = 22;
-                ForegroundColor = Colors.MediumPurple;
+                FontRenderingSize = 18;
+                IsBold = true;
             }
         }
 
@@ -30,8 +30,8 @@ namespace Gauge.VisualStudio.Classification
         {
             public GaugeScenarioFormat()
             {
-                FontRenderingSize = 20;
-                ForegroundColor = Colors.MediumPurple;
+                FontRenderingSize = 16;
+                IsBold = true;
             }
         }
 
@@ -40,12 +40,40 @@ namespace Gauge.VisualStudio.Classification
         [Name("gauge.step")]
         [DisplayName("Gauge Step")]
         [UserVisible(true)]
-        sealed class MarkdownListFormat : ClassificationFormatDefinition
+        sealed class GaugeStepFormat : ClassificationFormatDefinition
         {
-            public MarkdownListFormat()
+            public GaugeStepFormat()
             {
                 IsBold = true;
                 ForegroundColor = Colors.Teal;
+            }
+        }
+
+        [Export(typeof(EditorFormatDefinition))]
+        [ClassificationType(ClassificationTypeNames = "gauge.tag")]
+        [Name("gauge.tag")]
+        [DisplayName("Gauge Tag")]
+        [UserVisible(true)]
+        sealed class GaugeTagFormat : ClassificationFormatDefinition
+        {
+            public GaugeTagFormat()
+            {
+                IsBold = true;
+                ForegroundColor = Colors.Gray;
+            }
+        }
+
+        [Export(typeof(EditorFormatDefinition))]
+        [ClassificationType(ClassificationTypeNames = "gauge.tagvalue")]
+        [Name("gauge.tagvalue")]
+        [DisplayName("Gauge Tag Value")]
+        [UserVisible(true)]
+        sealed class GaugeTagValueFormat : ClassificationFormatDefinition
+        {
+            public GaugeTagValueFormat()
+            {
+                IsBold = true;
+                ForegroundColor = Colors.MediumAquamarine;
             }
         }
     }

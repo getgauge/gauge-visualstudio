@@ -106,6 +106,8 @@ namespace Gauge.VisualStudio.Classification
             { Parser.TokenType.Scenario, "gauge.scenario" },
             { Parser.TokenType.Step, "gauge.step" },
             { Parser.TokenType.Comment, "gauge.comment" },
+            { Parser.TokenType.Tag, "gauge.tag" },
+            { Parser.TokenType.TagValue, "gauge.tagvalue" },
         };
 
         IClassificationType GetClassificationTypeForMarkdownToken(Parser.TokenType tokenType)

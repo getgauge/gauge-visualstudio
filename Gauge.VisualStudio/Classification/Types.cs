@@ -34,5 +34,15 @@ namespace Gauge.VisualStudio.Classification
         [Name("gauge.comment")]
         [BaseDefinition("gauge")]
         internal static ClassificationTypeDefinition GaugeCommentDefinition = null;
+        
+        [Export]
+        [Name("gauge.tag")]
+        [BaseDefinition("gauge")]
+        internal static ClassificationTypeDefinition GaugeTagDefinition = null;
+        
+        [Export]
+        [Name("gauge.tagvalue")]
+        [BaseDefinition("gauge.tag")]
+        internal static ClassificationTypeDefinition GaugeTagValueDefinition = null;
     }
 }

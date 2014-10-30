@@ -8,11 +8,6 @@ namespace Gauge.VisualStudio.Classification
     {
         internal const char DummyChar = '~';
 
-        private const string LineTerminator = @"\r|\n|\r\n";
-        private const string InputCharacter = @"[^\r\n]";
-        private const string WhiteSpace = @"[ \t\f]";
-        private const string TableIdentifier = @"[|]";
-
         private static readonly Regex ScenarioHeadingRegex = new Regex(@"(\#\#.*)$", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
         private static readonly Regex ScenarioHeadingRegexAlt = new Regex(@".+[\n\r]-+", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
 
@@ -21,8 +16,7 @@ namespace Gauge.VisualStudio.Classification
 
         private static readonly Regex StepRegex = new Regex(@"\W+(\*.+)");
 
-        private static Regex _tagsRegex = new Regex(string.Format("{0}* tags {1}? \":\" {2}* {3}?", WhiteSpace, WhiteSpace, InputCharacter,
-            LineTerminator), RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
+        private static readonly Regex TagsRegex = new Regex(@"\s*tags\s*:\s*(?<tag>[\w\s]+)(,(?<tag>[\w\s]+))*");
 
         public static List<Token> ParseMarkdownParagraph(string text, int offset = 0)
         {
@@ -33,6 +27,7 @@ namespace Gauge.VisualStudio.Classification
             tokens.AddRange(ParseSpecs(text));
             tokens.AddRange(ParseScenarios(text));
             tokens.AddRange(ParseSteps(text));
+            tokens.AddRange(ParseTags(text));
             return tokens;
         }
 
@@ -47,7 +42,8 @@ namespace Gauge.VisualStudio.Classification
             Specification, 
             Scenario,
             Step,
-            Tag
+            Tag,
+            TagValue
         }
 
         public struct Token
@@ -65,26 +61,27 @@ namespace Gauge.VisualStudio.Classification
             var matches = ScenarioHeadingRegex.Matches(text);
             foreach (Match match in matches)
             {
-                yield return new Token(TokenType.Scenario, new Span(match.Index, match.Groups[0].Length));
+                yield return new Token(TokenType.Scenario, new Span(match.Index, match.Length));
             }
 
             matches = ScenarioHeadingRegexAlt.Matches(text);
             foreach (Match match in matches)
             {
-                yield return new Token(TokenType.Scenario, new Span(match.Index, match.Groups[0].Length));
+                yield return new Token(TokenType.Scenario, new Span(match.Index, match.Length));
             }
         }
+
         private static IEnumerable<Token> ParseSpecs(string text)
         {
             var matches = SpecHeadingRegex.Matches(text);
             foreach (Match match in matches)
             {
-                yield return new Token(TokenType.Specification, new Span(match.Index, match.Groups[0].Length));
+                yield return new Token(TokenType.Specification, new Span(match.Index, match.Length));
             }
             matches = SpecHeadingRegexAlt.Matches(text);
             foreach (Match match in matches)
             {
-                yield return new Token(TokenType.Specification, new Span(match.Index, match.Groups[0].Length));
+                yield return new Token(TokenType.Specification, new Span(match.Index, match.Length));
             }
         }
 
@@ -93,7 +90,20 @@ namespace Gauge.VisualStudio.Classification
             var matches = StepRegex.Matches(text);
             foreach (Match match in matches)
             {
-                yield return new Token(TokenType.Step, new Span(match.Index, match.Groups[0].Length));
+                yield return new Token(TokenType.Step, new Span(match.Index, match.Length));
+            }
+        }
+
+        private static IEnumerable<Token> ParseTags(string text)
+        {
+            var matches = TagsRegex.Matches(text);
+            foreach (Match match in matches)
+            {
+                yield return new Token(TokenType.Tag, new Span(match.Index, match.Length));
+                foreach (Capture capture in match.Groups["tag"].Captures)
+                {
+                    yield return new Token(TokenType.TagValue, new Span(capture.Index, capture.Length));                    
+                }
             }
         }
     }
