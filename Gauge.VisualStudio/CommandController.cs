@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.Composition;
 using Gauge.VisualStudio.AutoComplete;
+using Gauge.VisualStudio.GotoDefn;
 using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.OLE.Interop;

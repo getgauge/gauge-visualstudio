@@ -30,7 +30,6 @@ namespace Gauge.VisualStudio.AutoComplete
             var handled = false;
             var hresult = VSConstants.S_OK;
 
-            // 1. Pre-process
             if (pguidCmdGroup == VSConstants.VSStd2K)
             {
                 switch ((VSConstants.VSStd2KCmdID) nCmdID)
@@ -129,19 +128,12 @@ namespace Gauge.VisualStudio.AutoComplete
 
         public int QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText)
         {
-            try
+            switch ((VSConstants.VSStd2KCmdID) prgCmds[0].cmdID)
             {
-                switch ((VSConstants.VSStd2KCmdID) prgCmds[0].cmdID)
-                {
-                    case VSConstants.VSStd2KCmdID.AUTOCOMPLETE:
-                    case VSConstants.VSStd2KCmdID.COMPLETEWORD:
-                        prgCmds[0].cmdf = (uint) OLECMDF.OLECMDF_ENABLED | (uint) OLECMDF.OLECMDF_SUPPORTED;
-                        return VSConstants.S_OK;
-                }
-            }
-            catch
-            {
-                //do nothing
+                case VSConstants.VSStd2KCmdID.AUTOCOMPLETE:
+                case VSConstants.VSStd2KCmdID.COMPLETEWORD:
+                    prgCmds[0].cmdf = (uint) OLECMDF.OLECMDF_ENABLED | (uint) OLECMDF.OLECMDF_SUPPORTED;
+                    return VSConstants.S_OK;
             }
 
             return Next.QueryStatus(pguidCmdGroup, cCmds, prgCmds, pCmdText);

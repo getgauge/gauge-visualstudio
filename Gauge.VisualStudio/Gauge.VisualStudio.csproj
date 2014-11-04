@@ -44,9 +44,9 @@
     <Reference Include="envdte, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
-    <Reference Include="Gauge.CSharp.Lib, Version=0.0.2.2, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Gauge.CSharp.Lib, Version=0.0.2.3, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Gauge.CSharp.Lib.0.0.2.2\lib\net45\Gauge.CSharp.Lib.dll</HintPath>
+      <HintPath>..\packages\Gauge.CSharp.Lib.0.0.2.3\lib\net45\Gauge.CSharp.Lib.dll</HintPath>
     </Reference>
     <Reference Include="Google.ProtocolBuffers, Version=2.4.1.521, Culture=neutral, PublicKeyToken=55f7125234beb589, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
