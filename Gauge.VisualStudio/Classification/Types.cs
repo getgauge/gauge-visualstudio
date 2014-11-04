@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.Composition;
+using Microsoft.VisualStudio.Language.StandardClassification;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Utilities;
 
@@ -28,6 +29,7 @@ namespace Gauge.VisualStudio.Classification
         [Export]
         [Name("gauge.step")]
         [BaseDefinition("gauge")]
+        [BaseDefinition(PredefinedClassificationTypeNames.Keyword)]
         internal static ClassificationTypeDefinition GaugeStepDefinition = null;
 
         [Export]
@@ -48,11 +50,13 @@ namespace Gauge.VisualStudio.Classification
         [Export]
         [Name("gauge.tag")]
         [BaseDefinition("gauge")]
+        [BaseDefinition(PredefinedClassificationTypeNames.Comment)]
         internal static ClassificationTypeDefinition GaugeTagDefinition = null;
         
         [Export]
         [Name("gauge.tagvalue")]
         [BaseDefinition("gauge.tag")]
+        [BaseDefinition(PredefinedClassificationTypeNames.Literal)]
         internal static ClassificationTypeDefinition GaugeTagValueDefinition = null;
     }
 }

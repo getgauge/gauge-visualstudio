@@ -42,11 +42,6 @@ namespace Gauge.VisualStudio.Classification
         [UserVisible(true)]
         sealed class GaugeStepFormat : ClassificationFormatDefinition
         {
-            public GaugeStepFormat()
-            {
-                IsBold = true;
-                ForegroundColor = Colors.Teal;
-            }
         }
         
         [Export(typeof(EditorFormatDefinition))]
@@ -59,7 +54,6 @@ namespace Gauge.VisualStudio.Classification
             public GaugeStaticParamFormat()
             {
                 IsBold = true;
-                ForegroundColor = Colors.Orange;
             }
         }
 
@@ -73,7 +67,6 @@ namespace Gauge.VisualStudio.Classification
             public GaugeDynamicParamFormat()
             {
                 IsBold = true;
-                ForegroundColor = Colors.BlueViolet;
             }
         }
 
@@ -84,11 +77,6 @@ namespace Gauge.VisualStudio.Classification
         [UserVisible(true)]
         sealed class GaugeTagFormat : ClassificationFormatDefinition
         {
-            public GaugeTagFormat()
-            {
-                IsBold = true;
-                ForegroundColor = Colors.Gray;
-            }
         }
 
         [Export(typeof(EditorFormatDefinition))]
@@ -101,7 +89,6 @@ namespace Gauge.VisualStudio.Classification
             public GaugeTagValueFormat()
             {
                 IsBold = true;
-                ForegroundColor = Colors.MediumAquamarine;
             }
         }
     }
