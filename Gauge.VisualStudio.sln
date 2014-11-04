@@ -5,8 +5,6 @@ VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauge.VisualStudio", "Gauge.VisualStudio\Gauge.VisualStudio.csproj", "{E2686B26-FAC1-4CF3-9A1B-4161E980BD3D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauge.CSharp.Lib", "..\gauge-csharp\Lib\Gauge.CSharp.Lib.csproj", "{98C96CA5-84EE-4E47-B0C1-7FF7591EE12A}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{2F1B299F-FED3-482F-9D5C-BF0C2E0890C9}"
 	ProjectSection(SolutionItems) = preProject
 		.nuget\NuGet.Config = .nuget\NuGet.Config
@@ -26,10 +24,6 @@ Global
 		{E2686B26-FAC1-4CF3-9A1B-4161E980BD3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E2686B26-FAC1-4CF3-9A1B-4161E980BD3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E2686B26-FAC1-4CF3-9A1B-4161E980BD3D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{98C96CA5-84EE-4E47-B0C1-7FF7591EE12A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{98C96CA5-84EE-4E47-B0C1-7FF7591EE12A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{98C96CA5-84EE-4E47-B0C1-7FF7591EE12A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{98C96CA5-84EE-4E47-B0C1-7FF7591EE12A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{766FDE39-A14F-485E-BCCE-66AD2539F64B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{766FDE39-A14F-485E-BCCE-66AD2539F64B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{766FDE39-A14F-485E-BCCE-66AD2539F64B}.Release|Any CPU.ActiveCfg = Release|Any CPU

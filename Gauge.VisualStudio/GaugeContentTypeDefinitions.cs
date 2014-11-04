@@ -12,12 +12,12 @@ namespace Gauge.VisualStudio
 
         [Export]
         [Name(GaugeContentType)]
-        [BaseDefinition("code")]
+        [BaseDefinition("text")]
         internal static ContentTypeDefinition GaugeContentTypeDefinition = null;
 
         [Export(typeof(ClassificationTypeDefinition))]
         [Name(GaugeContentType)]
-        [BaseDefinition("code")]
+        [BaseDefinition("text")]
         internal static ClassificationTypeDefinition GaugeClassificationTypeDefinition = null;
 
         [Export]

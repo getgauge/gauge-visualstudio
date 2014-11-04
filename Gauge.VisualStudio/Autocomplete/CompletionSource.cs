@@ -35,8 +35,6 @@ namespace Gauge.VisualStudio.AutoComplete
             {
                 if (_disposed)
                     throw new ObjectDisposedException("GaugeCompletionSource");
-                var projectItem = GaugeDTEProvider.DTE.ActiveDocument.ProjectItem;
-                var kind = GaugeDTEProvider.DTE.ActiveDocument.Type;
 
                 var completions =new List<Completion>(Steps.GetAll().Select(x => new Completion(string.Format("* {0}", x))));
 
