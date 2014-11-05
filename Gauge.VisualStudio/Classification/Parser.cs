@@ -31,6 +31,29 @@ namespace Gauge.VisualStudio.Classification
             return tokens;
         }
 
+        public static string GetSpecificationName(string text)
+        {
+            var match = SpecHeadingRegex.Match(text);
+            if (match.Success)
+                return match.Value;
+            match = SpecHeadingRegexAlt.Match(text);
+            return match.Success ? match.Value : string.Empty;
+        }
+
+        public static IEnumerable<string> GetScenarios(string text)
+        {
+            var matches = ScenarioHeadingRegex.Matches(text);
+            foreach (Match match in matches)
+            {
+                yield return match.Value;
+            }
+            matches = ScenarioHeadingRegexAlt.Matches(text);
+            foreach (Match match in matches)
+            {
+                yield return match.Value;
+            }
+        }
+
         public static bool ParagraphContainsMultilineTokens(string text)
         {
             return SpecHeadingRegexAlt.IsMatch(text) || ScenarioHeadingRegexAlt.IsMatch(text);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
@@ -8,10 +9,12 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using EnvDTE;
 using Gauge.CSharp.Lib;
+using main;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Utilities;
+using VSLangProj;
 using Process = System.Diagnostics.Process;
 
 namespace Gauge.VisualStudio
@@ -24,8 +27,8 @@ namespace Gauge.VisualStudio
     {
         public static DTE DTE { get; private set; }
 
-        [Import]
-        internal SVsServiceProvider ServiceProvider = null;
+        [Import(typeof(SVsServiceProvider))]
+        internal IServiceProvider ServiceProvider = null;
 
         private static readonly Dictionary<string, GaugeApiConnection> ApiConnections = new Dictionary<string, GaugeApiConnection>();
 
@@ -33,12 +36,9 @@ namespace Gauge.VisualStudio
 
         public IClassifier GetClassifier(ITextBuffer buffer)
         {
-            DTE = (DTE)ServiceProvider.GetService(typeof(DTE));
-            var projects = DTE.Solution.Projects;
-            for (var i = 1; i <= projects.Count; i++)
+            var projects = GetGaugeProjects(ServiceProvider);
+            foreach (var vsProject in projects)
             {
-                var vsProject = projects.Item(i).Object as VSLangProj.VSProject;
-                if (vsProject == null || vsProject.References.Find("Gauge.CSharp.Lib") == null) continue;
                 var gaugeProject = vsProject.Project;
                 if (ApiConnections.ContainsKey(SlugifyName(vsProject.Project)))
                     return null;
@@ -51,6 +51,39 @@ namespace Gauge.VisualStudio
                 ApiConnections.Add(SlugifyName(gaugeProject), apiConnection);
             }
             return null;
+        }
+
+        public static IEnumerable<VSProject> GetGaugeProjects(IServiceProvider service)
+        {
+            DTE = (DTE) service.GetService(typeof (DTE));
+            var projects = DTE.Solution.Projects;
+            for (var i = 1; i <= projects.Count; i++)
+            {
+                var vsProject = projects.Item(i).Object as VSProject;
+                if (vsProject == null || vsProject.References.Find("Gauge.CSharp.Lib") == null) continue;
+                yield return vsProject;
+            }
+        }
+
+        public static IEnumerable<string> GetAllSpecs(IServiceProvider service)
+        {
+            var specs = new List<string>();
+            foreach (var gaugeProject in GetGaugeProjects(service))
+                specs.AddRange(ScanProject(gaugeProject.Project.ProjectItems));
+
+            return specs.Where(s => s.EndsWith(".spec") | s.EndsWith(".md"));
+        }
+
+        private static IEnumerable<string> ScanProject(IEnumerable projectItems)
+        {
+            foreach (ProjectItem item in projectItems)
+            {
+                var foo = item.Properties.Item("FullPath").Value;
+                yield return item.FileNames[0];
+
+                foreach (var childItem in ScanProject(item.ProjectItems))
+                    yield return childItem;
+            }
         }
 
         public static GaugeApiConnection GetApiConnectionForActiveDocument()
