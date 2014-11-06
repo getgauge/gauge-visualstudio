@@ -108,6 +108,7 @@
     <Compile Include="GaugeContentTypeDefinitions.cs" />
     <Compile Include="GotoDefn\GotoDefnCommandFilter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestRunner\GaugeRunner.cs" />
     <Compile Include="TestRunner\TestContainerDiscoverer.cs" />
     <Compile Include="TestRunner\TestDiscoverer.cs" />
     <Compile Include="TestRunner\TestExecutor.cs" />

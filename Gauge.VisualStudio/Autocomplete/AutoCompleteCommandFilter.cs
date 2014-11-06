@@ -42,7 +42,7 @@ namespace Gauge.VisualStudio.AutoComplete
                         var lineText = TextView.Caret.Position.BufferPosition.GetContainingLine().GetText().Trim();
                         var stepRegex = new Regex(@"^(\*\s?\w*)$", RegexOptions.Compiled);
                         //the current character isn't yet available in the buffer!, add it to the text to check
-                        if (stepRegex.IsMatch(string.Format("{0}{1}", lineText, GetTypeChar(pvaIn))))
+                        if (stepRegex.IsMatch(string.Format("{0}{1}", GetTypeChar(pvaIn), lineText)))
                         {
                             StartSession();
                         }

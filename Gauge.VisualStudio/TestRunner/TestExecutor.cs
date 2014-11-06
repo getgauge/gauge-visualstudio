@@ -18,11 +18,8 @@ namespace Gauge.VisualStudio.TestRunner
             foreach (var testCase in tests)
             {
                 if (_cancelled) break;
-                var testResult = new TestResult(testCase)
-                {
-                    //Outcome = (TestOutcome) testCase.GetPropertyValue(TestResultProperties.Outcome)
-                    Outcome = TestOutcome.Passed
-                };
+
+                var testResult = GaugeRunner.Run(testCase, runContext.IsBeingDebugged);
                 frameworkHandle.RecordResult(testResult);
             }
         }

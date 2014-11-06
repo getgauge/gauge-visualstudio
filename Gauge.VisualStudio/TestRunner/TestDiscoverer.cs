@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Gauge.VisualStudio.Classification;
@@ -29,14 +30,17 @@ namespace Gauge.VisualStudio.TestRunner
 
                 var scenarios = Parser.GetScenarios(source);
                 var specificationName = Parser.GetSpecificationName(source);
+                var scenarioIndex = 0;
 
                 foreach (var scenario in scenarios)
                 {
-                    var testCase = new TestCase(string.Format("{0}.{1}", specificationName, scenario), TestExecutor.ExecutorUri,
-                        spec)
+                    var testCase = new TestCase(string.Format("{0}.{1}", specificationName, scenario), TestExecutor.ExecutorUri, spec)
                     {
                         CodeFilePath = spec,
-                        DisplayName = scenario
+                        DisplayName = scenario,
+                        // Ugly hack below - I don't know how else to pass the scenario index to GaugeRunner
+                        // LocalExtensionData returns a null despite setting it here
+                        LineNumber = scenarioIndex
                     };
 
                     if (discoverySink != null)
@@ -44,6 +48,8 @@ namespace Gauge.VisualStudio.TestRunner
                         discoverySink.SendTestCase(testCase);
                     }
                     testCases.Add(testCase);
+                    
+                    scenarioIndex++;
                 }
             });
 
