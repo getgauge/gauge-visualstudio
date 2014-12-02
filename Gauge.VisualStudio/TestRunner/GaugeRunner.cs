@@ -1,7 +1,12 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Management;
+using System.Runtime.InteropServices;
+using EnvDTE;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using Process = System.Diagnostics.Process;
+using Thread = System.Threading.Thread;
 
 namespace Gauge.VisualStudio.TestRunner
 {
@@ -9,12 +14,10 @@ namespace Gauge.VisualStudio.TestRunner
     {
         public static TestResult Run(TestCase testCase, bool isBeingDebugged)
         {
-            //TODO: attach debugger if isBeingDebugged
             var result = new TestResult(testCase);
             var projectRoot = GetProjectRootPath(new FileInfo(testCase.Source).Directory);
             try
             {
-                Debug.WriteLine(testCase.LocalExtensionData);
                 var p = new Process
                 {
                     StartInfo =
@@ -29,7 +32,12 @@ namespace Gauge.VisualStudio.TestRunner
                     }
                 };
                 p.Start();
-
+                
+                if (isBeingDebugged)
+                {
+                    AttachToProcess(p.Id);
+                }
+                
                 var output = p.StandardOutput.ReadToEnd();
                 var error = p.StandardError.ReadToEnd();
 
@@ -82,17 +90,43 @@ namespace Gauge.VisualStudio.TestRunner
 
         private static void AttachToProcess(int processId)
         {
-            foreach (EnvDTE.Process process in GaugeDTEProvider.DTE.Debugger.LocalProcesses)
+            var runnerProcessId = GetRunnerProcessId(processId);
+            if (runnerProcessId == 0) return;
+            foreach (EnvDTE.Process process in DTE.Debugger.LocalProcesses)
             {
-                if (process.ProcessID != processId) continue;
+                if (process.ProcessID != runnerProcessId) continue;
                 process.Attach();
-
-                GaugeDTEProvider.DTE.Debugger.CurrentProcess = process;
+                DTE.Debugger.CurrentProcess = process;
             }
         }
+
+        public static DTE DTE
+        {
+            get
+            {
+                return Marshal.GetActiveObject("VisualStudio.DTE") as DTE;
+            }
+        }
+
+        private static int GetRunnerProcessId(int parentProcessId)
+        {
+            var retries = 0;
+            while (retries < 5)
+            {
+                var mos = new ManagementObjectSearcher(
+                        String.Format("Select * From Win32_Process Where ParentProcessID={0} and Name='Gauge.CSharp.Runner.exe'",
+                            parentProcessId));
+                var processes = mos.Get().Cast<ManagementObject>().Select(mo => Convert.ToInt32(mo["ProcessID"])).ToList();
+                if (processes.Any())
+                {
+                    return processes.First();
+                }
+                retries++;
+                Thread.Sleep(200);
+            }
+            return 0;
+        }
     }
-
-
 
     internal class ConventionViolationException : Exception
     {
