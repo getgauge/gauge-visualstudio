@@ -5,6 +5,7 @@ obj
 *.sln.DotSettings.user
 *.psess
 packages
+artifacts
 .nuget
 *.nupkg
 *.csproj.user
