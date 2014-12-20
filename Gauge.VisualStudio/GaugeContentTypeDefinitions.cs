@@ -9,6 +9,7 @@ namespace Gauge.VisualStudio
         public const string GaugeContentType = "Gauge";
         private const string SpecFileExtension = ".spec";
         private const string MarkdownFileExtension = ".md";
+        private const string ConceptFileExtension = ".cpt";
 
         [Export]
         [Name(GaugeContentType)]
@@ -29,5 +30,10 @@ namespace Gauge.VisualStudio
         [FileExtension(MarkdownFileExtension)]
         [ContentType(GaugeContentType)]
         internal static FileExtensionToContentTypeDefinition GaugeMarkdownFileExtensionDefinition = null;
+
+        [Export]
+        [FileExtension(ConceptFileExtension)]
+        [ContentType(GaugeContentType)]
+        internal static FileExtensionToContentTypeDefinition GaugeConceptFileExtensionDefinition = null;
     }
 }

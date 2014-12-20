@@ -30,7 +30,7 @@ namespace Gauge.VisualStudio.GotoDefn
                 var lineText = caretBufferPosition.GetContainingLine().GetText().Replace('*', ' ').Trim();
                 var nextLineText = NextLineText(caretBufferPosition.GetContainingLine());
 
-                //if next line is a table then change the last word of the 
+                //if next line is a table then change the last word of the step to take in a special param
                 if (tableRegex.IsMatch(nextLineText))
                     lineText = string.Format("{0} {{}}", lineText);
 
@@ -82,9 +82,18 @@ namespace Gauge.VisualStudio.GotoDefn
 
         private static string NextLineText(ITextSnapshotLine currentLine)
         {
-            var nextLine = currentLine.Snapshot.GetLineFromLineNumber(currentLine.LineNumber + 1);
-            var nextLineText = nextLine.GetText();
-            return nextLineText.Trim() == string.Empty ? NextLineText(nextLine) : nextLineText;
+            ITextSnapshotLine nextLine;
+            string nextLineText;
+            try
+            {
+                nextLine = currentLine.Snapshot.GetLineFromLineNumber(currentLine.LineNumber + 1);
+                nextLineText = nextLine.GetText();
+            }
+            catch
+            {
+                return string.Empty;
+            }
+            return nextLineText.Trim() == string.Empty && currentLine.LineNumber < currentLine.Snapshot.LineCount ? NextLineText(nextLine) : nextLineText;
         }
 
         private static IEnumerable<CodeElement> GetCodeElementsFor(IEnumerable elements, vsCMElement type)
