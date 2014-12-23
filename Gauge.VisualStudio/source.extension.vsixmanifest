@@ -4,6 +4,8 @@
     <Identity Id="Gauge.VisualStudio.ThoughtWorks.9731a722-d394-4c99-9df7-758867938fd6" Version="0.0.1" Language="en-US" Publisher="ThoughtWorks" />
     <DisplayName>Gauge.VisualStudio</DisplayName>
     <Description xml:space="preserve">Visual Studio Extension for Gauge</Description>
+    <License>LICENSE.txt</License>
+    <GettingStartedGuide>http://getgauge.io/documentation/getting_started/README.html</GettingStartedGuide>
     <Tags>Gauge, C#, BDD, Test Explorer, Testing</Tags>
   </Metadata>
   <Installation>
