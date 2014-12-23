@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
+using System.Windows.Media.Imaging;
+using Gauge.VisualStudio.Models;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Utilities;
@@ -25,7 +27,7 @@ namespace Gauge.VisualStudio.AutoComplete
         {
             private readonly ITextBuffer _buffer;
             private bool _disposed;
-            
+
             public GaugeCompletionSource(ITextBuffer buffer)
             {
                 _buffer = buffer;
@@ -36,8 +38,13 @@ namespace Gauge.VisualStudio.AutoComplete
                 if (_disposed)
                     throw new ObjectDisposedException("GaugeCompletionSource");
 
-                var completions =new List<Completion>(Steps.GetAll().Select(x => new Completion(string.Format("* {0}", x))));
+                BitmapSource stepImageSource = new BitmapImage(new Uri("pack://application:,,,/Gauge.VisualStudio;component/assets/glyphs/step.png"));
 
+                var completions = new List<Completion>(Step.GetAll().Select(x => new Completion(x, string.Format("* {0}", x), "Step", stepImageSource, "Step")));
+
+                BitmapSource conceptImageSource = new BitmapImage(new Uri("pack://application:,,,/Gauge.VisualStudio;component/assets/glyphs/concept.png"));
+                completions.AddRange(Concept.GetAllConcepts().Select(x => new Completion(x.StepValue, string.Format("* {0}", x.StepValue), "Concept", conceptImageSource, "Concept")));
+                
                 var snapshot = _buffer.CurrentSnapshot;
                 var snapshotPoint = session.GetTriggerPoint(snapshot);
                 if (snapshotPoint == null) return;
@@ -48,9 +55,7 @@ namespace Gauge.VisualStudio.AutoComplete
                 var start = triggerPoint;
 
                 while (start > line.Start && !char.IsWhiteSpace((start - 1).GetChar()))
-                {
                     start -= 1;
-                }
 
                 var applicableTo = snapshot.CreateTrackingSpan(new SnapshotSpan(start, triggerPoint), SpanTrackingMode.EdgeInclusive);
 

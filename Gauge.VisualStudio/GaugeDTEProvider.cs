@@ -9,7 +9,6 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using EnvDTE;
 using Gauge.CSharp.Lib;
-using main;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
@@ -31,6 +30,8 @@ namespace Gauge.VisualStudio
         internal IServiceProvider ServiceProvider = null;
 
         private static readonly Dictionary<string, GaugeApiConnection> ApiConnections = new Dictionary<string, GaugeApiConnection>();
+
+        public static readonly Dictionary<string, Dictionary<string, TextPoint>> ConceptDictionary = new Dictionary<string, Dictionary<string, TextPoint>>(); 
 
         private static readonly HashSet<Process> ChildProcesses = new HashSet<Process>();
 
@@ -78,7 +79,6 @@ namespace Gauge.VisualStudio
         {
             foreach (ProjectItem item in projectItems)
             {
-                var foo = item.Properties.Item("FullPath").Value;
                 yield return item.FileNames[0];
 
                 foreach (var childItem in ScanProject(item.ProjectItems))

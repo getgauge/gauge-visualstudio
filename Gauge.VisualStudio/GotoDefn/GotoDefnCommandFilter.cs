@@ -35,6 +35,10 @@ namespace Gauge.VisualStudio.GotoDefn
                     lineText = string.Format("{0} {{}}", lineText);
 
                 var stepRegex = new Regex(@"""([^""]*)""|\<([^\>]*)\>", RegexOptions.Compiled);
+
+                if (!stepRegex.IsMatch(lineText))
+                    return hresult;
+
                 var dte = GaugeDTEProvider.DTE;
                 var containingProject = dte.ActiveDocument.ProjectItem.ContainingProject;
                 var allClasses = GetCodeElementsFor(containingProject.CodeModel.CodeElements,

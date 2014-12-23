@@ -1,17 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using main;
 
-namespace Gauge.VisualStudio.AutoComplete
+namespace Gauge.VisualStudio.Models
 {
-    public class Steps
+    public class Step
     {
         public static IEnumerable<string> GetAll()
         {
             var gaugeApiConnection = GaugeDTEProvider.GetApiConnectionForActiveDocument();
-            Debug.WriteLine("requesting {0}", GaugeDTEProvider.DTE.ActiveDocument.ProjectItem.Name);
             var stepsRequest = GetAllStepsRequest.DefaultInstance;
             var apiMessage = APIMessage.CreateBuilder()
                 .SetMessageId(GenerateMessageId())
