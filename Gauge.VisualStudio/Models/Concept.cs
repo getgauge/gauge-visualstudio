@@ -30,5 +30,10 @@ namespace Gauge.VisualStudio.Models
         {
             return DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
         }
+
+        public static Concept Search(string lineText)
+        {
+            return GetAllConcepts().FirstOrDefault(concept => concept.StepValue == lineText);
+        }
     }
 }

@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using EnvDTE;
+using Gauge.VisualStudio.Classification;
+using Gauge.VisualStudio.Models;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Text;
@@ -27,7 +29,11 @@ namespace Gauge.VisualStudio.GotoDefn
             {
                 var caretBufferPosition = TextView.Caret.Position.BufferPosition;
                 var tableRegex = new Regex(@"[ ]*\|[\w ]+\|", RegexOptions.Compiled);
-                var lineText = caretBufferPosition.GetContainingLine().GetText().Replace('*', ' ').Trim();
+                var originalText = caretBufferPosition.GetContainingLine().GetText();
+                if (!Parser.StepRegex.IsMatch(originalText))
+                    return hresult;
+
+                var lineText = originalText.Replace('*', ' ').Trim();
                 var nextLineText = NextLineText(caretBufferPosition.GetContainingLine());
 
                 //if next line is a table then change the last word of the step to take in a special param
@@ -35,12 +41,25 @@ namespace Gauge.VisualStudio.GotoDefn
                     lineText = string.Format("{0} {{}}", lineText);
 
                 var stepRegex = new Regex(@"""([^""]*)""|\<([^\>]*)\>", RegexOptions.Compiled);
-
-                if (!stepRegex.IsMatch(lineText))
-                    return hresult;
-
                 var dte = GaugeDTEProvider.DTE;
                 var containingProject = dte.ActiveDocument.ProjectItem.ContainingProject;
+                
+                //if the current step is a concept, then open the concept file.
+                //Gauge parses and caches the concepts, its location (file + line number).
+                //The plugin's job is to simply make an api call and fetch this information.
+
+                var concept = Concept.Search(lineText);
+                if (concept != null)
+                {
+                    var window = dte.ItemOperations.OpenFile(concept.FilePath);
+                    window.Activate();
+
+                    var textSelection = window.Selection as TextSelection;
+                    if (textSelection != null) 
+                        textSelection.MoveTo(concept.LineNumber, 0);
+                    return hresult;
+                }
+
                 var allClasses = GetCodeElementsFor(containingProject.CodeModel.CodeElements,
                     vsCMElement.vsCMElementClass);
 
