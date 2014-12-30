@@ -189,6 +189,8 @@
     <Compile Include="GaugeContentTypeDefinitions.cs" />
     <Compile Include="GaugeDTEProvider.cs" />
     <Compile Include="GotoDefn\GotoDefnCommandFilter.cs" />
+    <Compile Include="Highlighting\StepAdornment.cs" />
+    <Compile Include="Highlighting\StepAdornmentFactory.cs" />
     <Compile Include="Models\Concept.cs" />
     <Compile Include="Models\Step.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
