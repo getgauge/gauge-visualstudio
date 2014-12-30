@@ -189,8 +189,12 @@
     <Compile Include="GaugeContentTypeDefinitions.cs" />
     <Compile Include="GaugeDTEProvider.cs" />
     <Compile Include="GotoDefn\GotoDefnCommandFilter.cs" />
+    <Compile Include="Highlighting\ImplementStepAction.cs" />
+    <Compile Include="Highlighting\UnimplementedStepTag.cs" />
     <Compile Include="Highlighting\StepAdornment.cs" />
     <Compile Include="Highlighting\StepAdornmentFactory.cs" />
+    <Compile Include="Highlighting\UnimplementedStepTagger.cs" />
+    <Compile Include="Highlighting\StepTaggerProvider.cs" />
     <Compile Include="Models\Concept.cs" />
     <Compile Include="Models\Step.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -6,19 +6,22 @@ using Gauge.VisualStudio.Models;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Formatting;
+using Microsoft.VisualStudio.Text.Tagging;
 
 namespace Gauge.VisualStudio.Highlighting
 {
     internal class StepAdornment
     {
         private readonly IWpfTextView _textView;
+        private readonly ITagAggregator<UnimplementedStepTag> _createTagAggregator;
         private readonly IAdornmentLayer _adornmentLayer;
         private readonly Pen _pen = new Pen(Brushes.OrangeRed, 1.0) { DashStyle = DashStyles.Dash };
         private readonly DrawingBrush _drawingBrush = new DrawingBrush();
 
-        public StepAdornment(IWpfTextView textView)
+        public StepAdornment(IWpfTextView textView, ITagAggregator<UnimplementedStepTag> createTagAggregator)
         {
             _textView = textView;
+            _createTagAggregator = createTagAggregator;
             _adornmentLayer = _textView.GetAdornmentLayer("StepArdornment");
             _textView.LayoutChanged += OnLayoutChanged;
         }
@@ -37,8 +40,7 @@ namespace Gauge.VisualStudio.Highlighting
             var bufferGraph = textView.BufferGraph;
             try
             {
-                var collection = bufferGraph.MapDownToSnapshot(extent, SpanTrackingMode.EdgeInclusive,
-                    textView.TextSnapshot);
+                var collection = bufferGraph.MapDownToSnapshot(extent, SpanTrackingMode.EdgeInclusive, textView.TextSnapshot);
                 var span = new SnapshotSpan(collection[0].Start, collection[collection.Count - 1].End);
                 text = span.GetText();
                 return true;
@@ -56,19 +58,13 @@ namespace Gauge.VisualStudio.Highlighting
             string text;
             if (!TryGetText(_textView, line, out text)) return;
 
-            var match = Parser.StepRegex.Match(text);
-            if (!match.Success || GetStepImplementation(line) != null || Concept.Search(text) != null)
-                return;
-
-            var matchStart = line.Start.Position;
-            var span = new SnapshotSpan(_textView.TextSnapshot, Span.FromBounds(matchStart, matchStart + match.Length));
-            SetBoundary(textViewLines, span);
-        }
-
-        private static CodeFunction GetStepImplementation(ITextViewLine line)
-        {
-            var snapshotLine = line.Snapshot.GetLineFromPosition(line.Start.Position);
-            return Step.GetStepImplementation(snapshotLine);
+            foreach (var tag in _createTagAggregator.GetTags(line.Extent))
+            {
+                foreach (var span in tag.Span.GetSpans(_textView.TextSnapshot))
+                {
+                    SetBoundary(textViewLines, span);
+                }
+            }
         }
 
         public void SetBoundary(IWpfTextViewLineCollection textViewLines, SnapshotSpan span)

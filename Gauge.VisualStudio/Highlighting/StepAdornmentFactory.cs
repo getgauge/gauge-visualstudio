@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.Composition;
 using Microsoft.VisualStudio.Text.Editor;
+using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
 
 namespace Gauge.VisualStudio.Highlighting
@@ -15,10 +16,12 @@ namespace Gauge.VisualStudio.Highlighting
         [TextViewRole(PredefinedTextViewRoles.Interactive)]
         public AdornmentLayerDefinition GaugeAdornmentLayer = null;
 
+        [Import]
+        private IViewTagAggregatorFactoryService ViewTagAggregatorFactoryService { get; set; }
 
         public void TextViewCreated(IWpfTextView textView)
         {
-            new StepAdornment(textView);
+            new StepAdornment(textView, ViewTagAggregatorFactoryService.CreateTagAggregator<UnimplementedStepTag>(textView));
         }
     }
 }

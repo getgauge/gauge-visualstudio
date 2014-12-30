@@ -53,7 +53,16 @@ namespace Gauge.VisualStudio.GotoDefn
                     }
 
                     var function = Step.GetStepImplementation(caretBufferPosition.GetContainingLine(), containingProject);
-                    if (!function.ProjectItem.IsOpen) function.ProjectItem.Open();
+
+                    if (function==null)
+                    {
+                        return hresult;
+                    }
+
+                    if (!function.ProjectItem.IsOpen)
+                    {
+                        function.ProjectItem.Open();
+                    }
 
                     var startPoint = function.GetStartPoint(vsCMPart.vsCMPartHeader);
                     startPoint.TryToShow();
