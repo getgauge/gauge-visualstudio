@@ -44,14 +44,19 @@ namespace Gauge.VisualStudio.Models
         public static string GetStepText(ITextSnapshotLine line)
         {
             var originalText = line.GetText();
-            var tableRegex = new Regex(@"[ ]*\|[\w ]+\|", RegexOptions.Compiled);
             var lineText = originalText.Replace('*', ' ').Trim();
-            var nextLineText = NextLineText(line);
 
             //if next line is a table then change the last word of the step to take in a special param
-            if (tableRegex.IsMatch(nextLineText))
+            if (IsTable(line))
                 lineText = string.Format("{0} {{}}", lineText);
             return lineText;
+        }
+
+        public static bool IsTable(ITextSnapshotLine line)
+        {
+            var nextLineText = NextLineText(line);
+            var tableRegex = new Regex(@"[ ]*\|[\w ]+\|", RegexOptions.Compiled);
+            return tableRegex.IsMatch(nextLineText);
         }
 
         public static void Refresh()
