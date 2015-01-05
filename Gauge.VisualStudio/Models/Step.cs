@@ -3,11 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Windows.Forms;
 using EnvDTE;
 using main;
 using Microsoft.VisualStudio.Text;
-using Microsoft.VisualStudio.Text.Formatting;
 
 namespace Gauge.VisualStudio.Models
 {
@@ -15,17 +13,15 @@ namespace Gauge.VisualStudio.Models
     {
         public static IEnumerable<string> GetAll()
         {
-            var gaugeApiConnection = GaugeDTEProvider.GetApiConnectionForActiveDocument();
-            var stepsRequest = GetAllStepsRequest.DefaultInstance;
-            var apiMessage = APIMessage.CreateBuilder()
-                .SetMessageId(GenerateMessageId())
-                .SetMessageType(APIMessage.Types.APIMessageType.GetAllStepsRequest)
-                .SetAllStepsRequest(stepsRequest)
-                .Build();
+            return GetAllStepsFromGauge().AllStepsResponse.AllStepsList.Select(x => x.ParameterizedStepValue);
+        }
 
-            var bytes = gaugeApiConnection.WriteAndReadApiMessage(apiMessage);
-
-            return bytes.AllStepsResponse.AllStepsList.Select(x => x.ParameterizedStepValue);
+        public static string GetParsedStepValue(ITextSnapshotLine input)
+        {
+            var stepValueFromInput = GetStepValueFromInput(GetStepText(input));
+            return GetAllStepsFromGauge()
+                   .AllStepsResponse.AllStepsList.First(value => value.StepValue == stepValueFromInput)
+                   .ParameterizedStepValue;
         }
 
         public static CodeFunction GetStepImplementation(ITextSnapshotLine line, Project containingProject = null)
@@ -37,9 +33,7 @@ namespace Gauge.VisualStudio.Models
 
             var lineText = GetStepText(line);
 
-            var stepRegex = new Regex(@"""([^""]*)""|\<([^\>]*)\>", RegexOptions.Compiled);
-            var allClasses = GetCodeElementsFor(containingProject.CodeModel.CodeElements,
-                vsCMElement.vsCMElementClass);
+            var allClasses = GetAllClasses(containingProject);
 
             foreach (var codeElement in allClasses)
             {
@@ -61,7 +55,7 @@ namespace Gauge.VisualStudio.Models
                         {
                             string input = arg.Value.ToString().Trim('"');
 
-                            if (stepRegex.Replace(input, "{}") != stepRegex.Replace(lineText, "{}"))
+                            if (GetStepValueFromInput(input) != GetStepValueFromInput(lineText))
                                 continue;
 
                             return function;
@@ -72,10 +66,19 @@ namespace Gauge.VisualStudio.Models
             return null;
         }
 
+        public static IEnumerable<CodeElement> GetAllClasses(Project containingProject=null)
+        {
+            if (containingProject==null)
+            {
+                containingProject = GaugeDTEProvider.DTE.ActiveDocument.ProjectItem.ContainingProject;
+            }
+            return GetCodeElementsFor(containingProject.CodeModel.CodeElements, vsCMElement.vsCMElementClass);
+        }
+
         public static string GetStepText(ITextSnapshotLine line)
         {
-            var tableRegex = new Regex(@"[ ]*\|[\w ]+\|", RegexOptions.Compiled);
             var originalText = line.GetText();
+            var tableRegex = new Regex(@"[ ]*\|[\w ]+\|", RegexOptions.Compiled);
             var lineText = originalText.Replace('*', ' ').Trim();
             var nextLineText = NextLineText(line);
 
@@ -83,6 +86,20 @@ namespace Gauge.VisualStudio.Models
             if (tableRegex.IsMatch(nextLineText))
                 lineText = string.Format("{0} {{}}", lineText);
             return lineText;
+        }
+
+        private static APIMessage GetAllStepsFromGauge()
+        {
+            var gaugeApiConnection = GaugeDTEProvider.GetApiConnectionForActiveDocument();
+            var stepsRequest = GetAllStepsRequest.DefaultInstance;
+            var apiMessage = APIMessage.CreateBuilder()
+                .SetMessageId(GenerateMessageId())
+                .SetMessageType(APIMessage.Types.APIMessageType.GetAllStepsRequest)
+                .SetAllStepsRequest(stepsRequest)
+                .Build();
+
+            var bytes = gaugeApiConnection.WriteAndReadApiMessage(apiMessage);
+            return bytes;
         }
 
         private static IEnumerable<CodeElement> GetCodeElementsFor(IEnumerable elements, vsCMElement type)
@@ -129,6 +146,12 @@ namespace Gauge.VisualStudio.Models
         private static long GenerateMessageId()
         {
             return DateTime.Now.Ticks/TimeSpan.TicksPerMillisecond;
+        }
+
+        private static string GetStepValueFromInput(string input)
+        {
+            var stepRegex = new Regex(@"""([^""]*)""|\<([^\>]*)\>", RegexOptions.Compiled);
+            return stepRegex.Replace(input, "{}");
         }
     }
 }

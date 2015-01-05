@@ -1,14 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using EnvDTE;
 using Gauge.VisualStudio.Classification;
 using Gauge.VisualStudio.Models;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
-using Microsoft.VisualStudio.Text.Formatting;
 using Microsoft.VisualStudio.Text.Tagging;
 
 namespace Gauge.VisualStudio.Highlighting
@@ -46,26 +44,12 @@ namespace Gauge.VisualStudio.Highlighting
             {
                 var text = span.GetText();
                 var match = Parser.StepRegex.Match(text);
-                if (!match.Success || GetStepImplementation(span) != null || Concept.Search(text) != null)
-                    continue;
-
                 var point = span.Start.Add(match.Index);
                 var unimplementedStepSpan = new SnapshotSpan(span.Snapshot, new Span(point.Position, match.Length));
-                ITextViewLine line;
-                try
-                {
-                    line = _textView.Caret.ContainingTextViewLine;
-                }
-                catch
-                {
+                if (!match.Success || GetStepImplementation(unimplementedStepSpan) != null || Concept.Search(text) != null)
                     continue;
-                }
 
-                var actions = new ReadOnlyCollection<SmartTagActionSet>(new SmartTagActionSet[] {});
-                if (line != null && _textView.Caret.ContainingTextViewLine.ContainsBufferPosition(span.Start))
-                {
-                    actions = GetSmartTagActions(unimplementedStepSpan);
-                }
+                var actions = GetSmartTagActions(unimplementedStepSpan);
                 yield return new TagSpan<UnimplementedStepTag>(unimplementedStepSpan, new UnimplementedStepTag(SmartTagType.Ephemeral, actions));
             }
         }

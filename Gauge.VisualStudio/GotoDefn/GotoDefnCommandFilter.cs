@@ -59,14 +59,7 @@ namespace Gauge.VisualStudio.GotoDefn
                         return hresult;
                     }
 
-                    if (!function.ProjectItem.IsOpen)
-                    {
-                        function.ProjectItem.Open();
-                    }
-
-                    var startPoint = function.GetStartPoint(vsCMPart.vsCMPartHeader);
-                    startPoint.TryToShow();
-                    startPoint.Parent.Selection.MoveToPoint(startPoint);
+                    GaugeVSHelper.NavigateToFunction(function);
                     return hresult;
                 default:
                     hresult = Next.Exec(pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);

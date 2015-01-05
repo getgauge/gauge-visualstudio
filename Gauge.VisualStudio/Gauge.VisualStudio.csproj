@@ -203,6 +203,7 @@
     <Compile Include="TestRunner\TestContainerDiscoverer.cs" />
     <Compile Include="TestRunner\TestDiscoverer.cs" />
     <Compile Include="TestRunner\TestExecutor.cs" />
+    <Compile Include="GaugeVsHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

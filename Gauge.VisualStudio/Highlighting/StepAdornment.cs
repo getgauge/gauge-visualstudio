@@ -28,6 +28,7 @@ namespace Gauge.VisualStudio.Highlighting
 
         private void OnLayoutChanged(object sender, TextViewLayoutChangedEventArgs e)
         {
+            GaugeDTEProvider.DTE.ActiveDocument.Save();
             foreach (var line in e.NewOrReformattedLines)
             {
                 CreateVisuals(line);
@@ -62,12 +63,12 @@ namespace Gauge.VisualStudio.Highlighting
             {
                 foreach (var span in tag.Span.GetSpans(_textView.TextSnapshot))
                 {
-                    SetBoundary(textViewLines, span);
+                    SetBoundary(textViewLines, span, tag.Tag);
                 }
             }
         }
 
-        public void SetBoundary(IWpfTextViewLineCollection textViewLines, SnapshotSpan span)
+        public void SetBoundary(IWpfTextViewLineCollection textViewLines, SnapshotSpan span, UnimplementedStepTag tag)
         {
             var g = textViewLines.GetMarkerGeometry(span);
             if (g == null) return;
@@ -83,7 +84,7 @@ namespace Gauge.VisualStudio.Highlighting
             Canvas.SetLeft(image, g.Bounds.Left);
             Canvas.SetTop(image, g.Bounds.Top);
 
-            _adornmentLayer.AddAdornment(AdornmentPositioningBehavior.TextRelative, span, null, image, null);
+            _adornmentLayer.AddAdornment(AdornmentPositioningBehavior.TextRelative, span, tag, image, null);
         }
     }
 }
