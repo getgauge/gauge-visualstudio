@@ -11,7 +11,7 @@ using Microsoft.VisualStudio.Text.Tagging;
 
 namespace Gauge.VisualStudio.Highlighting
 {
-    internal class UnimplementedStepTagger : ITagger<UnimplementedStepTag>
+    internal class UnimplementedStepTagger : ITagger<UnimplementedStepTag>, IDisposable
     {
         private readonly ITextView _textView;
 
@@ -67,6 +67,12 @@ namespace Gauge.VisualStudio.Highlighting
         {
             var snapshotLine = span.Snapshot.GetLineFromPosition(span.Start.Position);
             return Step.GetStepImplementation(snapshotLine);
+        }
+
+        public void Dispose()
+        {
+            _textView.Caret.PositionChanged -= OnCaretMove;
+            _textView.LayoutChanged -= OnLayoutChanged;
         }
     }
 }

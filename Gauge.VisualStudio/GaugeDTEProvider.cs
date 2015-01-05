@@ -34,6 +34,7 @@ namespace Gauge.VisualStudio
         public static readonly Dictionary<string, Dictionary<string, TextPoint>> ConceptDictionary = new Dictionary<string, Dictionary<string, TextPoint>>(); 
 
         private static readonly HashSet<Process> ChildProcesses = new HashSet<Process>();
+        private readonly SpecsChangeWatcher _specsChangeWatcher = new SpecsChangeWatcher();
 
         public IClassifier GetClassifier(ITextBuffer buffer)
         {
@@ -47,6 +48,7 @@ namespace Gauge.VisualStudio
                 var openPort = GetOpenPort();
 
                 StartGaugeAsDaemon(gaugeProject, openPort);
+                _specsChangeWatcher.Watch(Path.GetDirectoryName(gaugeProject.FullName));
 
                 var apiConnection = new GaugeApiConnection(new TcpClientWrapper(openPort));
                 ApiConnections.Add(SlugifyName(gaugeProject), apiConnection);
@@ -145,6 +147,7 @@ namespace Gauge.VisualStudio
             {
                 childProcess.Kill();
             }
+            _specsChangeWatcher.Dispose();
         }
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Windows.Controls;
 using System.Windows.Media;
 using EnvDTE;
@@ -10,7 +11,7 @@ using Microsoft.VisualStudio.Text.Tagging;
 
 namespace Gauge.VisualStudio.Highlighting
 {
-    internal class StepAdornment
+    internal class StepAdornment : IDisposable
     {
         private readonly IWpfTextView _textView;
         private readonly ITagAggregator<UnimplementedStepTag> _createTagAggregator;
@@ -85,6 +86,11 @@ namespace Gauge.VisualStudio.Highlighting
             Canvas.SetTop(image, g.Bounds.Top);
 
             _adornmentLayer.AddAdornment(AdornmentPositioningBehavior.TextRelative, span, tag, image, null);
+        }
+
+        public void Dispose()
+        {
+            _textView.LayoutChanged -= OnLayoutChanged;
         }
     }
 }

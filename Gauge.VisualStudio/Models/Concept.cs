@@ -7,6 +7,7 @@ namespace Gauge.VisualStudio.Models
 {
     public class Concept
     {
+        private static IEnumerable<Concept> _allConcepts;
         public string StepValue { get; set; }
         public string FilePath { get; set; }
         public int LineNumber { get; set; }
@@ -33,7 +34,13 @@ namespace Gauge.VisualStudio.Models
 
         public static Concept Search(string lineText)
         {
-            return GetAllConcepts().FirstOrDefault(concept => concept.StepValue == lineText);
+            _allConcepts = _allConcepts ?? GetAllConcepts();
+            return _allConcepts.FirstOrDefault(concept => concept.StepValue == lineText);
+        }
+
+        public static void Refresh()
+        {
+            _allConcepts = GetAllConcepts();
         }
     }
 }

@@ -11,16 +11,18 @@ namespace Gauge.VisualStudio.Models
 {
     public class Step
     {
+        private static IList<ProtoStepValue> _allSteps;
+        private static IEnumerable<GaugeImplementation> _gaugeImplementations;
+
         public static IEnumerable<string> GetAll()
         {
-            return GetAllStepsFromGauge().AllStepsResponse.AllStepsList.Select(x => x.ParameterizedStepValue);
+            return GetAllSteps().Select(x => x.ParameterizedStepValue);
         }
 
         public static string GetParsedStepValue(ITextSnapshotLine input)
         {
             var stepValueFromInput = GetStepValueFromInput(GetStepText(input));
-            return GetAllStepsFromGauge()
-                   .AllStepsResponse.AllStepsList.First(value => value.StepValue == stepValueFromInput)
+            return GetAllSteps(true).First(value => value.StepValue == stepValueFromInput)
                    .ParameterizedStepValue;
         }
 
@@ -33,39 +35,36 @@ namespace Gauge.VisualStudio.Models
 
             var lineText = GetStepText(line);
 
+            _gaugeImplementations = _gaugeImplementations ?? GetGaugeImplementations(containingProject);
+            var gaugeImplementation = _gaugeImplementations.FirstOrDefault(implementation => implementation.ContainsFor(lineText));
+            return gaugeImplementation == null ? null : gaugeImplementation.Function;
+        }
+
+        private static IEnumerable<GaugeImplementation> GetGaugeImplementations(Project containingProject = null)
+        {
+            var gaugeImplementations = new List<GaugeImplementation>();
             var allClasses = GetAllClasses(containingProject);
 
             foreach (var codeElement in allClasses)
             {
                 if (!(codeElement is CodeClass)) continue;
                 var codeClass = (CodeClass) codeElement;
-                // get all methods implemented by this class
                 var allFunctions = GetCodeElementsFor(codeClass.Members, vsCMElement.vsCMElementFunction);
                 foreach (var codeFunction in allFunctions)
                 {
                     var function = codeFunction as CodeFunction;
                     if (function == null) continue;
-                    var allAttributes = GetCodeElementsFor(function.Attributes,
-                        vsCMElement.vsCMElementAttribute);
-                    foreach (dynamic attribute in allAttributes)
-                    {
-                        if (attribute.FullName != "Gauge.CSharp.Lib.Attribute.Step") continue;
+                    var allAttributes = GetCodeElementsFor(function.Attributes, vsCMElement.vsCMElementAttribute);
 
-                        foreach (var arg in attribute.Arguments)
-                        {
-                            string input = arg.Value.ToString().Trim('"');
-
-                            if (GetStepValueFromInput(input) != GetStepValueFromInput(lineText))
-                                continue;
-
-                            return function;
-                        }
-                    }
+                    var attribute = allAttributes.FirstOrDefault(a => a.FullName == "Gauge.CSharp.Lib.Attribute.Step");
+                    if (attribute != null)
+                        gaugeImplementations.Add(new GaugeImplementation {Function = function, StepAttribute = attribute});
                 }
             }
-            return null;
-        }
 
+            return gaugeImplementations;
+        }
+        
         public static IEnumerable<CodeElement> GetAllClasses(Project containingProject=null)
         {
             if (containingProject==null)
@@ -88,7 +87,32 @@ namespace Gauge.VisualStudio.Models
             return lineText;
         }
 
-        private static APIMessage GetAllStepsFromGauge()
+        public static void Refresh()
+        {
+            _allSteps = GetAllStepsFromGauge();
+            _gaugeImplementations =
+                GetGaugeImplementations(GaugeDTEProvider.DTE.ActiveDocument.ProjectItem.ContainingProject);
+        }
+
+        internal class GaugeImplementation
+        {
+            public CodeFunction Function { get; set; }
+            public dynamic StepAttribute { get; set; }
+
+            public bool ContainsFor(string givenText)
+            {
+                foreach (var arg in StepAttribute.Arguments)
+                {
+                    string input = arg.Value.ToString().Trim('"');
+
+                    if (GetStepValueFromInput(input) == GetStepValueFromInput(givenText))
+                        return true;
+                }
+                return false;
+            }
+        }
+
+        private static IList<ProtoStepValue> GetAllStepsFromGauge()
         {
             var gaugeApiConnection = GaugeDTEProvider.GetApiConnectionForActiveDocument();
             var stepsRequest = GetAllStepsRequest.DefaultInstance;
@@ -99,7 +123,7 @@ namespace Gauge.VisualStudio.Models
                 .Build();
 
             var bytes = gaugeApiConnection.WriteAndReadApiMessage(apiMessage);
-            return bytes;
+            return bytes.AllStepsResponse.AllStepsList;
         }
 
         private static IEnumerable<CodeElement> GetCodeElementsFor(IEnumerable elements, vsCMElement type)
@@ -152,6 +176,16 @@ namespace Gauge.VisualStudio.Models
         {
             var stepRegex = new Regex(@"""([^""]*)""|\<([^\>]*)\>", RegexOptions.Compiled);
             return stepRegex.Replace(input, "{}");
+        }
+
+        private static IEnumerable<ProtoStepValue> GetAllSteps(bool forceCacheUpdate=false)
+        {
+            if (forceCacheUpdate)
+            {
+                _allSteps = GetAllStepsFromGauge();
+            }
+            _allSteps = _allSteps ?? GetAllStepsFromGauge();
+            return _allSteps;
         }
     }
 }
