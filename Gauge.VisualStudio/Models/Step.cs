@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using EnvDTE;
 using main;
@@ -89,9 +90,16 @@ namespace Gauge.VisualStudio.Models
 
         public static void Refresh()
         {
-            _allSteps = GetAllStepsFromGauge();
-            _gaugeImplementations =
-                GetGaugeImplementations(GaugeDTEProvider.DTE.ActiveDocument.ProjectItem.ContainingProject);
+            try
+            {
+                _allSteps = GetAllStepsFromGauge();
+                _gaugeImplementations = GetGaugeImplementations(GaugeDTEProvider.DTE.ActiveDocument.ProjectItem.ContainingProject);
+
+            }
+            catch (COMException)
+            {
+                // happens when project closes, and saves file on close. Ignore the refresh.
+            }
         }
 
         internal class GaugeImplementation
