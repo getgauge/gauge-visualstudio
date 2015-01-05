@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Media;
@@ -36,14 +37,16 @@ namespace Gauge.VisualStudio.Highlighting
                 return;
             }
 
-            var targetClass = Step.GetAllClasses().First(element => element.Name == "StepImplementation") as CodeClass;
+            var targetClass = GaugeProject.GetAllClasses().First(element => element.Name == "StepImplementation") as CodeClass;
+
+            var functionCount = GaugeProject.GetFunctionsForClass(targetClass).Count();
 
             if (targetClass==null)
             {
                 return;
             }
 
-            var implementationFunction = targetClass.AddFunction("TestFunction", vsCMFunction.vsCMFunctionFunction, vsCMTypeRef.vsCMTypeRefVoid, -1,
+            var implementationFunction = targetClass.AddFunction(string.Format("GaugeImpl{0}", functionCount+1), vsCMFunction.vsCMFunctionFunction, vsCMTypeRef.vsCMTypeRefVoid, -1,
                 vsCMAccess.vsCMAccessPublic);
 
             var stepText = _span.GetText(_snapshot);

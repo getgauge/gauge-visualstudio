@@ -196,7 +196,9 @@
     <Compile Include="Highlighting\UnimplementedStepTagger.cs" />
     <Compile Include="Highlighting\StepTaggerProvider.cs" />
     <Compile Include="Models\Concept.cs" />
+    <Compile Include="Models\GaugeImplementation.cs" />
     <Compile Include="Models\Step.cs" />
+    <Compile Include="Models\GaugeProject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SpecsChangeWatcher.cs" />
     <Compile Include="TestRunner\GaugeRunner.cs" />

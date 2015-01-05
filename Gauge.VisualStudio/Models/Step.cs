@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -36,44 +35,11 @@ namespace Gauge.VisualStudio.Models
 
             var lineText = GetStepText(line);
 
-            _gaugeImplementations = _gaugeImplementations ?? GetGaugeImplementations(containingProject);
+            _gaugeImplementations = _gaugeImplementations ?? GaugeProject.GetGaugeImplementations(containingProject);
             var gaugeImplementation = _gaugeImplementations.FirstOrDefault(implementation => implementation.ContainsFor(lineText));
             return gaugeImplementation == null ? null : gaugeImplementation.Function;
         }
 
-        private static IEnumerable<GaugeImplementation> GetGaugeImplementations(Project containingProject = null)
-        {
-            var gaugeImplementations = new List<GaugeImplementation>();
-            var allClasses = GetAllClasses(containingProject);
-
-            foreach (var codeElement in allClasses)
-            {
-                if (!(codeElement is CodeClass)) continue;
-                var codeClass = (CodeClass) codeElement;
-                var allFunctions = GetCodeElementsFor(codeClass.Members, vsCMElement.vsCMElementFunction);
-                foreach (var codeFunction in allFunctions)
-                {
-                    var function = codeFunction as CodeFunction;
-                    if (function == null) continue;
-                    var allAttributes = GetCodeElementsFor(function.Attributes, vsCMElement.vsCMElementAttribute);
-
-                    var attribute = allAttributes.FirstOrDefault(a => a.FullName == "Gauge.CSharp.Lib.Attribute.Step");
-                    if (attribute != null)
-                        gaugeImplementations.Add(new GaugeImplementation {Function = function, StepAttribute = attribute});
-                }
-            }
-
-            return gaugeImplementations;
-        }
-        
-        public static IEnumerable<CodeElement> GetAllClasses(Project containingProject=null)
-        {
-            if (containingProject==null)
-            {
-                containingProject = GaugeDTEProvider.DTE.ActiveDocument.ProjectItem.ContainingProject;
-            }
-            return GetCodeElementsFor(containingProject.CodeModel.CodeElements, vsCMElement.vsCMElementClass);
-        }
 
         public static string GetStepText(ITextSnapshotLine line)
         {
@@ -93,30 +59,12 @@ namespace Gauge.VisualStudio.Models
             try
             {
                 _allSteps = GetAllStepsFromGauge();
-                _gaugeImplementations = GetGaugeImplementations(GaugeDTEProvider.DTE.ActiveDocument.ProjectItem.ContainingProject);
+                _gaugeImplementations = GaugeProject.GetGaugeImplementations(GaugeDTEProvider.DTE.ActiveDocument.ProjectItem.ContainingProject);
 
             }
             catch (COMException)
             {
                 // happens when project closes, and saves file on close. Ignore the refresh.
-            }
-        }
-
-        internal class GaugeImplementation
-        {
-            public CodeFunction Function { get; set; }
-            public dynamic StepAttribute { get; set; }
-
-            public bool ContainsFor(string givenText)
-            {
-                foreach (var arg in StepAttribute.Arguments)
-                {
-                    string input = arg.Value.ToString().Trim('"');
-
-                    if (GetStepValueFromInput(input) == GetStepValueFromInput(givenText))
-                        return true;
-                }
-                return false;
             }
         }
 
@@ -132,31 +80,6 @@ namespace Gauge.VisualStudio.Models
 
             var bytes = gaugeApiConnection.WriteAndReadApiMessage(apiMessage);
             return bytes.AllStepsResponse.AllStepsList;
-        }
-
-        private static IEnumerable<CodeElement> GetCodeElementsFor(IEnumerable elements, vsCMElement type)
-        {
-            var codeElements = new List<CodeElement>();
-
-            foreach (CodeElement elem in elements)
-            {
-                if (elem.Kind == vsCMElement.vsCMElementNamespace)
-                {
-                    codeElements.AddRange(GetCodeElementsFor(((CodeNamespace) elem).Members, type));
-                }
-                else if (elem.InfoLocation == vsCMInfoLocation.vsCMInfoLocationExternal)
-                {
-                    continue;
-                }
-                else if (elem.IsCodeType)
-                {
-                    codeElements.AddRange(GetCodeElementsFor(((CodeType) elem).Members, type));
-                }
-                if (elem.Kind == type)
-                    codeElements.Add(elem);
-            }
-    
-            return codeElements;
         }
 
         private static string NextLineText(ITextSnapshotLine currentLine)
@@ -180,7 +103,7 @@ namespace Gauge.VisualStudio.Models
             return DateTime.Now.Ticks/TimeSpan.TicksPerMillisecond;
         }
 
-        private static string GetStepValueFromInput(string input)
+        internal static string GetStepValueFromInput(string input)
         {
             var stepRegex = new Regex(@"""([^""]*)""|\<([^\>]*)\>", RegexOptions.Compiled);
             return stepRegex.Replace(input, "{}");
