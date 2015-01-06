@@ -12,7 +12,7 @@ namespace Gauge.VisualStudio.Models
     public class Step
     {
         private static IList<ProtoStepValue> _allSteps;
-        private static IEnumerable<GaugeImplementation> _gaugeImplementations;
+        private static IEnumerable<Implementation> _gaugeImplementations;
 
         public static IEnumerable<string> GetAll()
         {
@@ -26,7 +26,7 @@ namespace Gauge.VisualStudio.Models
                    .ParameterizedStepValue;
         }
 
-        public static CodeFunction GetStepImplementation(ITextSnapshotLine line, Project containingProject = null)
+        public static CodeFunction GetStepImplementation(ITextSnapshotLine line, EnvDTE.Project containingProject = null)
         {
             if (containingProject==null)
             {
@@ -35,11 +35,10 @@ namespace Gauge.VisualStudio.Models
 
             var lineText = GetStepText(line);
 
-            _gaugeImplementations = _gaugeImplementations ?? GaugeProject.GetGaugeImplementations(containingProject);
+            _gaugeImplementations = _gaugeImplementations ?? Project.GetGaugeImplementations(containingProject);
             var gaugeImplementation = _gaugeImplementations.FirstOrDefault(implementation => implementation.ContainsFor(lineText));
             return gaugeImplementation == null ? null : gaugeImplementation.Function;
         }
-
 
         public static string GetStepText(ITextSnapshotLine line)
         {
@@ -64,10 +63,10 @@ namespace Gauge.VisualStudio.Models
             try
             {
                 _allSteps = GetAllStepsFromGauge();
-                _gaugeImplementations = GaugeProject.GetGaugeImplementations(GaugeDTEProvider.DTE.ActiveDocument.ProjectItem.ContainingProject);
+                _gaugeImplementations = Project.GetGaugeImplementations(GaugeDTEProvider.DTE.ActiveDocument.ProjectItem.ContainingProject);
 
             }
-            catch (COMException)
+            catch
             {
                 // happens when project closes, and saves file on close. Ignore the refresh.
             }

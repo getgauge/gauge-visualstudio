@@ -8,8 +8,10 @@ using EnvDTE;
 using Gauge.CSharp.Lib;
 using Gauge.VisualStudio.Classification;
 using Gauge.VisualStudio.Models;
+using Gauge.VisualStudio.UI;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
+using Project = Gauge.VisualStudio.Models.Project;
 
 namespace Gauge.VisualStudio.Highlighting
 {
@@ -32,20 +34,26 @@ namespace Gauge.VisualStudio.Highlighting
 
         public void Invoke()
         {
+            var classPicker = new ClassPicker();
+            var selectedClass = string.Empty;
+            classPicker.ShowModal();
+            selectedClass = classPicker.SelectedClass;
+
             var containingLine = _span.GetStartPoint(_snapshot).GetContainingLine();
             if (Step.GetStepImplementation(containingLine)!=null)
             {
                 return;
             }
 
-            var targetClass = GaugeProject.GetAllClasses().First(element => element.Name == "StepImplementation") as CodeClass;
-
-            var functionCount = GaugeProject.GetFunctionsForClass(targetClass).Count();
+            var targetClass = Project.FindOrCreateClass(selectedClass);
 
             if (targetClass==null)
             {
+                //TODO: Display error to user?
                 return;
             }
+
+            var functionCount = Project.GetFunctionsForClass(targetClass).Count();
 
             var implementationFunction = targetClass.AddFunction(string.Format("GaugeImpl{0}", functionCount+1), vsCMFunction.vsCMFunctionFunction, vsCMTypeRef.vsCMTypeRefVoid, -1,
                 vsCMAccess.vsCMAccessPublic);
@@ -68,11 +76,9 @@ namespace Gauge.VisualStudio.Highlighting
             }
 
             implementationFunction.AddAttribute("Step", Step.GetParsedStepValue(containingLine).ToLiteral(), -1);
-            GaugeVSHelper.NavigateToFunction(implementationFunction);
+            Project.NavigateToFunction(implementationFunction);
 
             _enabled = false;
-//            var filePicker = new FilePicker();
-//            filePicker.ShowModal();
         }
 
         public ReadOnlyCollection<SmartTagActionSet> ActionSets

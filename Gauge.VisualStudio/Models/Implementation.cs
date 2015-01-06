@@ -2,7 +2,7 @@
 
 namespace Gauge.VisualStudio.Models
 {
-    internal class GaugeImplementation
+    internal class Implementation
     {
         public CodeFunction Function { get; set; }
         public dynamic StepAttribute { get; set; }

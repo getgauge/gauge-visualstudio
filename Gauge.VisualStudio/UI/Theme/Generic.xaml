@@ -1,0 +1,32 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:ui="clr-namespace:Gauge.VisualStudio.UI">
+
+    <ControlTemplate x:Key="ClassPickerControlTemplate" TargetType="{x:Type ui:ClassPicker}">
+        <Border Background="{DynamicResource ClassPickerBackground}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <ContentPresenter Margin="1" Grid.Row="0" Content="{TemplateBinding Content}"/>
+            </Grid>
+        </Border>
+    </ControlTemplate>
+
+    <SolidColorBrush x:Key="ClassPickerBackground" Color="WhiteSmoke" />
+    
+    <Style x:Key="ClassPickerStyle" TargetType="{x:Type ui:ClassPicker}">
+        <Setter Property="WindowChrome.WindowChrome">
+            <Setter.Value>
+                <WindowChrome
+                        ResizeBorderThickness="6"
+                        CaptionHeight="30"
+                        CornerRadius="1"
+                        GlassFrameThickness="0,0,0,1"/>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Template" Value="{DynamicResource ClassPickerControlTemplate}"/>
+    </Style>
+
+</ResourceDictionary>

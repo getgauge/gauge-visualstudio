@@ -7,6 +7,7 @@ using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
+using Project = Gauge.VisualStudio.Models.Project;
 
 namespace Gauge.VisualStudio.GotoDefn
 {
@@ -59,7 +60,7 @@ namespace Gauge.VisualStudio.GotoDefn
                         return hresult;
                     }
 
-                    GaugeVSHelper.NavigateToFunction(function);
+                    Project.NavigateToFunction(function);
                     return hresult;
                 default:
                     hresult = Next.Exec(pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
