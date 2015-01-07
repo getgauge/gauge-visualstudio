@@ -9,12 +9,19 @@ namespace Gauge.VisualStudio.Models
 
         public bool ContainsFor(string givenText)
         {
-            foreach (var arg in StepAttribute.Arguments)
+            try
             {
-                string input = arg.Value.ToString().Trim('"');
+                foreach (var arg in StepAttribute.Arguments)
+                {
+                    string input = arg.Value.ToString().Trim('"');
 
-                if (Step.GetStepValueFromInput(input) == Step.GetStepValueFromInput(givenText))
-                    return true;
+                    if (Step.GetStepValueFromInput(input) == Step.GetStepValueFromInput(givenText))
+                        return true;
+                }
+            }
+            catch 
+            {
+                return false;
             }
             return false;
         }

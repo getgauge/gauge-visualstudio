@@ -5,9 +5,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using EnvDTE;
 using Microsoft.CSharp;
 using CodeNamespace = EnvDTE.CodeNamespace;
+using Thread = System.Threading.Thread;
 
 namespace Gauge.VisualStudio.Models
 {
@@ -75,9 +77,9 @@ namespace Gauge.VisualStudio.Models
 
             var codeTypeDeclaration = new CodeTypeDeclaration(targetClass) {IsClass = true, TypeAttributes = TypeAttributes.Public};
             codeNamespace.Types.Add(codeTypeDeclaration);
+
             var codeCompileUnit = new CodeCompileUnit();
             codeCompileUnit.Namespaces.Add(codeNamespace);
-
             var targetFileName = Path.Combine(Path.GetDirectoryName(project.FullName), string.Format("{0}.cs", targetClass));
             using (var streamWriter = new StreamWriter(targetFileName))
             {
@@ -85,8 +87,10 @@ namespace Gauge.VisualStudio.Models
                 codeDomProvider.GenerateCodeFromCompileUnit(codeCompileUnit, streamWriter, options);
             }
 
-            project.ProjectItems.AddFromFile(targetFileName);
-            return GetAllClasses().First(element => element.Name == targetClass) as CodeClass;
+            var file = project.ProjectItems.AddFromFile(targetFileName);
+
+            var classes = GetCodeElementsFor(file.FileCodeModel.CodeElements, vsCMElement.vsCMElementClass).ToList();
+            return classes.First(element => element.Name == targetClass) as CodeClass;
         }
         
         private static IEnumerable<CodeElement> GetCodeElementsFor(IEnumerable elements, vsCMElement type)
