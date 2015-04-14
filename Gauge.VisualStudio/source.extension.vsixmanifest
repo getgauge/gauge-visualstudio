@@ -5,8 +5,9 @@
     <DisplayName>Gauge.VisualStudio</DisplayName>
     <Description xml:space="preserve">Visual Studio Extension for Gauge</Description>
     <License>LICENSE.txt</License>
-    <GettingStartedGuide>http://getgauge.io/documentation/getting_started/README.html</GettingStartedGuide>
-    <Tags>Gauge, C#, BDD, Test Explorer, Testing</Tags>
+    <GettingStartedGuide>http://getgauge.io/documentation/user/current/</GettingStartedGuide>
+    <Icon>logo.png</Icon>
+    <Tags>Gauge, C#, Testing</Tags>
   </Metadata>
   <Installation>
     <InstallationTarget Id="Microsoft.VisualStudio.Pro" Version="[11.0,13.0)" />
