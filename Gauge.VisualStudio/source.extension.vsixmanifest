@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
-    <Identity Id="Gauge.VisualStudio.ThoughtWorks.9731a722-d394-4c99-9df7-758867938fd6" Version="0.0.1" Language="en-US" Publisher="ThoughtWorks" />
+    <Identity Id="Gauge.VisualStudio.ThoughtWorks.9731a722-d394-4c99-9df7-758867938fd6" Version="0.0.3" Language="en-US" Publisher="ThoughtWorks Inc." />
     <DisplayName>Gauge.VisualStudio</DisplayName>
     <Description xml:space="preserve">Visual Studio Extension for Gauge</Description>
     <License>LICENSE.txt</License>
@@ -10,7 +10,7 @@
     <Tags>Gauge, C#, Testing</Tags>
   </Metadata>
   <Installation>
-    <InstallationTarget Id="Microsoft.VisualStudio.Pro" Version="[11.0,13.0)" />
+    <InstallationTarget Id="Microsoft.VisualStudio.Pro" Version="12.0" />
   </Installation>
   <Dependencies>
     <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="4.5" />

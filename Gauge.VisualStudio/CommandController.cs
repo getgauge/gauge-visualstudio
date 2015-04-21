@@ -26,14 +26,16 @@ namespace Gauge.VisualStudio
 {
     public class CommandController
     {
-        [Export(typeof (IVsTextViewCreationListener))]
+        [Export(typeof(IVsTextViewCreationListener))]
         [ContentType(GaugeContentTypeDefinitions.GaugeContentType)]
         [TextViewRole(PredefinedTextViewRoles.Document)]
         internal sealed class VsTextViewCreationListener : IVsTextViewCreationListener
         {
-            [Import] private IVsEditorAdaptersFactoryService _adaptersFactory;
+            [Import]
+            private IVsEditorAdaptersFactoryService _adaptersFactory;
 
-            [Import] private ICompletionBroker _completionBroker;
+            [Import]
+            private ICompletionBroker _completionBroker;
 
             public void VsTextViewCreated(IVsTextView textViewAdapter)
             {

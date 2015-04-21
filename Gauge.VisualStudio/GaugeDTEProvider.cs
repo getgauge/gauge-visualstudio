@@ -45,10 +45,9 @@ namespace Gauge.VisualStudio
 
         private static readonly Dictionary<string, GaugeApiConnection> ApiConnections = new Dictionary<string, GaugeApiConnection>();
 
-        public static readonly Dictionary<string, Dictionary<string, TextPoint>> ConceptDictionary = new Dictionary<string, Dictionary<string, TextPoint>>(); 
+        public static readonly Dictionary<string, Dictionary<string, TextPoint>> ConceptDictionary = new Dictionary<string, Dictionary<string, TextPoint>>();
 
         private static readonly HashSet<Process> ChildProcesses = new HashSet<Process>();
-        private readonly SpecsChangeWatcher _specsChangeWatcher = new SpecsChangeWatcher();
 
         public IClassifier GetClassifier(ITextBuffer buffer)
         {
@@ -62,7 +61,6 @@ namespace Gauge.VisualStudio
                 var openPort = GetOpenPort();
 
                 StartGaugeAsDaemon(gaugeProject, openPort);
-                _specsChangeWatcher.Watch(Path.GetDirectoryName(gaugeProject.FullName));
 
                 var apiConnection = new GaugeApiConnection(new TcpClientWrapper(openPort));
                 ApiConnections.Add(SlugifyName(gaugeProject), apiConnection);
@@ -72,7 +70,7 @@ namespace Gauge.VisualStudio
 
         public static IEnumerable<VSProject> GetGaugeProjects(IServiceProvider service)
         {
-            DTE = (DTE) service.GetService(typeof (DTE));
+            DTE = (DTE)service.GetService(typeof(DTE));
             var projects = DTE.Solution.Projects;
             for (var i = 1; i <= projects.Count; i++)
             {
@@ -129,11 +127,10 @@ namespace Gauge.VisualStudio
             {
                 StartInfo = gaugeStartInfo
             };
-            gaugeProcess.Start();
-            gaugeProcess.WaitForExit(5000); //timeout = 5 seconds to launch gauge
+            if(gaugeProcess.Start())
+                ChildProcesses.Add(gaugeProcess);
 
             //TODO: Check process exitcode and handle failure
-            ChildProcesses.Add(gaugeProcess);
         }
 
         private static int GetOpenPort()
@@ -161,7 +158,6 @@ namespace Gauge.VisualStudio
             {
                 childProcess.Kill();
             }
-            _specsChangeWatcher.Dispose();
         }
     }
 }

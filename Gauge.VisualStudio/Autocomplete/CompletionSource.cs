@@ -58,11 +58,11 @@ namespace Gauge.VisualStudio.AutoComplete
 
                 BitmapSource conceptImageSource = new BitmapImage(new Uri("pack://application:,,,/Gauge.VisualStudio;component/assets/glyphs/concept.png"));
                 completions.AddRange(Concept.GetAllConcepts().Select(x => new Completion(x.StepValue, string.Format("* {0}", x.StepValue), "Concept", conceptImageSource, "Concept")));
-                
+
                 var snapshot = _buffer.CurrentSnapshot;
                 var snapshotPoint = session.GetTriggerPoint(snapshot);
                 if (snapshotPoint == null) return;
-                
+
                 var triggerPoint = (SnapshotPoint)snapshotPoint;
 
                 var line = triggerPoint.GetContainingLine();
@@ -81,6 +81,6 @@ namespace Gauge.VisualStudio.AutoComplete
                 _disposed = true;
             }
         }
-         
+
     }
 }

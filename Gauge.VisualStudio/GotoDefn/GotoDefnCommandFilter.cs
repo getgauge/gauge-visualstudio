@@ -36,7 +36,7 @@ namespace Gauge.VisualStudio.GotoDefn
         public int Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
         {
             var hresult = VSConstants.S_OK;
-            switch ((VSConstants.VSStd97CmdID) nCmdID)
+            switch ((VSConstants.VSStd97CmdID)nCmdID)
             {
                 case VSConstants.VSStd97CmdID.GotoDefn:
                     var caretBufferPosition = TextView.Caret.Position.BufferPosition;
@@ -48,7 +48,7 @@ namespace Gauge.VisualStudio.GotoDefn
 
                     var dte = GaugeDTEProvider.DTE;
                     var containingProject = dte.ActiveDocument.ProjectItem.ContainingProject;
-                
+
                     //if the current step is a concept, then open the concept file.
                     //Gauge parses and caches the concepts, its location (file + line number).
                     //The plugin's job is to simply make an api call and fetch this information.
@@ -60,14 +60,14 @@ namespace Gauge.VisualStudio.GotoDefn
                         window.Activate();
 
                         var textSelection = window.Selection as TextSelection;
-                        if (textSelection != null) 
+                        if (textSelection != null)
                             textSelection.MoveTo(concept.LineNumber, 0);
                         return hresult;
                     }
 
                     var function = Step.GetStepImplementation(caretBufferPosition.GetContainingLine(), containingProject);
 
-                    if (function==null)
+                    if (function == null)
                     {
                         return hresult;
                     }
@@ -84,10 +84,10 @@ namespace Gauge.VisualStudio.GotoDefn
 
         public int QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText)
         {
-            if ((VSConstants.VSStd97CmdID) prgCmds[0].cmdID != VSConstants.VSStd97CmdID.GotoDefn)
+            if ((VSConstants.VSStd97CmdID)prgCmds[0].cmdID != VSConstants.VSStd97CmdID.GotoDefn)
                 return Next.QueryStatus(pguidCmdGroup, cCmds, prgCmds, pCmdText);
 
-            prgCmds[0].cmdf = (uint) OLECMDF.OLECMDF_ENABLED | (uint) OLECMDF.OLECMDF_SUPPORTED;
+            prgCmds[0].cmdf = (uint)OLECMDF.OLECMDF_ENABLED | (uint)OLECMDF.OLECMDF_SUPPORTED;
             return VSConstants.S_OK;
         }
     }

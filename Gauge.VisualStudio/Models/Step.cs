@@ -29,13 +29,13 @@ namespace Gauge.VisualStudio.Models
 
         public static IEnumerable<string> GetAll()
         {
-            return GetAllSteps().Select(x => x.ParameterizedStepValue);
+            return GetAllStepsFromGauge().Select(x => x.ParameterizedStepValue);
         }
 
         public static string GetParsedStepValue(ITextSnapshotLine input)
         {
             var stepValueFromInput = GetStepValueFromInput(GetStepText(input));
-            return GetAllSteps(true).First(value => value.StepValue == stepValueFromInput)
+            return GetAllStepsFromGauge().First(value => value.StepValue == stepValueFromInput)
                    .ParameterizedStepValue;
         }
 
@@ -126,6 +126,8 @@ namespace Gauge.VisualStudio.Models
             return stepRegex.Replace(input, "{}");
         }
 
+
+        // TODO : Use this when there is an implementation to listen to VS solution events.
         private static IEnumerable<ProtoStepValue> GetAllSteps(bool forceCacheUpdate=false)
         {
             if (forceCacheUpdate)

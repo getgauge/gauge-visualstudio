@@ -46,7 +46,7 @@ namespace Gauge.VisualStudio.AutoComplete
 
             if (pguidCmdGroup == VSConstants.VSStd2K)
             {
-                switch ((VSConstants.VSStd2KCmdID) nCmdID)
+                switch ((VSConstants.VSStd2KCmdID)nCmdID)
                 {
                     case VSConstants.VSStd2KCmdID.AUTOCOMPLETE:
                     case VSConstants.VSStd2KCmdID.COMPLETEWORD:
@@ -82,7 +82,7 @@ namespace Gauge.VisualStudio.AutoComplete
 
         private static char GetTypeChar(IntPtr pvaIn)
         {
-            return (char) (ushort) Marshal.GetObjectForNativeVariant(pvaIn);
+            return (char)(ushort)Marshal.GetObjectForNativeVariant(pvaIn);
         }
 
         private void Filter()
@@ -142,11 +142,11 @@ namespace Gauge.VisualStudio.AutoComplete
 
         public int QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText)
         {
-            switch ((VSConstants.VSStd2KCmdID) prgCmds[0].cmdID)
+            switch ((VSConstants.VSStd2KCmdID)prgCmds[0].cmdID)
             {
                 case VSConstants.VSStd2KCmdID.AUTOCOMPLETE:
                 case VSConstants.VSStd2KCmdID.COMPLETEWORD:
-                    prgCmds[0].cmdf = (uint) OLECMDF.OLECMDF_ENABLED | (uint) OLECMDF.OLECMDF_SUPPORTED;
+                    prgCmds[0].cmdf = (uint)OLECMDF.OLECMDF_ENABLED | (uint)OLECMDF.OLECMDF_SUPPORTED;
                     return VSConstants.S_OK;
             }
 
