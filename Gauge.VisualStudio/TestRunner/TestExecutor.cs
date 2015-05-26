@@ -32,9 +32,7 @@ namespace Gauge.VisualStudio.TestRunner
             foreach (var testCase in tests)
             {
                 if (_cancelled) break;
-
-                var testResult = GaugeRunner.Run(testCase, runContext.IsBeingDebugged);
-                frameworkHandle.RecordResult(testResult);
+                GaugeRunner.Run(testCase, runContext.IsBeingDebugged, frameworkHandle);
             }
         }
 
