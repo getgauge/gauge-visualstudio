@@ -142,6 +142,5 @@ namespace Gauge.VisualStudio.Models
             startPoint.TryToShow();
             startPoint.Parent.Selection.MoveToPoint(startPoint);
         }
-
     }
 }

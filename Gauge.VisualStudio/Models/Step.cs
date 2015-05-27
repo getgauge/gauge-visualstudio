@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using EnvDTE;
+using Gauge.VisualStudio.Extensions;
 using main;
 using Microsoft.VisualStudio.Text;
 
@@ -24,18 +25,18 @@ namespace Gauge.VisualStudio.Models
 {
     public class Step
     {
-        private static IList<ProtoStepValue> _allSteps;
+        private static readonly Dictionary<string, IList<ProtoStepValue>> StepsCache = new Dictionary<string, IList<ProtoStepValue>>();
         private static IEnumerable<Implementation> _gaugeImplementations;
 
         public static IEnumerable<string> GetAll()
         {
-            return GetAllStepsFromGauge().Select(x => x.ParameterizedStepValue);
+            return GetAllSteps(ActiveProject).Select(x => x.ParameterizedStepValue);
         }
 
         public static string GetParsedStepValue(ITextSnapshotLine input)
         {
             var stepValueFromInput = GetStepValueFromInput(GetStepText(input));
-            return GetAllStepsFromGauge().First(value => value.StepValue == stepValueFromInput)
+            return GetAllSteps(ActiveProject).First(value => value.StepValue == stepValueFromInput)
                    .ParameterizedStepValue;
         }
 
@@ -43,7 +44,14 @@ namespace Gauge.VisualStudio.Models
         {
             if (containingProject==null)
             {
-                containingProject = GaugeDTEProvider.DTE.ActiveDocument.ProjectItem.ContainingProject;
+                try
+                {
+                    containingProject = ActiveProject;
+                }
+                catch
+                {
+                    return null;
+                }
             }
 
             var lineText = GetStepText(line);
@@ -53,6 +61,11 @@ namespace Gauge.VisualStudio.Models
             return gaugeImplementation == null ? null : gaugeImplementation.Function;
         }
 
+        private static EnvDTE.Project ActiveProject
+        {
+            get { return GaugeDTEProvider.DTE.ActiveDocument.ProjectItem.ContainingProject; }
+        }
+
         public static string GetStepText(ITextSnapshotLine line)
         {
             var originalText = line.GetText();
@@ -60,7 +73,7 @@ namespace Gauge.VisualStudio.Models
 
             //if next line is a table then change the last word of the step to take in a special param
             if (IsTable(line))
-                lineText = string.Format("{0} {{}}", lineText);
+                lineText = string.Format("{0} <table>", lineText);
             return lineText;
         }
 
@@ -71,13 +84,17 @@ namespace Gauge.VisualStudio.Models
             return tableRegex.IsMatch(nextLineText);
         }
 
-        public static void Refresh()
+        public static void Refresh(EnvDTE.Project gaugeProject)
         {
             try
             {
-                _allSteps = GetAllStepsFromGauge();
-                _gaugeImplementations = Project.GetGaugeImplementations(GaugeDTEProvider.DTE.ActiveDocument.ProjectItem.ContainingProject);
-
+                var projectName = gaugeProject.SlugifiedName();
+                if (StepsCache.ContainsKey(projectName))
+                {
+                    StepsCache.Remove(projectName);
+                }
+                StepsCache.Add(projectName,GetAllStepsFromGauge(gaugeProject));
+                _gaugeImplementations = Project.GetGaugeImplementations(gaugeProject);
             }
             catch
             {
@@ -85,9 +102,9 @@ namespace Gauge.VisualStudio.Models
             }
         }
 
-        private static IList<ProtoStepValue> GetAllStepsFromGauge()
+        private static IList<ProtoStepValue> GetAllStepsFromGauge(EnvDTE.Project project)
         {
-            var gaugeApiConnection = GaugeDTEProvider.GetApiConnectionForActiveDocument();
+            var gaugeApiConnection = GaugeDTEProvider.GetApiConnectionFor(project);
             var stepsRequest = GetAllStepsRequest.DefaultInstance;
             var apiMessage = APIMessage.CreateBuilder()
                 .SetMessageId(GenerateMessageId())
@@ -122,20 +139,28 @@ namespace Gauge.VisualStudio.Models
 
         internal static string GetStepValueFromInput(string input)
         {
-            var stepRegex = new Regex(@"""([^""]*)""|\<([^\>]*)\>", RegexOptions.Compiled);
-            return stepRegex.Replace(input, "{}");
+            var gaugeApiConnection = GaugeDTEProvider.GetApiConnectionFor(ActiveProject);
+            var stepsRequest = GetStepValueRequest.CreateBuilder().SetStepText(input).Build();
+            var apiMessage = APIMessage.CreateBuilder()
+                .SetMessageId(GenerateMessageId())
+                .SetMessageType(APIMessage.Types.APIMessageType.GetStepValueRequest)
+                .SetStepValueRequest(stepsRequest)
+                .Build();
+
+            var bytes = gaugeApiConnection.WriteAndReadApiMessage(apiMessage);
+            return bytes.StepValueResponse.StepValue.StepValue;
         }
 
 
         // TODO : Use this when there is an implementation to listen to VS solution events.
-        private static IEnumerable<ProtoStepValue> GetAllSteps(bool forceCacheUpdate=false)
+        private static IEnumerable<ProtoStepValue> GetAllSteps(EnvDTE.Project project, bool forceCacheUpdate = false)
         {
-            if (forceCacheUpdate)
+            var projectName = project.SlugifiedName();
+            if (forceCacheUpdate || !StepsCache.ContainsKey(projectName))
             {
-                _allSteps = GetAllStepsFromGauge();
+                Refresh(project);
             }
-            _allSteps = _allSteps ?? GetAllStepsFromGauge();
-            return _allSteps;
+            return StepsCache[projectName];
         }
     }
 }

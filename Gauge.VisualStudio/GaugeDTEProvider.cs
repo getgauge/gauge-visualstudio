@@ -23,6 +23,8 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using EnvDTE;
 using Gauge.CSharp.Lib;
+using Gauge.VisualStudio.Extensions;
+using main;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
@@ -48,6 +50,7 @@ namespace Gauge.VisualStudio
         public static readonly Dictionary<string, Dictionary<string, TextPoint>> ConceptDictionary = new Dictionary<string, Dictionary<string, TextPoint>>();
 
         private static readonly HashSet<Process> ChildProcesses = new HashSet<Process>();
+        private static readonly HashSet<SpecsChangeWatcher> ChangeWatchers = new HashSet<SpecsChangeWatcher>();
 
         public IClassifier GetClassifier(ITextBuffer buffer)
         {
@@ -55,15 +58,17 @@ namespace Gauge.VisualStudio
             foreach (var vsProject in projects)
             {
                 var gaugeProject = vsProject.Project;
-                if (ApiConnections.ContainsKey(SlugifyName(vsProject.Project)))
+                if (ApiConnections.ContainsKey(vsProject.Project.SlugifiedName()))
                     return null;
 
                 var openPort = GetOpenPort();
-
                 StartGaugeAsDaemon(gaugeProject, openPort);
 
+                var specsChangeWatcher = new SpecsChangeWatcher(gaugeProject);
+                ChangeWatchers.Add(specsChangeWatcher);
+
                 var apiConnection = new GaugeApiConnection(new TcpClientWrapper(openPort));
-                ApiConnections.Add(SlugifyName(gaugeProject), apiConnection);
+                ApiConnections.Add(gaugeProject.SlugifiedName(), apiConnection);
             }
             return null;
         }
@@ -102,12 +107,7 @@ namespace Gauge.VisualStudio
 
         public static GaugeApiConnection GetApiConnectionForActiveDocument()
         {
-            return ApiConnections[SlugifyName(DTE.ActiveDocument.ProjectItem.ContainingProject)];
-        }
-
-        private static string SlugifyName(Project gaugeProject)
-        {
-            return gaugeProject.Name.Replace('.', '_');
+            return ApiConnections[DTE.ActiveDocument.ProjectItem.ContainingProject.SlugifiedName()];
         }
 
         private static void StartGaugeAsDaemon(Project gaugeProject, int openPort)
@@ -158,6 +158,13 @@ namespace Gauge.VisualStudio
             {
                 childProcess.Kill();
             }
+        }
+
+        public static GaugeApiConnection GetApiConnectionFor(Project project)
+        {
+            GaugeApiConnection apiConnection;
+            ApiConnections.TryGetValue(project.SlugifiedName(), out apiConnection);
+            return apiConnection;
         }
     }
 }

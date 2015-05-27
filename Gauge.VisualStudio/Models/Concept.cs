@@ -15,20 +15,25 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Gauge.VisualStudio.Extensions;
 using main;
 
 namespace Gauge.VisualStudio.Models
 {
     public class Concept
     {
-        private static IEnumerable<Concept> _allConcepts;
+        private static Dictionary<string, IEnumerable<Concept>> _conceptsCache = new Dictionary<string, IEnumerable<Concept>>();
         public string StepValue { get; set; }
         public string FilePath { get; set; }
         public int LineNumber { get; set; }
 
-        public static IEnumerable<Concept> GetAllConcepts()
+        public static IEnumerable<Concept> GetAllConcepts(EnvDTE.Project gaugeProject)
         {
-            var gaugeApiConnection = GaugeDTEProvider.GetApiConnectionForActiveDocument();
+            if (gaugeProject == null)
+            {
+                return Enumerable.Empty<Concept>();
+            }
+            var gaugeApiConnection = GaugeDTEProvider.GetApiConnectionFor(gaugeProject);
             var conceptsRequest = GetAllConceptsRequest.DefaultInstance;
             var apiMessage = APIMessage.CreateBuilder()
                 .SetMessageId(GenerateMessageId())
@@ -41,6 +46,18 @@ namespace Gauge.VisualStudio.Models
             return bytes.AllConceptsResponse.ConceptsList.Select(info => new Concept { StepValue = info.StepValue.ParameterizedStepValue, FilePath = info.Filepath, LineNumber = info.LineNumber });
         }
 
+        public static IEnumerable<Concept> GetAllConcepts()
+        {
+            try
+            {
+                return GetAllConcepts(GaugeDTEProvider.DTE.ActiveDocument.ProjectItem.ContainingProject);
+            }
+            catch
+            {
+                return Enumerable.Empty<Concept>();
+            }
+        } 
+
         private static long GenerateMessageId()
         {
             return DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
@@ -48,13 +65,37 @@ namespace Gauge.VisualStudio.Models
 
         public static Concept Search(string lineText)
         {
-            _allConcepts = _allConcepts ?? GetAllConcepts();
-            return _allConcepts.FirstOrDefault(concept => concept.StepValue == lineText);
+            try
+            {
+                var project = GaugeDTEProvider.DTE.ActiveDocument.ProjectItem.ContainingProject;
+                var projectName = project.SlugifiedName();
+                if (!_conceptsCache.ContainsKey(projectName))
+                {
+                    _conceptsCache.Add(projectName, GetAllConcepts(project));
+                }
+                return _conceptsCache[projectName].FirstOrDefault(concept => concept.StepValue == lineText);
+            }
+            catch
+            {
+                return null;                
+            }
         }
 
-        public static void Refresh()
+        public static void Refresh(EnvDTE.Project gaugeProject)
         {
-            _allConcepts = GetAllConcepts();
+            try
+            {
+                var projectName = gaugeProject.SlugifiedName();
+                if (_conceptsCache.ContainsKey(projectName))
+                {
+                    _conceptsCache.Remove(projectName);
+                }
+                _conceptsCache.Add(projectName, GetAllConcepts(gaugeProject));
+            }
+            catch
+            {
+                // happens when project closes, and saves file on close. Ignore the refresh.
+            }
         }
     }
 }
