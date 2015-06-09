@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.ComponentModel.Composition;
+using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
@@ -33,9 +34,21 @@ namespace Gauge.VisualStudio.Highlighting
         [Import]
         private IViewTagAggregatorFactoryService ViewTagAggregatorFactoryService { get; set; }
 
+        [Import]
+        public ITextDocumentFactoryService TextDocumentFactoryService { get; set; }
+
         public void TextViewCreated(IWpfTextView textView)
         {
-            new StepAdornment(textView, ViewTagAggregatorFactoryService.CreateTagAggregator<UnimplementedStepTag>(textView));
+            ITextDocument document;
+            if (!TextDocumentFactoryService.TryGetTextDocument(textView.TextDataModel.DocumentBuffer, out document))
+                return;
+            
+            var stepAdornment = new StepAdornment(textView, ViewTagAggregatorFactoryService.CreateTagAggregator<UnimplementedStepTag>(textView));
+
+            document.FileActionOccurred += (sender, args) =>
+            {
+                stepAdornment.Update();
+            };
         }
     }
 }

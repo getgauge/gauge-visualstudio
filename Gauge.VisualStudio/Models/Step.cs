@@ -17,7 +17,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using EnvDTE;
-using Gauge.VisualStudio.Extensions;
 using main;
 using Microsoft.VisualStudio.Text;
 
@@ -25,18 +24,15 @@ namespace Gauge.VisualStudio.Models
 {
     public class Step
     {
-        private static readonly Dictionary<string, IList<ProtoStepValue>> StepsCache = new Dictionary<string, IList<ProtoStepValue>>();
-        private static IEnumerable<Implementation> _gaugeImplementations;
-
         public static IEnumerable<string> GetAll()
         {
-            return GetAllSteps(ActiveProject).Select(x => x.ParameterizedStepValue);
+            return GetAllStepsFromGauge(ActiveProject).Select(x => x.ParameterizedStepValue);
         }
 
         public static string GetParsedStepValue(ITextSnapshotLine input)
         {
             var stepValueFromInput = GetStepValueFromInput(GetStepText(input));
-            return GetAllSteps(ActiveProject).First(value => value.StepValue == stepValueFromInput)
+            return GetAllStepsFromGauge(ActiveProject).First(value => value.StepValue == stepValueFromInput)
                    .ParameterizedStepValue;
         }
 
@@ -56,8 +52,8 @@ namespace Gauge.VisualStudio.Models
 
             var lineText = GetStepText(line);
 
-            _gaugeImplementations = _gaugeImplementations ?? Project.GetGaugeImplementations(containingProject);
-            var gaugeImplementation = _gaugeImplementations.FirstOrDefault(implementation => implementation.ContainsFor(lineText));
+            var gaugeImplementations = Project.GetGaugeImplementations(containingProject);
+            var gaugeImplementation = gaugeImplementations.FirstOrDefault(implementation => implementation.ContainsFor(lineText));
             return gaugeImplementation == null ? null : gaugeImplementation.Function;
         }
 
@@ -82,24 +78,6 @@ namespace Gauge.VisualStudio.Models
             var nextLineText = NextLineText(line);
             var tableRegex = new Regex(@"[ ]*\|[\w ]+\|", RegexOptions.Compiled);
             return tableRegex.IsMatch(nextLineText);
-        }
-
-        public static void Refresh(EnvDTE.Project gaugeProject)
-        {
-            try
-            {
-                var projectName = gaugeProject.SlugifiedName();
-                if (StepsCache.ContainsKey(projectName))
-                {
-                    StepsCache.Remove(projectName);
-                }
-                StepsCache.Add(projectName,GetAllStepsFromGauge(gaugeProject));
-                _gaugeImplementations = Project.GetGaugeImplementations(gaugeProject);
-            }
-            catch
-            {
-                // happens when project closes, and saves file on close. Ignore the refresh.
-            }
         }
 
         private static IList<ProtoStepValue> GetAllStepsFromGauge(EnvDTE.Project project)
@@ -149,18 +127,6 @@ namespace Gauge.VisualStudio.Models
 
             var bytes = gaugeApiConnection.WriteAndReadApiMessage(apiMessage);
             return bytes.StepValueResponse.StepValue.StepValue;
-        }
-
-
-        // TODO : Use this when there is an implementation to listen to VS solution events.
-        private static IEnumerable<ProtoStepValue> GetAllSteps(EnvDTE.Project project, bool forceCacheUpdate = false)
-        {
-            var projectName = project.SlugifiedName();
-            if (forceCacheUpdate || !StepsCache.ContainsKey(projectName))
-            {
-                Refresh(project);
-            }
-            return StepsCache[projectName];
         }
     }
 }

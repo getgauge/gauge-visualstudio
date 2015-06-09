@@ -103,5 +103,14 @@ namespace Gauge.VisualStudio.Highlighting
         {
             _textView.LayoutChanged -= OnLayoutChanged;
         }
+
+        public void Update()
+        {
+            _adornmentLayer.RemoveAllAdornments();
+            foreach (var textViewLine in _textView.TextViewLines)
+            {
+                CreateVisuals(textViewLine);
+            }
+        }
     }
 }

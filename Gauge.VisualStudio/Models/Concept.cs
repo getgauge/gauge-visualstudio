@@ -15,14 +15,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Gauge.VisualStudio.Extensions;
 using main;
 
 namespace Gauge.VisualStudio.Models
 {
     public class Concept
     {
-        private static Dictionary<string, IEnumerable<Concept>> _conceptsCache = new Dictionary<string, IEnumerable<Concept>>();
         public string StepValue { get; set; }
         public string FilePath { get; set; }
         public int LineNumber { get; set; }
@@ -68,33 +66,11 @@ namespace Gauge.VisualStudio.Models
             try
             {
                 var project = GaugeDTEProvider.DTE.ActiveDocument.ProjectItem.ContainingProject;
-                var projectName = project.SlugifiedName();
-                if (!_conceptsCache.ContainsKey(projectName))
-                {
-                    _conceptsCache.Add(projectName, GetAllConcepts(project));
-                }
-                return _conceptsCache[projectName].FirstOrDefault(concept => concept.StepValue == lineText);
+                return  GetAllConcepts(project).FirstOrDefault(concept => concept.StepValue == lineText);
             }
             catch
             {
                 return null;                
-            }
-        }
-
-        public static void Refresh(EnvDTE.Project gaugeProject)
-        {
-            try
-            {
-                var projectName = gaugeProject.SlugifiedName();
-                if (_conceptsCache.ContainsKey(projectName))
-                {
-                    _conceptsCache.Remove(projectName);
-                }
-                _conceptsCache.Add(projectName, GetAllConcepts(gaugeProject));
-            }
-            catch
-            {
-                // happens when project closes, and saves file on close. Ignore the refresh.
             }
         }
     }

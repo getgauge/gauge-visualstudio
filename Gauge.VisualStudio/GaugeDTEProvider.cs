@@ -24,7 +24,6 @@ using System.Net.NetworkInformation;
 using EnvDTE;
 using Gauge.CSharp.Lib;
 using Gauge.VisualStudio.Extensions;
-using main;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
@@ -50,7 +49,6 @@ namespace Gauge.VisualStudio
         public static readonly Dictionary<string, Dictionary<string, TextPoint>> ConceptDictionary = new Dictionary<string, Dictionary<string, TextPoint>>();
 
         private static readonly HashSet<Process> ChildProcesses = new HashSet<Process>();
-        private static readonly HashSet<SpecsChangeWatcher> ChangeWatchers = new HashSet<SpecsChangeWatcher>();
 
         public IClassifier GetClassifier(ITextBuffer buffer)
         {
@@ -64,9 +62,6 @@ namespace Gauge.VisualStudio
                 var openPort = GetOpenPort();
                 StartGaugeAsDaemon(gaugeProject, openPort);
 
-                var specsChangeWatcher = new SpecsChangeWatcher(gaugeProject);
-                ChangeWatchers.Add(specsChangeWatcher);
-
                 var apiConnection = new GaugeApiConnection(new TcpClientWrapper(openPort));
                 ApiConnections.Add(gaugeProject.SlugifiedName(), apiConnection);
             }
@@ -75,7 +70,7 @@ namespace Gauge.VisualStudio
 
         public static IEnumerable<VSProject> GetGaugeProjects(IServiceProvider service)
         {
-            DTE = (DTE)service.GetService(typeof(DTE));
+            DTE = GetDTE(service);
             var projects = DTE.Solution.Projects;
             for (var i = 1; i <= projects.Count; i++)
             {
@@ -83,6 +78,11 @@ namespace Gauge.VisualStudio
                 if (vsProject == null || vsProject.References.Find("Gauge.CSharp.Lib") == null) continue;
                 yield return vsProject;
             }
+        }
+
+        private static DTE GetDTE(IServiceProvider service)
+        {
+            return (DTE)service.GetService(typeof(DTE));
         }
 
         public static IEnumerable<string> GetAllSpecs(IServiceProvider service)
