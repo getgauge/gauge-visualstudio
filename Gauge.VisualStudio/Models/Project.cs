@@ -43,9 +43,9 @@ namespace Gauge.VisualStudio.Models
                     if (function == null) continue;
                     var allAttributes = GetCodeElementsFor(function.Attributes, vsCMElement.vsCMElementAttribute);
 
-                    var attribute = allAttributes.FirstOrDefault(a => a.FullName == typeof(CSharp.Lib.Attribute.Step).FullName);
+                    var attribute = allAttributes.FirstOrDefault(a => a.FullName == typeof(CSharp.Lib.Attribute.Step).FullName) as CodeAttribute;
                     if (attribute != null)
-                        gaugeImplementations.Add(new Implementation { Function = function, StepAttribute = attribute });
+                        gaugeImplementations.Add(new Implementation { Function = function, StepValue = attribute.Value.Trim('"') });
                 }
             }
 
