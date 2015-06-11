@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel.Composition;
 using System.Linq;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -30,15 +31,20 @@ namespace Gauge.VisualStudio.Highlighting
 {
     internal class ImplementStepAction : ISmartTagAction
     {
-        private readonly ITrackingSpan _span;
+        private readonly SnapshotSpan _span;
+        private readonly UnimplementedStepTagger _unimplementedStepTagger;
         private readonly ITextSnapshot _snapshot;
         private readonly string _display;
         private bool _enabled = true;
+        private readonly ITrackingSpan _trackingSpan;
 
-        public ImplementStepAction(ITrackingSpan trackingSpan, UnimplementedStepTagger unimplementedStepTagger)
+        public ImplementStepAction(SnapshotSpan span, UnimplementedStepTagger unimplementedStepTagger)
         {
-            _span = trackingSpan;
-            _snapshot = _span.TextBuffer.CurrentSnapshot;
+            _trackingSpan = span.Snapshot.CreateTrackingSpan(span, SpanTrackingMode.EdgeInclusive);
+
+            _span = span;
+            _unimplementedStepTagger = unimplementedStepTagger;
+            _snapshot = _trackingSpan.TextBuffer.CurrentSnapshot;
             _display = "Implement Step";
             Icon = new BitmapImage(new Uri("pack://application:,,,/Gauge.VisualStudio;component/assets/glyphs/step.png"));
         }
@@ -50,7 +56,7 @@ namespace Gauge.VisualStudio.Highlighting
             classPicker.ShowModal();
             selectedClass = classPicker.SelectedClass;
 
-            var containingLine = _span.GetStartPoint(_snapshot).GetContainingLine();
+            var containingLine = _trackingSpan.GetStartPoint(_snapshot).GetContainingLine();
             if (Step.GetStepImplementation(containingLine)!=null)
             {
                 return;
@@ -65,31 +71,54 @@ namespace Gauge.VisualStudio.Highlighting
             }
 
             var functionCount = Project.GetFunctionsForClass(targetClass).Count();
+            CodeFunction implementationFunction = null;
 
-            var implementationFunction = targetClass.AddFunction(string.Format("GaugeImpl{0}", functionCount+1), vsCMFunction.vsCMFunctionFunction, vsCMTypeRef.vsCMTypeRefVoid, -1,
-                vsCMAccess.vsCMAccessPublic);
-
-            if (Step.IsTable(containingLine))
+            try
             {
-                implementationFunction.AddParameter(string.Format("table"), typeof(Table).Name);
-            }
-            else
-            {
-                var stepText = _span.GetText(_snapshot);
-                var matches = Parser.StepRegex.Match(stepText);
+                implementationFunction = targetClass.AddFunction(string.Format("GaugeImpl{0}", functionCount + 1),
+                    vsCMFunction.vsCMFunctionFunction, vsCMTypeRef.vsCMTypeRefVoid, -1,
+                    vsCMAccess.vsCMAccessPublic);
 
-                var paramCount = matches.Groups["stat"].Captures.Count + matches.Groups["dyn"].Captures.Count;
-
-                for (var i = 1; i <= paramCount; i++)
+                if (Step.HasTable(containingLine))
                 {
-                    implementationFunction.AddParameter(string.Format("param{0}", i), vsCMTypeRef.vsCMTypeRefString);
+                    implementationFunction.AddParameter(string.Format("table"), typeof (Table).Name);
                 }
+                else
+                {
+                    var stepText = _trackingSpan.GetText(_snapshot);
+                    var matches = Parser.StepRegex.Match(stepText);
+
+                    var paramCount = matches.Groups["stat"].Captures.Count + matches.Groups["dyn"].Captures.Count;
+
+                    for (var i = 1; i <= paramCount; i++)
+                    {
+                        implementationFunction.AddParameter(string.Format("param{0}", i), vsCMTypeRef.vsCMTypeRefString);
+                    }
+                }
+
+                var codeAttribute = implementationFunction.AddAttribute("Step",
+                    Step.GetParsedStepValue(containingLine).ToLiteral(), -1);
+
+                if (codeAttribute == null)
+                {
+                    throw new ChangeRejectedException("Step Attribute not created");
+                }
+
+                Project.NavigateToFunction(implementationFunction);
+
+                _unimplementedStepTagger.MarkTagImplemented(_span);
+
+                _enabled = false;
             }
-
-            implementationFunction.AddAttribute("Step", Step.GetParsedStepValue(containingLine).ToLiteral(), -1);
-            Project.NavigateToFunction(implementationFunction);
-
-            _enabled = false;
+            catch
+            {
+                if (implementationFunction != null)
+                    targetClass.RemoveMember(implementationFunction);
+            }
+            finally
+            {
+                targetClass.ProjectItem.Save();
+            }
         }
 
         public ReadOnlyCollection<SmartTagActionSet> ActionSets

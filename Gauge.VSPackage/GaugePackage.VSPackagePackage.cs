@@ -1,15 +1,25 @@
-﻿using System;
+﻿// Copyright [2014, 2015] [ThoughtWorks Inc.](www.thoughtworks.com)
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
-using System.ComponentModel.Design;
-using Microsoft.Win32;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.VisualStudio.OLE.Interop;
+using Company.Gauge_VSPackage;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 
-namespace Company.Gauge_VSPackage
+namespace Gauge.VSPackage
 {
     /// <summary>
     /// This is the class that implements the package exposed by this assembly.
@@ -27,11 +37,11 @@ namespace Company.Gauge_VSPackage
     // This attribute is used to register the information needed to show this package
     // in the Help/About dialog of Visual Studio.
     [InstalledProductRegistration("#110", "#112", "1.0", IconResourceID = 400)]
-    [Guid(GuidList.guidGauge_VSPackagePkgString)]
+    [Guid(GuidList.GuidGaugeVsPackagePkgString)]
     [ProvideAutoLoad(UIContextGuids80.SolutionExists)]
-    public sealed class Gauge_VSPackagePackage : Package
+    public sealed class GaugePackage : Package
     {
-        private SolutionEventsListener solutionEventsListener;
+        private SolutionEventsListener _solutionEventsListener;
 
         /// <summary>
         /// Default constructor of the package.
@@ -40,7 +50,7 @@ namespace Company.Gauge_VSPackage
         /// not sited yet inside Visual Studio environment. The place to do all the other 
         /// initialization is the Initialize method.
         /// </summary>
-        public Gauge_VSPackagePackage()
+        public GaugePackage()
         {
             Debug.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering constructor for: {0}", this.ToString()));
         }
@@ -59,8 +69,8 @@ namespace Company.Gauge_VSPackage
         {
             Debug.WriteLine (string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", this.ToString()));
             base.Initialize();
-            solutionEventsListener = new SolutionEventsListener(this);
-            solutionEventsListener.StartListeningForChanges();
+            _solutionEventsListener = new SolutionEventsListener(this);
+            _solutionEventsListener.StartListeningForChanges();
         }
         #endregion
 

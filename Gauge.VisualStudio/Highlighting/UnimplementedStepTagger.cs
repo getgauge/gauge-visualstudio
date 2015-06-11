@@ -52,6 +52,11 @@ namespace Gauge.VisualStudio.Highlighting
             }
         }
 
+        internal void MarkTagImplemented(SnapshotSpan span)
+        {
+            TagsChanged(this, new SnapshotSpanEventArgs(span));
+        }
+
         public IEnumerable<ITagSpan<UnimplementedStepTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {
             foreach (var span in spans)
@@ -72,8 +77,7 @@ namespace Gauge.VisualStudio.Highlighting
 
         private ReadOnlyCollection<SmartTagActionSet> GetSmartTagActions(SnapshotSpan span)
         {
-            var trackingSpan = span.Snapshot.CreateTrackingSpan(span, SpanTrackingMode.EdgeInclusive);
-            var actionList = new ReadOnlyCollection<ISmartTagAction>(new ISmartTagAction[] {new ImplementStepAction(trackingSpan, this)});
+            var actionList = new ReadOnlyCollection<ISmartTagAction>(new ISmartTagAction[] {new ImplementStepAction(span, this)});
             return new ReadOnlyCollection<SmartTagActionSet>(new[] {new SmartTagActionSet(actionList)});
         }
 

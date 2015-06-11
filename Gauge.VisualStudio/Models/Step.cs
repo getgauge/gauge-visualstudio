@@ -68,12 +68,12 @@ namespace Gauge.VisualStudio.Models
             var lineText = originalText.Replace('*', ' ').Trim();
 
             //if next line is a table then change the last word of the step to take in a special param
-            if (IsTable(line))
+            if (HasTable(line))
                 lineText = string.Format("{0} <table>", lineText);
             return lineText;
         }
 
-        public static bool IsTable(ITextSnapshotLine line)
+        public static bool HasTable(ITextSnapshotLine line)
         {
             var nextLineText = NextLineText(line);
             var tableRegex = new Regex(@"[ ]*\|[\w ]+\|", RegexOptions.Compiled);

@@ -8,11 +8,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Gauge.VSPackage")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Visual Studio Extension for running Gauge Specs")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Company")]
-[assembly: AssemblyProduct("Gauge.VSPackage")]
-[assembly: AssemblyCopyright("")]
+[assembly: AssemblyCompany("ThoughtWorks Inc.")]
+[assembly: AssemblyProduct("Gauge.VisualStudio")]
+[assembly: AssemblyCopyright("2015 ThoughtWorks Inc.")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]   
 [assembly: ComVisible(false)]     
@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
 
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("0.0.5.0")]
+[assembly: AssemblyFileVersion("0.0.5.0")]
 
 
 
