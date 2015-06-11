@@ -32,7 +32,6 @@ namespace Gauge.VisualStudio.Highlighting
     {
         private readonly ITrackingSpan _span;
         private readonly ITextSnapshot _snapshot;
-        private string _upper;
         private readonly string _display;
         private bool _enabled = true;
 
@@ -40,7 +39,6 @@ namespace Gauge.VisualStudio.Highlighting
         {
             _span = trackingSpan;
             _snapshot = _span.TextBuffer.CurrentSnapshot;
-            _upper = _span.GetText(_snapshot).ToUpper();
             _display = "Implement Step";
             Icon = new BitmapImage(new Uri("pack://application:,,,/Gauge.VisualStudio;component/assets/glyphs/step.png"));
         }

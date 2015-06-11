@@ -42,13 +42,12 @@ namespace Gauge.VisualStudio.Highlighting
             ITextDocument document;
             if (!TextDocumentFactoryService.TryGetTextDocument(textView.TextDataModel.DocumentBuffer, out document))
                 return;
-            
-            var stepAdornment = new StepAdornment(textView, ViewTagAggregatorFactoryService.CreateTagAggregator<UnimplementedStepTag>(textView));
 
-            document.FileActionOccurred += (sender, args) =>
-            {
-                stepAdornment.Update();
-            };
+            var tagAggregator = ViewTagAggregatorFactoryService.CreateTagAggregator<UnimplementedStepTag>(textView);
+
+            var stepAdornment = new StepAdornment(textView, tagAggregator);
+
+            document.FileActionOccurred += (sender, args) => stepAdornment.Update();
         }
     }
 }
