@@ -21,17 +21,29 @@ namespace Gauge.VisualStudio.Models
 {
     public class Concept
     {
+        private readonly EnvDTE.Project _project;
+
+        public Concept(EnvDTE.Project project)
+        {
+            _project = project;
+        }
+
+        public Concept() 
+            : this(GaugeDTEProvider.DTE.ActiveDocument.ProjectItem.ContainingProject)
+        {
+        }
+
         public string StepValue { get; set; }
         public string FilePath { get; set; }
         public int LineNumber { get; set; }
 
-        public static IEnumerable<Concept> GetAllConcepts(EnvDTE.Project gaugeProject)
+        public IEnumerable<Concept> GetAllConcepts()
         {
-            if (gaugeProject == null)
+            if (_project == null)
             {
                 return Enumerable.Empty<Concept>();
             }
-            var gaugeApiConnection = GaugeDTEProvider.GetApiConnectionFor(gaugeProject);
+            var gaugeApiConnection = GaugeDTEProvider.GetApiConnectionFor(_project);
             var conceptsRequest = GetAllConceptsRequest.DefaultInstance;
             var apiMessage = APIMessage.CreateBuilder()
                 .SetMessageId(GenerateMessageId())
@@ -44,29 +56,16 @@ namespace Gauge.VisualStudio.Models
             return bytes.AllConceptsResponse.ConceptsList.Select(info => new Concept { StepValue = info.StepValue.ParameterizedStepValue, FilePath = info.Filepath, LineNumber = info.LineNumber });
         }
 
-        public static IEnumerable<Concept> GetAllConcepts()
-        {
-            try
-            {
-                return GetAllConcepts(GaugeDTEProvider.DTE.ActiveDocument.ProjectItem.ContainingProject);
-            }
-            catch
-            {
-                return Enumerable.Empty<Concept>();
-            }
-        } 
-
         private static long GenerateMessageId()
         {
             return DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
         }
 
-        public static Concept Search(string lineText)
+        public Concept Search(string lineText)
         {
             try
             {
-                var project = GaugeDTEProvider.DTE.ActiveDocument.ProjectItem.ContainingProject;
-                return  GetAllConcepts(project).FirstOrDefault(concept => concept.StepValue == lineText);
+                return  GetAllConcepts().FirstOrDefault(concept => concept.StepValue == lineText);
             }
             catch
             {

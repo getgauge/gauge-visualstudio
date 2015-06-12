@@ -25,6 +25,8 @@ namespace Gauge.VisualStudio.GotoDefn
 {
     internal sealed class GotoDefnCommandFilter : IOleCommandTarget
     {
+        private readonly Concept _concept = new Concept();
+
         public GotoDefnCommandFilter(IWpfTextView textView)
         {
             TextView = textView;
@@ -52,7 +54,7 @@ namespace Gauge.VisualStudio.GotoDefn
                     //Gauge parses and caches the concepts, its location (file + line number).
                     //The plugin's job is to simply make an api call and fetch this information.
 
-                    var concept = Concept.Search(lineText);
+                    var concept = _concept.Search(lineText);
                     if (concept != null)
                     {
                         var window = dte.ItemOperations.OpenFile(concept.FilePath);

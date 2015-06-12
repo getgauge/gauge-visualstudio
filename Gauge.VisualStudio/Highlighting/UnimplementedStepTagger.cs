@@ -66,7 +66,7 @@ namespace Gauge.VisualStudio.Highlighting
                 var match = Parser.StepRegex.Match(text);
                 var point = span.Start.Add(match.Index);
                 var unimplementedStepSpan = new SnapshotSpan(span.Snapshot, new Span(point.Position, match.Length));
-                if (!match.Success || GetStepImplementation(unimplementedStepSpan, step) != null || Concept.Search(text) != null)
+                if (!match.Success || GetStepImplementation(unimplementedStepSpan, step) != null || new Concept().Search(text) != null)
                     continue;
 
                 var actions = GetSmartTagActions(unimplementedStepSpan);

@@ -24,17 +24,28 @@ namespace Gauge.VisualStudio.Models
 {
     public class Step
     {
-        private readonly IEnumerable<Implementation> _gaugeImplementations = Project.GetGaugeImplementations(ActiveProject);
+        private readonly EnvDTE.Project _project;
+        private readonly IEnumerable<Implementation> _gaugeImplementations;
 
-        public static IEnumerable<string> GetAll()
+        public Step() : this(ActiveProject)
         {
-            return GetAllStepsFromGauge(ActiveProject).Select(x => x.ParameterizedStepValue);
         }
 
-        public static string GetParsedStepValue(ITextSnapshotLine input)
+        public Step(EnvDTE.Project project)
+        {
+            _project = project;
+            _gaugeImplementations = Project.GetGaugeImplementations(project);
+        }
+
+        public IEnumerable<string> GetAll()
+        {
+            return GetAllStepsFromGauge(_project).Select(x => x.ParameterizedStepValue);
+        }
+
+        public string GetParsedStepValue(ITextSnapshotLine input)
         {
             var stepValueFromInput = GetStepValueFromInput(GetStepText(input));
-            return GetAllStepsFromGauge(ActiveProject).First(value => value.StepValue == stepValueFromInput)
+            return GetAllStepsFromGauge(_project).First(value => value.StepValue == stepValueFromInput)
                    .ParameterizedStepValue;
         }
 

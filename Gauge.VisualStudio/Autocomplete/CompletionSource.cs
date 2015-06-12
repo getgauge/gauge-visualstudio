@@ -41,6 +41,8 @@ namespace Gauge.VisualStudio.AutoComplete
         {
             private readonly ITextBuffer _buffer;
             private bool _disposed;
+            private readonly Concept _concept = new Concept();
+            private readonly Step _step = new Step();
 
             public GaugeCompletionSource(ITextBuffer buffer)
             {
@@ -54,10 +56,10 @@ namespace Gauge.VisualStudio.AutoComplete
 
                 BitmapSource stepImageSource = new BitmapImage(new Uri("pack://application:,,,/Gauge.VisualStudio;component/assets/glyphs/step.png"));
 
-                var completions = new List<Completion>(Step.GetAll().Select(x => new Completion(x, string.Format("* {0}", x), "Step", stepImageSource, "Step")));
+                var completions = new List<Completion>(_step.GetAll().Select(x => new Completion(x, string.Format("* {0}", x), "Step", stepImageSource, "Step")));
 
                 BitmapSource conceptImageSource = new BitmapImage(new Uri("pack://application:,,,/Gauge.VisualStudio;component/assets/glyphs/concept.png"));
-                completions.AddRange(Concept.GetAllConcepts().Select(x => new Completion(x.StepValue, string.Format("* {0}", x.StepValue), "Concept", conceptImageSource, "Concept")));
+                completions.AddRange(_concept.GetAllConcepts().Select(x => new Completion(x.StepValue, string.Format("* {0}", x.StepValue), "Concept", conceptImageSource, "Concept")));
 
                 var snapshot = _buffer.CurrentSnapshot;
                 var snapshotPoint = session.GetTriggerPoint(snapshot);
