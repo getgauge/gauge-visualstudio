@@ -18,7 +18,7 @@ using EnvDTE;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 
-namespace Gauge.VSPackage
+namespace Gauge.VisualStudio
 {
     class SolutionEventsListener : IVsSolutionEvents
     {

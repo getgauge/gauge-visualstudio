@@ -15,11 +15,10 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
-using Company.Gauge_VSPackage;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
-namespace Gauge.VSPackage
+namespace Gauge.VisualStudio
 {
     /// <summary>
     /// This is the class that implements the package exposed by this assembly.

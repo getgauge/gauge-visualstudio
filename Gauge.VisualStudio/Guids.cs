@@ -14,7 +14,7 @@
 
 using System;
 
-namespace Company.Gauge_VSPackage
+namespace Gauge.VisualStudio
 {
     static class GuidList
     {
