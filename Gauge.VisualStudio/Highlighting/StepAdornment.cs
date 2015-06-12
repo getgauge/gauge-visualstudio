@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Media;
 using Microsoft.VisualStudio.Text;
@@ -40,7 +41,6 @@ namespace Gauge.VisualStudio.Highlighting
 
         private void OnLayoutChanged(object sender, TextViewLayoutChangedEventArgs e)
         {
-            GaugeDTEProvider.DTE.ActiveDocument.Save();
             foreach (var line in e.NewOrReformattedLines)
             {
                 CreateVisuals(line);

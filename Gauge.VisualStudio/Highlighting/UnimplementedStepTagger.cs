@@ -59,13 +59,14 @@ namespace Gauge.VisualStudio.Highlighting
 
         public IEnumerable<ITagSpan<UnimplementedStepTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {
+            var step = new Step();
             foreach (var span in spans)
             {
                 var text = span.GetText();
                 var match = Parser.StepRegex.Match(text);
                 var point = span.Start.Add(match.Index);
                 var unimplementedStepSpan = new SnapshotSpan(span.Snapshot, new Span(point.Position, match.Length));
-                if (!match.Success || GetStepImplementation(unimplementedStepSpan) != null || Concept.Search(text) != null)
+                if (!match.Success || GetStepImplementation(unimplementedStepSpan, step) != null || Concept.Search(text) != null)
                     continue;
 
                 var actions = GetSmartTagActions(unimplementedStepSpan);
@@ -81,10 +82,10 @@ namespace Gauge.VisualStudio.Highlighting
             return new ReadOnlyCollection<SmartTagActionSet>(new[] {new SmartTagActionSet(actionList)});
         }
 
-        private static CodeFunction GetStepImplementation(SnapshotSpan span)
+        private static CodeFunction GetStepImplementation(SnapshotSpan span, Step step)
         {
             var snapshotLine = span.Snapshot.GetLineFromPosition(span.Start.Position);
-            return Step.GetStepImplementation(snapshotLine);
+            return step.GetStepImplementation(snapshotLine);
         }
 
         public void Dispose()

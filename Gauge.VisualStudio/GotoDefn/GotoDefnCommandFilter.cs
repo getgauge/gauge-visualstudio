@@ -47,7 +47,6 @@ namespace Gauge.VisualStudio.GotoDefn
                     var lineText = Step.GetStepText(caretBufferPosition.GetContainingLine());
 
                     var dte = GaugeDTEProvider.DTE;
-                    var containingProject = dte.ActiveDocument.ProjectItem.ContainingProject;
 
                     //if the current step is a concept, then open the concept file.
                     //Gauge parses and caches the concepts, its location (file + line number).
@@ -65,7 +64,7 @@ namespace Gauge.VisualStudio.GotoDefn
                         return hresult;
                     }
 
-                    var function = Step.GetStepImplementation(caretBufferPosition.GetContainingLine(), containingProject);
+                    var function = new Step().GetStepImplementation(caretBufferPosition.GetContainingLine());
 
                     if (function == null)
                     {

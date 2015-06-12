@@ -3,9 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauge.VisualStudio", "Gauge.VisualStudio\Gauge.VisualStudio.csproj", "{EC41ADEB-B985-4EDC-B633-8942A96DDC18}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauge.VSPackage", "Gauge.VSPackage\Gauge.VSPackage.csproj", "{DC3355B9-8179-48A6-9A01-0E96F2FB842E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauge.VisualStudio", "Gauge.VisualStudio\Gauge.VisualStudio.csproj", "{DC3355B9-8179-48A6-9A01-0E96F2FB842E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,10 +11,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{EC41ADEB-B985-4EDC-B633-8942A96DDC18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EC41ADEB-B985-4EDC-B633-8942A96DDC18}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EC41ADEB-B985-4EDC-B633-8942A96DDC18}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EC41ADEB-B985-4EDC-B633-8942A96DDC18}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DC3355B9-8179-48A6-9A01-0E96F2FB842E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DC3355B9-8179-48A6-9A01-0E96F2FB842E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DC3355B9-8179-48A6-9A01-0E96F2FB842E}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -24,6 +24,8 @@ namespace Gauge.VisualStudio.Models
 {
     public class Step
     {
+        private readonly IEnumerable<Implementation> _gaugeImplementations = Project.GetGaugeImplementations(ActiveProject);
+
         public static IEnumerable<string> GetAll()
         {
             return GetAllStepsFromGauge(ActiveProject).Select(x => x.ParameterizedStepValue);
@@ -36,24 +38,11 @@ namespace Gauge.VisualStudio.Models
                    .ParameterizedStepValue;
         }
 
-        public static CodeFunction GetStepImplementation(ITextSnapshotLine line, EnvDTE.Project containingProject = null)
+        public CodeFunction GetStepImplementation(ITextSnapshotLine line)
         {
-            if (containingProject==null)
-            {
-                try
-                {
-                    containingProject = ActiveProject;
-                }
-                catch
-                {
-                    return null;
-                }
-            }
-
             var lineText = GetStepText(line);
 
-            var gaugeImplementations = Project.GetGaugeImplementations(containingProject);
-            var gaugeImplementation = gaugeImplementations.FirstOrDefault(implementation => implementation.ContainsFor(lineText));
+            var gaugeImplementation = _gaugeImplementations.FirstOrDefault(implementation => implementation.ContainsFor(lineText));
             return gaugeImplementation == null ? null : gaugeImplementation.Function;
         }
 

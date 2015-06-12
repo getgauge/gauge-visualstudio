@@ -57,7 +57,7 @@ namespace Gauge.VisualStudio.Highlighting
             selectedClass = classPicker.SelectedClass;
 
             var containingLine = _trackingSpan.GetStartPoint(_snapshot).GetContainingLine();
-            if (Step.GetStepImplementation(containingLine)!=null)
+            if (new Step().GetStepImplementation(containingLine)!=null)
             {
                 return;
             }
