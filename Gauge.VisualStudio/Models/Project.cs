@@ -63,7 +63,8 @@ namespace Gauge.VisualStudio.Models
             {
                 containingProject = GaugeDTEProvider.DTE.ActiveDocument.ProjectItem.ContainingProject;
             }
-            return GetCodeElementsFor(containingProject.CodeModel.CodeElements, vsCMElement.vsCMElementClass);
+
+            return containingProject.CodeModel==null ? Enumerable.Empty<CodeElement>() : GetCodeElementsFor(containingProject.CodeModel.CodeElements, vsCMElement.vsCMElementClass);
         }
 
         internal static CodeClass FindOrCreateClass(string className, EnvDTE.Project project = null)
