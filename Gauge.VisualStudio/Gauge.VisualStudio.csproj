@@ -197,6 +197,8 @@
     <Compile Include="Classification\Parser.cs" />
     <Compile Include="Classification\Types.cs" />
     <Compile Include="CommandController.cs" />
+    <Compile Include="ErrorListLogger.cs" />
+    <Compile Include="Extensions\DocumentExtensions.cs" />
     <Compile Include="Extensions\ProjectExtensions.cs" />
     <Compile Include="GaugeContentTypeDefinitions.cs" />
     <Compile Include="GaugeDTEProvider.cs" />

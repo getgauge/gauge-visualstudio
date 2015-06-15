@@ -25,7 +25,7 @@ namespace Gauge.VisualStudio.Models
     public class Step
     {
         private readonly EnvDTE.Project _project;
-        private readonly IEnumerable<Implementation> _gaugeImplementations;
+        private static readonly Project GaugeProject= new Project();
 
         public Step() : this(ActiveProject)
         {
@@ -34,7 +34,6 @@ namespace Gauge.VisualStudio.Models
         public Step(EnvDTE.Project project)
         {
             _project = project;
-            _gaugeImplementations = Project.GetGaugeImplementations(project);
         }
 
         public IEnumerable<string> GetAll()
@@ -53,7 +52,7 @@ namespace Gauge.VisualStudio.Models
         {
             var lineText = GetStepText(line);
 
-            var gaugeImplementation = _gaugeImplementations.FirstOrDefault(implementation => implementation.ContainsFor(lineText));
+            var gaugeImplementation = GaugeProject.Implementations.FirstOrDefault(implementation => implementation.ContainsFor(lineText));
             return gaugeImplementation == null ? null : gaugeImplementation.Function;
         }
 

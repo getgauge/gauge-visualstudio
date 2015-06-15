@@ -20,14 +20,40 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using EnvDTE;
-using Microsoft.CSharp;
+using EnvDTE80;
 using CodeNamespace = EnvDTE.CodeNamespace;
 
 namespace Gauge.VisualStudio.Models
 {
     public class Project
     {
-        internal static IEnumerable<Implementation> GetGaugeImplementations(EnvDTE.Project containingProject = null)
+        private static Events2 _events2;
+        private static CodeModelEvents _codeModelEvents;
+        private static List<Implementation> _implementations;
+
+        public Project()
+        {
+            _implementations = GetGaugeImplementations();
+            if (_events2 != null) return;
+
+            _events2 = GaugeDTEProvider.DTE.Events as Events2;
+            _codeModelEvents = _events2.CodeModelEvents;
+
+            _codeModelEvents.ElementAdded += RefreshImplementations;
+            _codeModelEvents.ElementChanged += (element, change) => RefreshImplementations(element);
+            _codeModelEvents.ElementDeleted += (parent, element) => RefreshImplementations(element);
+        }
+
+        internal IEnumerable<Implementation> Implementations
+        {
+            get { return _implementations; }
+        }
+
+        private void RefreshImplementations(CodeElement element)
+        {
+            _implementations = GetGaugeImplementations(element.ProjectItem.ContainingProject);
+        }
+        private static List<Implementation> GetGaugeImplementations(EnvDTE.Project containingProject = null)
         {
             var gaugeImplementations = new List<Implementation>();
             var allClasses = GetAllClasses(containingProject);
@@ -78,7 +104,7 @@ namespace Gauge.VisualStudio.Models
             {
                 project = GaugeDTEProvider.DTE.ActiveDocument.ProjectItem.ContainingProject;
             }
-            var codeDomProvider = CSharpCodeProvider.CreateProvider("CSharp");
+            var codeDomProvider = CodeDomProvider.CreateProvider("CSharp");
 
             var targetClass = codeDomProvider.CreateValidIdentifier(className);
 

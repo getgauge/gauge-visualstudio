@@ -15,6 +15,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using EnvDTE;
 using Gauge.VisualStudio.Classification;
 using Gauge.VisualStudio.Models;
@@ -60,18 +61,20 @@ namespace Gauge.VisualStudio.Highlighting
         public IEnumerable<ITagSpan<UnimplementedStepTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {
             var step = new Step();
+            var concept = new Concept();
             foreach (var span in spans)
             {
                 var text = span.GetText();
                 var match = Parser.StepRegex.Match(text);
                 var point = span.Start.Add(match.Index);
                 var unimplementedStepSpan = new SnapshotSpan(span.Snapshot, new Span(point.Position, match.Length));
-                if (!match.Success || GetStepImplementation(unimplementedStepSpan, step) != null || new Concept().Search(text) != null)
+                if (!match.Success || GetStepImplementation(unimplementedStepSpan, step) != null || concept.Search(text) != null)
                     continue;
 
                 var actions = GetSmartTagActions(unimplementedStepSpan);
                 yield return new TagSpan<UnimplementedStepTag>(unimplementedStepSpan, new UnimplementedStepTag(SmartTagType.Ephemeral, actions));
             }
+//            return Enumerable.Empty<ITagSpan<UnimplementedStepTag>>();
         }
 
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged;

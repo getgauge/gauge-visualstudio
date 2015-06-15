@@ -15,6 +15,7 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using EnvDTE80;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
@@ -41,6 +42,8 @@ namespace Gauge.VisualStudio
     public sealed class GaugePackage : Package
     {
         private SolutionEventsListener _solutionEventsListener;
+        private Events2 _dteEvents;
+        private CodeModelEvents _documentEvents;
 
         /// <summary>
         /// Default constructor of the package.

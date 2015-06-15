@@ -37,7 +37,7 @@ namespace Gauge.VisualStudio.Highlighting
         private readonly string _display;
         private bool _enabled = true;
         private readonly ITrackingSpan _trackingSpan;
-        private Step _step;
+        private readonly Step _step;
 
         public ImplementStepAction(SnapshotSpan span, UnimplementedStepTagger unimplementedStepTagger)
         {

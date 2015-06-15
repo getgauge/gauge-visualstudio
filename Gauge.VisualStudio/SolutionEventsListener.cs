@@ -15,6 +15,7 @@
 using System;
 using System.Linq;
 using EnvDTE;
+using Gauge.VisualStudio.Extensions;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 
@@ -45,7 +46,7 @@ namespace Gauge.VisualStudio
             if (_solution == null) return VSConstants.S_OK;
 
             var dte = _serviceProvider.GetService(typeof(DTE)) as DTE;
-            if (dte != null && dte.ActiveDocument !=null && new [] {".spec", ".cpt"}.Any(dte.ActiveDocument.Name.Contains))
+            if (dte != null && dte.ActiveDocument !=null && dte.ActiveDocument.IsGaugeSpecFile())
             {
                 dte.ActiveDocument.Save();
             }

@@ -47,7 +47,11 @@ namespace Gauge.VisualStudio.Highlighting
 
             var stepAdornment = new StepAdornment(textView, tagAggregator);
 
-            document.FileActionOccurred += (sender, args) => stepAdornment.Update();
+            document.FileActionOccurred += (sender, args) =>
+            {
+                if (args.FileActionType == FileActionTypes.ContentSavedToDisk)
+                    stepAdornment.Update();
+            };
         }
     }
 }
