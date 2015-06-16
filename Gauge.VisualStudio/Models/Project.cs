@@ -21,6 +21,7 @@ using System.Linq;
 using System.Reflection;
 using EnvDTE;
 using EnvDTE80;
+using Gauge.VisualStudio.Extensions;
 using CodeNamespace = EnvDTE.CodeNamespace;
 
 namespace Gauge.VisualStudio.Models
@@ -49,10 +50,11 @@ namespace Gauge.VisualStudio.Models
             get { return _implementations; }
         }
 
-        private void RefreshImplementations(CodeElement element)
+        internal static void RefreshImplementations(CodeElement element)
         {
             _implementations = GetGaugeImplementations(element.ProjectItem.ContainingProject);
         }
+
         private static List<Implementation> GetGaugeImplementations(EnvDTE.Project containingProject = null)
         {
             var gaugeImplementations = new List<Implementation>();

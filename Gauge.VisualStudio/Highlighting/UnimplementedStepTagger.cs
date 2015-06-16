@@ -15,9 +15,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using EnvDTE;
 using Gauge.VisualStudio.Classification;
+using Gauge.VisualStudio.Extensions;
 using Gauge.VisualStudio.Models;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
@@ -46,7 +46,8 @@ namespace Gauge.VisualStudio.Highlighting
 
         private void OnLayoutChanged(object sender, TextViewLayoutChangedEventArgs e)
         {
-            if (TagsChanged == null) return;
+            if (TagsChanged == null || e.OldSnapshot == e.NewSnapshot) return;
+
             foreach (var span in e.NewOrReformattedSpans)
             {
                 TagsChanged(this, new SnapshotSpanEventArgs(span));
@@ -72,7 +73,8 @@ namespace Gauge.VisualStudio.Highlighting
                     continue;
 
                 var actions = GetSmartTagActions(unimplementedStepSpan);
-                yield return new TagSpan<UnimplementedStepTag>(unimplementedStepSpan, new UnimplementedStepTag(SmartTagType.Ephemeral, actions));
+                var unimplementedStepTag = new UnimplementedStepTag(SmartTagType.Ephemeral, actions);
+                yield return new TagSpan<UnimplementedStepTag>(unimplementedStepSpan, unimplementedStepTag);
             }
 //            return Enumerable.Empty<ITagSpan<UnimplementedStepTag>>();
         }

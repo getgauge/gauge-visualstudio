@@ -59,7 +59,7 @@ namespace Gauge.VisualStudio.Highlighting
             selectedClass = classPicker.SelectedClass;
 
             var containingLine = _trackingSpan.GetStartPoint(_snapshot).GetContainingLine();
-            if (new Step().GetStepImplementation(containingLine)!=null || selectedClass == null)
+            if (_step.GetStepImplementation(containingLine)!=null || selectedClass == null)
             {
                 return;
             }
@@ -105,6 +105,10 @@ namespace Gauge.VisualStudio.Highlighting
                 {
                     throw new ChangeRejectedException("Step Attribute not created");
                 }
+
+                targetClass.ProjectItem.Save();
+
+                Project.RefreshImplementations(targetClass as CodeElement);
 
                 Project.NavigateToFunction(implementationFunction);
 

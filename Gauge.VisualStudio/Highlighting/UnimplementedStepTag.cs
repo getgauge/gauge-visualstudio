@@ -14,13 +14,19 @@
 
 using System.Collections.ObjectModel;
 using Microsoft.VisualStudio.Language.Intellisense;
+using Microsoft.VisualStudio.Text.Tagging;
 
 namespace Gauge.VisualStudio.Highlighting
 {
-    internal class UnimplementedStepTag : SmartTag
+    internal class UnimplementedStepTag : SmartTag, IErrorTag
     {
         public UnimplementedStepTag(SmartTagType smartTagType, ReadOnlyCollection<SmartTagActionSet> actionSets) : base(smartTagType, actionSets)
         {
+            ErrorType = "Unimplemented Step";
+            ToolTipContent = "Step is not implemented, use 'Implement Step' option to generate a method";
         }
+
+        public string ErrorType { get; private set; }
+        public object ToolTipContent { get; private set; }
     }
 }
