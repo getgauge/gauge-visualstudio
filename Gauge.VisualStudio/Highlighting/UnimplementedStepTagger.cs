@@ -96,5 +96,11 @@ namespace Gauge.VisualStudio.Highlighting
             _textView.Caret.PositionChanged -= OnCaretMove;
             _textView.LayoutChanged -= OnLayoutChanged;
         }
+
+        public void RaiseLayoutChanged()
+        {
+            var length = _textView.TextSnapshot.Length;
+            TagsChanged(this, new SnapshotSpanEventArgs(new SnapshotSpan(new SnapshotPoint(_textView.TextSnapshot, 0), length)));
+        }
     }
 }
