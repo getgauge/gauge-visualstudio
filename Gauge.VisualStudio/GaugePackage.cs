@@ -70,9 +70,10 @@ namespace Gauge.VisualStudio
         protected override void Initialize()
         {
             Debug.WriteLine (string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", this.ToString()));
-            base.Initialize();
             _solutionEventsListener = new SolutionEventsListener(this);
             _solutionEventsListener.StartListeningForChanges();
+            ErrorListLogger.Initialize(this);
+            base.Initialize();
         }
         #endregion
 

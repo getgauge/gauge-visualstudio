@@ -21,6 +21,8 @@ using System.Windows.Media.Imaging;
 using EnvDTE;
 using Gauge.CSharp.Lib;
 using Gauge.VisualStudio.Classification;
+using Gauge.VisualStudio.Extensions;
+using Gauge.VisualStudio.Loggers;
 using Gauge.VisualStudio.Models;
 using Gauge.VisualStudio.UI;
 using Microsoft.VisualStudio.Language.Intellisense;
@@ -64,7 +66,16 @@ namespace Gauge.VisualStudio.Highlighting
                 return;
             }
 
-            var targetClass = Project.FindOrCreateClass(selectedClass);
+            CodeClass targetClass;
+            try
+            {
+                targetClass = Project.FindOrCreateClass(selectedClass);
+            }
+            catch (ArgumentException ex)
+            {
+                StatusBarLogger.Log(ex.Message);
+                return;
+            }
 
             if (targetClass==null)
             {

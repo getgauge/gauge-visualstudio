@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Linq;
 using EnvDTE;
 using Gauge.VisualStudio.Extensions;
 using Microsoft.VisualStudio;

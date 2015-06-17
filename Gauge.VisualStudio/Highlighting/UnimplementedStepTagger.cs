@@ -17,7 +17,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using EnvDTE;
 using Gauge.VisualStudio.Classification;
-using Gauge.VisualStudio.Extensions;
 using Gauge.VisualStudio.Models;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
@@ -76,7 +75,6 @@ namespace Gauge.VisualStudio.Highlighting
                 var unimplementedStepTag = new UnimplementedStepTag(SmartTagType.Ephemeral, actions);
                 yield return new TagSpan<UnimplementedStepTag>(unimplementedStepSpan, unimplementedStepTag);
             }
-//            return Enumerable.Empty<ITagSpan<UnimplementedStepTag>>();
         }
 
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged;

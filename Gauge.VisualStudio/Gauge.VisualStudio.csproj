@@ -197,7 +197,7 @@
     <Compile Include="Classification\Parser.cs" />
     <Compile Include="Classification\Types.cs" />
     <Compile Include="CommandController.cs" />
-    <Compile Include="ErrorListLogger.cs" />
+    <Compile Include="Loggers\ErrorListLogger.cs" />
     <Compile Include="Extensions\DocumentExtensions.cs" />
     <Compile Include="Extensions\ProjectExtensions.cs" />
     <Compile Include="GaugeContentTypeDefinitions.cs" />
@@ -208,6 +208,7 @@
     <Compile Include="Highlighting\StepTaggerProvider.cs" />
     <Compile Include="Highlighting\UnimplementedStepTag.cs" />
     <Compile Include="Highlighting\UnimplementedStepTagger.cs" />
+    <Compile Include="Loggers\StatusBarLogger.cs" />
     <Compile Include="Models\Concept.cs" />
     <Compile Include="Models\Implementation.cs" />
     <Compile Include="Models\Project.cs" />

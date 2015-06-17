@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using System.CodeDom;
 using System.CodeDom.Compiler;
 using System.Collections;
@@ -53,6 +54,13 @@ namespace Gauge.VisualStudio.Models
         internal static void RefreshImplementations(CodeElement element)
         {
             _implementations = GetGaugeImplementations(element.ProjectItem.ContainingProject);
+            foreach (Document document in GaugeDTEProvider.DTE.Documents)
+            {
+                if (document.IsGaugeSpecFile() && document.ProjectItem.IsOpen)
+                {
+
+                }
+            }
         }
 
         private static List<Implementation> GetGaugeImplementations(EnvDTE.Project containingProject = null)
@@ -108,9 +116,23 @@ namespace Gauge.VisualStudio.Models
             }
             var codeDomProvider = CodeDomProvider.CreateProvider("CSharp");
 
+            if (!codeDomProvider.IsValidIdentifier(className))
+            {
+                throw new ArgumentException(string.Format("Invalid Class Name: {0}", className));
+            }
+            
             var targetClass = codeDomProvider.CreateValidIdentifier(className);
 
-            var targetNamespace = project.Properties.Item("DefaultNamespace").Value.ToString();
+
+            string targetNamespace;
+            try
+            {
+                targetNamespace = project.Properties.Item("DefaultNamespace").Value.ToString();
+            }
+            catch
+            {
+                targetNamespace = project.FullName;
+            }
 
             var codeNamespace = new System.CodeDom.CodeNamespace(targetNamespace);
             codeNamespace.Imports.Add(new CodeNamespaceImport("System"));
