@@ -16,13 +16,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using Gauge.VisualStudio.Models;
+using Microsoft.CSharp;
+using Color = System.Windows.Media.Color;
 
 namespace Gauge.VisualStudio.UI
 {
     public partial class ClassPicker
     {
         private readonly IEnumerable<string> _classNames;
+        private readonly CSharpCodeProvider _cSharpCodeProvider = new CSharpCodeProvider();
+        private readonly SolidColorBrush _redColor = new SolidColorBrush(Color.FromRgb(255,0,0));
+        private readonly SolidColorBrush _blackColor = new SolidColorBrush(Color.FromRgb(0,0,0));
 
         public string SelectedClass { get; private set; }
 
@@ -32,7 +38,6 @@ namespace Gauge.VisualStudio.UI
             WindowStartupLocation=WindowStartupLocation.CenterScreen;
             _classNames = Project.GetAllClasses().Select(element => element.Name).Take(10);
             ClassListBox.ItemsSource = _classNames;
-
         }
 
         private void ClassPicker_OnKeyDown(object sender, KeyEventArgs e)
@@ -43,10 +48,19 @@ namespace Gauge.VisualStudio.UI
                     Close();
                     break;
                 case Key.Enter:
-                    SelectedClass = ClassListBox.Text;
-                    Close();
+                    if (IsValidIdentifier())
+                    {
+                        SelectedClass = ClassListBox.Text;
+                        Close();
+                    }
                     break;
             }
+            ClassListBox.Foreground = IsValidIdentifier() ? _blackColor : _redColor;
+        }
+
+        private bool IsValidIdentifier()
+        {
+            return _cSharpCodeProvider.IsValidIdentifier(ClassListBox.Text);
         }
     }
 }
