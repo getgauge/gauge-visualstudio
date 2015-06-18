@@ -18,6 +18,7 @@ using System.Linq;
 using System.Management;
 using System.Runtime.InteropServices;
 using EnvDTE;
+using Gauge.VisualStudio.Exceptions;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
@@ -104,7 +105,7 @@ namespace Gauge.VisualStudio.TestRunner
                 {
                     throw new ConventionViolationException("Folder structure does not follow Gauge Convention.");
                 }
-                if (directory.Name == "specs")
+                if (directory.Name.ToLowerInvariant() == "specs")
                 {
                     return directory.Parent.FullName;
                 }
@@ -225,12 +226,5 @@ namespace Gauge.VisualStudio.TestRunner
             return -1;
         }
 
-    }
-
-    internal class ConventionViolationException : Exception
-    {
-        public ConventionViolationException(string message) : base(message)
-        {
-        }
     }
 }

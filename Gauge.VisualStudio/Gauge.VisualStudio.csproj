@@ -197,6 +197,7 @@
     <Compile Include="Classification\Parser.cs" />
     <Compile Include="Classification\Types.cs" />
     <Compile Include="CommandController.cs" />
+    <Compile Include="Exceptions\ConventionViolationException.cs" />
     <Compile Include="Loggers\ErrorListLogger.cs" />
     <Compile Include="Extensions\DocumentExtensions.cs" />
     <Compile Include="Extensions\ProjectExtensions.cs" />
