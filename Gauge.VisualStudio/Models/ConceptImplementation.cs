@@ -12,24 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using EnvDTE;
+
 namespace Gauge.VisualStudio.Models
 {
-    public abstract class Implementation
+    class ConceptImplementation : Implementation
     {
-        protected string StepText;
+        private readonly Concept _concept;
 
-        internal bool ContainsImplememntationFor(string givenText)
+        public ConceptImplementation(Concept concept)
         {
-            try
-            {
-                return Step.GetStepValueFromInput(StepText).CompareTo(Step.GetStepValueFromInput(givenText))==0;
-            }
-            catch
-            {
-                return false;
-            }
+            _concept = concept;
+            StepText = _concept.StepValue;
         }
 
-        public abstract void NavigateToImplementation();
+        public override void NavigateToImplementation()
+        {
+            var dte = GaugeDTEProvider.DTE;
+            var window = dte.ItemOperations.OpenFile(_concept.FilePath);
+            window.Activate();
+
+            var textSelection = window.Selection as TextSelection;
+            if (textSelection != null)
+                textSelection.MoveTo(_concept.LineNumber, 0);
+        }
     }
 }

@@ -40,6 +40,7 @@ namespace Gauge.VisualStudio.Highlighting
         private bool _enabled = true;
         private readonly ITrackingSpan _trackingSpan;
         private readonly Step _step;
+        private readonly Project _project;
 
         public ImplementStepAction(SnapshotSpan span, UnimplementedStepTagger unimplementedStepTagger)
         {
@@ -51,6 +52,7 @@ namespace Gauge.VisualStudio.Highlighting
             _display = "Implement Step";
             Icon = new BitmapImage(new Uri("pack://application:,,,/Gauge.VisualStudio;component/assets/glyphs/step.png"));
             _step = new Step();
+            _project = new Project();
         }
 
         public void Invoke()
@@ -61,7 +63,7 @@ namespace Gauge.VisualStudio.Highlighting
             selectedClass = classPicker.SelectedClass;
 
             var containingLine = _trackingSpan.GetStartPoint(_snapshot).GetContainingLine();
-            if (_step.GetStepImplementation(containingLine)!=null || selectedClass == null)
+            if (_project.GetStepImplementation(containingLine)!=null || selectedClass == null)
             {
                 return;
             }
@@ -118,13 +120,9 @@ namespace Gauge.VisualStudio.Highlighting
                 }
 
                 targetClass.ProjectItem.Save();
-
                 Project.RefreshImplementations(targetClass as CodeElement);
-
                 Project.NavigateToFunction(implementationFunction);
-
                 _unimplementedStepTagger.MarkTagImplemented(_span);
-
                 _enabled = false;
             }
             catch

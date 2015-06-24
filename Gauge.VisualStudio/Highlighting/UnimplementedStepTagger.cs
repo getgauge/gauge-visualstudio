@@ -15,19 +15,21 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using EnvDTE;
+using System.Linq;
 using Gauge.VisualStudio.Classification;
 using Gauge.VisualStudio.Models;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
+using Project = Gauge.VisualStudio.Models.Project;
 
 namespace Gauge.VisualStudio.Highlighting
 {
     internal class UnimplementedStepTagger : ITagger<UnimplementedStepTag>, IDisposable
     {
         private readonly ITextView _textView;
+        private static Project _project = new Project();
 
         public UnimplementedStepTagger(ITextView textView)
         {
@@ -60,15 +62,13 @@ namespace Gauge.VisualStudio.Highlighting
 
         public IEnumerable<ITagSpan<UnimplementedStepTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {
-            var step = new Step();
-            var concept = new Concept();
-            foreach (var span in spans)
+            foreach (var line in spans.SelectMany(span => span.Snapshot.Lines))
             {
-                var text = span.GetText();
+                var text = Step.GetStepText(line);
                 var match = Parser.StepRegex.Match(text);
-                var point = span.Start.Add(match.Index);
-                var unimplementedStepSpan = new SnapshotSpan(span.Snapshot, new Span(point.Position, match.Length));
-                if (!match.Success || GetStepImplementation(unimplementedStepSpan, step) != null || concept.Search(text) != null)
+                var point = line.Start.Add(match.Index);
+                var unimplementedStepSpan = new SnapshotSpan(line.Snapshot, new Span(point.Position, match.Length));
+                if (!match.Success || _project.GetStepImplementation(line) != null)
                     continue;
 
                 var actions = GetSmartTagActions(unimplementedStepSpan);
@@ -83,12 +83,6 @@ namespace Gauge.VisualStudio.Highlighting
         {
             var actionList = new ReadOnlyCollection<ISmartTagAction>(new ISmartTagAction[] {new ImplementStepAction(span, this)});
             return new ReadOnlyCollection<SmartTagActionSet>(new[] {new SmartTagActionSet(actionList)});
-        }
-
-        private static CodeFunction GetStepImplementation(SnapshotSpan span, Step step)
-        {
-            var snapshotLine = span.Snapshot.GetLineFromPosition(span.Start.Position);
-            return step.GetStepImplementation(snapshotLine);
         }
 
         public void Dispose()

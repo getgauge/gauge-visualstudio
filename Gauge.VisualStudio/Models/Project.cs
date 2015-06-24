@@ -22,6 +22,7 @@ using System.Linq;
 using System.Reflection;
 using EnvDTE;
 using EnvDTE80;
+using Microsoft.VisualStudio.Text;
 using CodeNamespace = EnvDTE.CodeNamespace;
 
 namespace Gauge.VisualStudio.Models
@@ -57,6 +58,7 @@ namespace Gauge.VisualStudio.Models
 
         private static List<Implementation> GetGaugeImplementations(EnvDTE.Project containingProject = null)
         {
+            containingProject = containingProject ?? GaugeDTEProvider.DTE.ActiveDocument.ProjectItem.ContainingProject;
             var gaugeImplementations = new List<Implementation>();
             var allClasses = GetAllClasses(containingProject);
 
@@ -73,12 +75,22 @@ namespace Gauge.VisualStudio.Models
 
                     var attribute = allAttributes.FirstOrDefault(a => a.FullName == typeof(CSharp.Lib.Attribute.Step).FullName) as CodeAttribute;
                     if (attribute != null)
-                        gaugeImplementations.Add(new Implementation { Function = function, StepValue = attribute.Value.Trim('"') });
+                        gaugeImplementations.Add(new StepImplementation(function, attribute.Value.Trim('"')));
                 }
             }
 
+            gaugeImplementations.AddRange(new Concept(containingProject).GetAllConcepts().Select(concept => new ConceptImplementation(concept)));
+
             return gaugeImplementations;
         }
+
+        internal Implementation GetStepImplementation(ITextSnapshotLine line)
+        {
+            var lineText = Step.GetStepText(line);
+
+            return Implementations.FirstOrDefault(implementation => implementation.ContainsImplememntationFor(lineText));
+        }
+
 
         internal static IEnumerable<CodeElement> GetFunctionsForClass(CodeClass codeClass)
         {
@@ -87,10 +99,7 @@ namespace Gauge.VisualStudio.Models
 
         internal static IEnumerable<CodeElement> GetAllClasses(EnvDTE.Project containingProject = null)
         {
-            if (containingProject == null)
-            {
-                containingProject = GaugeDTEProvider.DTE.ActiveDocument.ProjectItem.ContainingProject;
-            }
+            containingProject = containingProject ?? GaugeDTEProvider.DTE.ActiveDocument.ProjectItem.ContainingProject;
 
             return containingProject.CodeModel==null ? Enumerable.Empty<CodeElement>() : GetCodeElementsFor(containingProject.CodeModel.CodeElements, vsCMElement.vsCMElementClass);
         }
@@ -102,10 +111,8 @@ namespace Gauge.VisualStudio.Models
         }
         private static CodeClass AddClass(string className, EnvDTE.Project project = null)
         {
-            if (project==null)
-            {
-                project = GaugeDTEProvider.DTE.ActiveDocument.ProjectItem.ContainingProject;
-            }
+            project = project ?? GaugeDTEProvider.DTE.ActiveDocument.ProjectItem.ContainingProject;
+
             var codeDomProvider = CodeDomProvider.CreateProvider("CSharp");
 
             if (!codeDomProvider.IsValidIdentifier(className))

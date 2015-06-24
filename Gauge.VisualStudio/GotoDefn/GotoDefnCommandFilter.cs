@@ -46,34 +46,16 @@ namespace Gauge.VisualStudio.GotoDefn
                     if (!Parser.StepRegex.IsMatch(originalText))
                         return hresult;
 
-                    var lineText = Step.GetStepText(caretBufferPosition.GetContainingLine());
-
-                    var dte = GaugeDTEProvider.DTE;
-
                     //if the current step is a concept, then open the concept file.
                     //Gauge parses and caches the concepts, its location (file + line number).
                     //The plugin's job is to simply make an api call and fetch this information.
 
-                    var concept = _concept.Search(lineText);
-                    if (concept != null)
+                    var stepImplementation = new Project().GetStepImplementation(caretBufferPosition.GetContainingLine());
+
+                    if (stepImplementation != null)
                     {
-                        var window = dte.ItemOperations.OpenFile(concept.FilePath);
-                        window.Activate();
-
-                        var textSelection = window.Selection as TextSelection;
-                        if (textSelection != null)
-                            textSelection.MoveTo(concept.LineNumber, 0);
-                        return hresult;
+                        stepImplementation.NavigateToImplementation();
                     }
-
-                    var function = new Step().GetStepImplementation(caretBufferPosition.GetContainingLine());
-
-                    if (function == null)
-                    {
-                        return hresult;
-                    }
-
-                    Project.NavigateToFunction(function);
                     return hresult;
                 default:
                     hresult = Next.Exec(pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);

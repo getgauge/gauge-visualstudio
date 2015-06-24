@@ -12,24 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using EnvDTE;
+
 namespace Gauge.VisualStudio.Models
 {
-    public abstract class Implementation
+    internal class StepImplementation : Implementation
     {
-        protected string StepText;
+        private readonly CodeFunction _function;
 
-        internal bool ContainsImplememntationFor(string givenText)
+        public StepImplementation(CodeFunction function, string stepText)
         {
-            try
-            {
-                return Step.GetStepValueFromInput(StepText).CompareTo(Step.GetStepValueFromInput(givenText))==0;
-            }
-            catch
-            {
-                return false;
-            }
+            _function = function;
+            StepText = stepText;
         }
 
-        public abstract void NavigateToImplementation();
+        public CodeFunction Function
+        {
+            get { return _function; }
+        }
+
+        public override void NavigateToImplementation()
+        {
+            Project.NavigateToFunction(_function);
+        }
     }
 }

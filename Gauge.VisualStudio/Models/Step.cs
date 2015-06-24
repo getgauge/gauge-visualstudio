@@ -25,7 +25,6 @@ namespace Gauge.VisualStudio.Models
     public class Step
     {
         private readonly EnvDTE.Project _project;
-        private static readonly Project GaugeProject= new Project();
 
         public Step() : this(ActiveProject)
         {
@@ -46,14 +45,6 @@ namespace Gauge.VisualStudio.Models
             var stepValueFromInput = GetStepValueFromInput(GetStepText(input));
             return GetAllStepsFromGauge(_project).First(value => value.StepValue == stepValueFromInput)
                    .ParameterizedStepValue;
-        }
-
-        public CodeFunction GetStepImplementation(ITextSnapshotLine line)
-        {
-            var lineText = GetStepText(line);
-
-            var gaugeImplementation = GaugeProject.Implementations.FirstOrDefault(implementation => implementation.ContainsFor(lineText));
-            return gaugeImplementation == null ? null : gaugeImplementation.Function;
         }
 
         private static EnvDTE.Project ActiveProject
