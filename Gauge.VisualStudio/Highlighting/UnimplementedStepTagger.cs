@@ -62,12 +62,13 @@ namespace Gauge.VisualStudio.Highlighting
 
         public IEnumerable<ITagSpan<UnimplementedStepTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {
-            foreach (var line in spans.SelectMany(span => span.Snapshot.Lines))
+            foreach (var span in spans)
             {
+                var line = span.Start.GetContainingLine();
                 var text = Step.GetStepText(line);
                 var match = Parser.StepRegex.Match(text);
-                var point = line.Start.Add(match.Index);
-                var unimplementedStepSpan = new SnapshotSpan(line.Snapshot, new Span(point.Position, match.Length));
+                var point = span.Start.Add(match.Index);
+                var unimplementedStepSpan = new SnapshotSpan(span.Snapshot, new Span(point.Position, match.Length));
                 if (!match.Success || _project.GetStepImplementation(line) != null)
                     continue;
 

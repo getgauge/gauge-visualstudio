@@ -59,13 +59,23 @@ namespace Gauge.VisualStudio.Models
         private static List<Implementation> GetGaugeImplementations(EnvDTE.Project containingProject = null)
         {
             containingProject = containingProject ?? GaugeDTEProvider.DTE.ActiveDocument.ProjectItem.ContainingProject;
-            var gaugeImplementations = new List<Implementation>();
             var allClasses = GetAllClasses(containingProject);
 
+            var gaugeImplementations = new List<Implementation>();
+            gaugeImplementations.AddRange(GetStepImplementations(allClasses));
+
+            gaugeImplementations.AddRange(new Concept(containingProject).GetAllConcepts().Select(concept => new ConceptImplementation(concept)));
+
+            return gaugeImplementations;
+        }
+
+        private static IEnumerable<StepImplementation> GetStepImplementations(IEnumerable<CodeElement> allClasses)
+        {
+            var gaugeImplementations = new List<StepImplementation>();
             foreach (var codeElement in allClasses)
             {
                 if (!(codeElement is CodeClass)) continue;
-                var codeClass = (CodeClass)codeElement;
+                var codeClass = (CodeClass) codeElement;
                 var allFunctions = GetFunctionsForClass(codeClass);
                 foreach (var codeFunction in allFunctions)
                 {
@@ -73,14 +83,13 @@ namespace Gauge.VisualStudio.Models
                     if (function == null) continue;
                     var allAttributes = GetCodeElementsFor(function.Attributes, vsCMElement.vsCMElementAttribute);
 
-                    var attribute = allAttributes.FirstOrDefault(a => a.FullName == typeof(CSharp.Lib.Attribute.Step).FullName) as CodeAttribute;
+                    var attribute =
+                        allAttributes.FirstOrDefault(a => a.FullName == typeof (CSharp.Lib.Attribute.Step).FullName) as
+                            CodeAttribute;
                     if (attribute != null)
                         gaugeImplementations.Add(new StepImplementation(function, attribute.Value.Trim('"')));
                 }
             }
-
-            gaugeImplementations.AddRange(new Concept(containingProject).GetAllConcepts().Select(concept => new ConceptImplementation(concept)));
-
             return gaugeImplementations;
         }
 
@@ -101,7 +110,9 @@ namespace Gauge.VisualStudio.Models
         {
             containingProject = containingProject ?? GaugeDTEProvider.DTE.ActiveDocument.ProjectItem.ContainingProject;
 
-            return containingProject.CodeModel==null ? Enumerable.Empty<CodeElement>() : GetCodeElementsFor(containingProject.CodeModel.CodeElements, vsCMElement.vsCMElementClass);
+            return containingProject.CodeModel == null
+                ? Enumerable.Empty<CodeElement>()
+                : GetCodeElementsFor(containingProject.CodeModel.CodeElements, vsCMElement.vsCMElementClass);
         }
 
         internal static CodeClass FindOrCreateClass(string className, EnvDTE.Project project = null)
