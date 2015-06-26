@@ -216,6 +216,7 @@
     <Compile Include="Models\Project.cs" />
     <Compile Include="Models\Step.cs" />
     <Compile Include="Models\StepImplementation.cs" />
+    <Compile Include="PkgCmdID.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -234,6 +235,12 @@
     <Compile Include="UI\ClassPicker.xaml.cs">
       <DependentUpon>ClassPicker.xaml</DependentUpon>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <VSCTCompile Include="GaugePackageVS.vsct">
+      <resourcename>Menus.ctmenu</resourcename>
+      <SubType>Designer</SubType>
+    </VSCTCompile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources.resx">
@@ -266,6 +273,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
+    <Resource Include="Resources\Images.png" />
     <Content Include="Resources\Package.ico" />
   </ItemGroup>
   <ItemGroup />

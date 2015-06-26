@@ -12,10 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
+using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Runtime.InteropServices;
 using EnvDTE80;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
@@ -39,6 +43,7 @@ namespace Gauge.VisualStudio
     [InstalledProductRegistration("#110", "#112", "1.0", IconResourceID = 400)]
     [Guid(GuidList.GuidGaugeVsPackagePkgString)]
     [ProvideAutoLoad(UIContextGuids80.SolutionExists)]
+    [ProvideMenuResource("Menus.ctmenu", 1)]
     public sealed class GaugePackage : Package
     {
         private SolutionEventsListener _solutionEventsListener;
@@ -58,7 +63,6 @@ namespace Gauge.VisualStudio
         }
 
 
-
         /////////////////////////////////////////////////////////////////////////////
         // Overridden Package Implementation
         #region Package Members
@@ -67,15 +71,153 @@ namespace Gauge.VisualStudio
         /// Initialization of the package; this method is called right after the package is sited, so this is the place
         /// where you can put all the initialization code that rely on services provided by VisualStudio.
         /// </summary>
+
         protected override void Initialize()
         {
-            Debug.WriteLine (string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", this.ToString()));
+            Debug.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", ToString()));
             _solutionEventsListener = new SolutionEventsListener(this);
             _solutionEventsListener.StartListeningForChanges();
             ErrorListLogger.Initialize(this);
+              
+            // Add our command handlers for menu (commands must exist in the .vsct file)
+            var mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
+            if (null != mcs)
+            {
+                // Create the command for the menu item.
+                var menuCommandId = new CommandID(GuidList.GuidGaugeVsPackageCmdSet, (int)PkgCmdIdList.CmdidMyCommand);
+                var menuItem = new OleMenuCommand(MenuItemCallback, menuCommandId);
+                menuItem.BeforeQueryStatus += delegate(object sender, EventArgs args)
+                {
+                    var menuCommand = sender as OleMenuCommand;
+
+                    if (menuCommand != null)
+                    {
+                        menuCommand.Visible = false;
+                        menuCommand.Enabled = false;
+
+                        string itemFullPath = null;
+
+                        IVsHierarchy hierarchy = null;
+                        var itemid = VSConstants.VSITEMID_NIL;
+
+                        if (!IsSingleProjectItemSelection(out hierarchy, out itemid)) return;
+
+                        ((IVsProject)hierarchy).GetMkDocument(itemid, out itemFullPath);
+                        var transformFileInfo = new FileInfo(itemFullPath);
+
+                        var isGaugeFile =
+                            string.Compare(".spec", transformFileInfo.Extension, StringComparison.OrdinalIgnoreCase) ==
+                            0;
+                        if (transformFileInfo.Directory == null) return;
+
+                        if (!isGaugeFile) return;
+
+                        menuCommand.Visible = true;
+                        menuCommand.Enabled = true;
+                    }
+                };
+                mcs.AddCommand(menuItem);
+            }
             base.Initialize();
         }
+
         #endregion
 
+        /// <summary>
+        ///     This function is the callback used to execute a command when the a menu item is clicked.
+        ///     See the Initialize method to see how the menu item is associated to this function using
+        ///     the OleMenuCommandService service and the MenuCommand class.
+        /// </summary>
+        private void MenuItemCallback(object sender, EventArgs e)
+        {
+            string itemFullPath = null;
+
+            IVsHierarchy hierarchy = null;
+            var itemid = VSConstants.VSITEMID_NIL;
+
+            if (!IsSingleProjectItemSelection(out hierarchy, out itemid)) return;
+
+            ((IVsProject)hierarchy).GetMkDocument(itemid, out itemFullPath);
+            var gaugeFile = new FileInfo(itemFullPath);
+
+            var arguments = string.Format(@"--simple-console --format {0}", gaugeFile.Name);
+            var p = new Process
+            {
+                StartInfo =
+                {
+                    WorkingDirectory = gaugeFile.Directory.ToString(),
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    CreateNoWindow = true,
+                    FileName = "gauge.exe",
+                    RedirectStandardError = true,
+                    Arguments = arguments,
+                }
+            };
+
+            p.Start();
+            p.WaitForExit();
+        }
+
+        public static bool IsSingleProjectItemSelection(out IVsHierarchy hierarchy, out uint itemid)
+        {
+            hierarchy = null;
+            itemid = VSConstants.VSITEMID_NIL;
+
+            var monitorSelection = GetGlobalService(typeof(SVsShellMonitorSelection)) as IVsMonitorSelection;
+            var solution = GetGlobalService(typeof(SVsSolution)) as IVsSolution;
+            if (monitorSelection == null || solution == null)
+            {
+                return false;
+            }
+
+            var hierarchyPtr = IntPtr.Zero;
+            var selectionContainerPtr = IntPtr.Zero;
+
+            try
+            {
+                IVsMultiItemSelect multiItemSelect = null;
+                var hr = monitorSelection.GetCurrentSelection(out hierarchyPtr, out itemid, out multiItemSelect,
+                    out selectionContainerPtr);
+
+                if (ErrorHandler.Failed(hr) || hierarchyPtr == IntPtr.Zero || itemid == VSConstants.VSITEMID_NIL)
+                {
+                    // there is no selection
+                    return false;
+                }
+
+                // multiple items are selected
+                if (multiItemSelect != null) return false;
+
+                // there is a hierarchy root node selected, thus it is not a single item inside a project
+
+                if (itemid == VSConstants.VSITEMID_ROOT) return false;
+
+                hierarchy = Marshal.GetObjectForIUnknown(hierarchyPtr) as IVsHierarchy;
+                if (hierarchy == null) return false;
+
+                Guid guidProjectId;
+
+                if (ErrorHandler.Failed(solution.GetGuidOfProject(hierarchy, out guidProjectId)))
+                {
+                    return false; // hierarchy is not a project inside the Solution if it does not have a ProjectID Guid
+                }
+
+                // if we got this far then there is a single project item selected
+                return true;
+            }
+            finally
+            {
+                if (selectionContainerPtr != IntPtr.Zero)
+                {
+                    Marshal.Release(selectionContainerPtr);
+                }
+
+                if (hierarchyPtr != IntPtr.Zero)
+                {
+                    Marshal.Release(hierarchyPtr);
+                }
+            }
+        }
     }
 }
