@@ -42,7 +42,7 @@ namespace Gauge.VisualStudio.Highlighting
         private readonly Step _step;
         private readonly Project _project;
 
-        public ImplementStepAction(SnapshotSpan span, UnimplementedStepTagger unimplementedStepTagger)
+        public ImplementStepAction(SnapshotSpan span, UnimplementedStepTagger unimplementedStepTagger, Project project)
         {
             _trackingSpan = span.Snapshot.CreateTrackingSpan(span, SpanTrackingMode.EdgeInclusive);
 
@@ -52,7 +52,7 @@ namespace Gauge.VisualStudio.Highlighting
             _display = "Implement Step";
             Icon = new BitmapImage(new Uri("pack://application:,,,/Gauge.VisualStudio;component/assets/glyphs/step.png"));
             _step = new Step();
-            _project = new Project();
+            _project = project;
         }
 
         public void Invoke()

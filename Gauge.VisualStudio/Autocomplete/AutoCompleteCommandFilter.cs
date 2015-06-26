@@ -56,8 +56,7 @@ namespace Gauge.VisualStudio.AutoComplete
 
 
             if (nCmdID == (uint)VSConstants.VSStd2KCmdID.RETURN
-                || nCmdID == (uint)VSConstants.VSStd2KCmdID.TAB
-                || (char.IsWhiteSpace(typedChar) || char.IsPunctuation(typedChar)))
+                || nCmdID == (uint)VSConstants.VSStd2KCmdID.TAB)
             {
                 if (_currentSession != null && !_currentSession.IsDismissed)
                 {

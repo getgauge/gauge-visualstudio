@@ -29,7 +29,7 @@ namespace Gauge.VisualStudio.Highlighting
     internal class UnimplementedStepTagger : ITagger<UnimplementedStepTag>, IDisposable
     {
         private readonly ITextView _textView;
-        private static Project _project = new Project();
+        private static readonly Project _project = new Project();
 
         public UnimplementedStepTagger(ITextView textView)
         {
@@ -65,7 +65,7 @@ namespace Gauge.VisualStudio.Highlighting
             foreach (var span in spans)
             {
                 var line = span.Start.GetContainingLine();
-                var text = Step.GetStepText(line);
+                var text = line.GetText();
                 var match = Parser.StepRegex.Match(text);
                 var point = span.Start.Add(match.Index);
                 var unimplementedStepSpan = new SnapshotSpan(span.Snapshot, new Span(point.Position, match.Length));
@@ -82,7 +82,7 @@ namespace Gauge.VisualStudio.Highlighting
 
         private ReadOnlyCollection<SmartTagActionSet> GetSmartTagActions(SnapshotSpan span)
         {
-            var actionList = new ReadOnlyCollection<ISmartTagAction>(new ISmartTagAction[] {new ImplementStepAction(span, this)});
+            var actionList = new ReadOnlyCollection<ISmartTagAction>(new ISmartTagAction[] {new ImplementStepAction(span, this, _project)});
             return new ReadOnlyCollection<SmartTagActionSet>(new[] {new SmartTagActionSet(actionList)});
         }
 
