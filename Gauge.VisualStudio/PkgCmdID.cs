@@ -2,7 +2,7 @@
 {
     static class PkgCmdIdList
     {
-        public const uint CmdidMyCommand = 0x100;
+        public const uint formatCommand = 0x100;
 
 
     };

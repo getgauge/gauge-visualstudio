@@ -84,7 +84,7 @@ namespace Gauge.VisualStudio
             if (null != mcs)
             {
                 // Create the command for the menu item.
-                var menuCommandId = new CommandID(GuidList.GuidGaugeVsPackageCmdSet, (int)PkgCmdIdList.CmdidMyCommand);
+                var menuCommandId = new CommandID(GuidList.GuidGaugeVsPackageCmdSet, (int)PkgCmdIdList.formatCommand);
                 var menuItem = new OleMenuCommand(MenuItemCallback, menuCommandId);
                 menuItem.BeforeQueryStatus += delegate(object sender, EventArgs args)
                 {
