@@ -20,6 +20,7 @@ using System.Windows.Media.Imaging;
 using Gauge.VisualStudio.Models;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.Utilities;
 
 namespace Gauge.VisualStudio.AutoComplete
@@ -31,21 +32,25 @@ namespace Gauge.VisualStudio.AutoComplete
         [Name("gaugeCompletion")]
         class GaugeCompletionSourceProvider : ICompletionSourceProvider
         {
+            [Import]
+            internal ITextStructureNavigatorSelectorService NavigatorService { get; set; }
             public ICompletionSource TryCreateCompletionSource(ITextBuffer textBuffer)
             {
-                return new GaugeCompletionSource(textBuffer);
+                return new GaugeCompletionSource(this, textBuffer);
             }
         }
 
         class GaugeCompletionSource : ICompletionSource
         {
+            private readonly GaugeCompletionSourceProvider _gaugeCompletionSourceProvider;
             private readonly ITextBuffer _buffer;
             private bool _disposed;
             private readonly Concept _concept = new Concept();
             private readonly Step _step = new Step();
 
-            public GaugeCompletionSource(ITextBuffer buffer)
+            public GaugeCompletionSource(GaugeCompletionSourceProvider gaugeCompletionSourceProvider, ITextBuffer buffer)
             {
+                _gaugeCompletionSourceProvider = gaugeCompletionSourceProvider;
                 _buffer = buffer;
             }
 
@@ -56,10 +61,10 @@ namespace Gauge.VisualStudio.AutoComplete
 
                 BitmapSource stepImageSource = new BitmapImage(new Uri("pack://application:,,,/Gauge.VisualStudio;component/assets/glyphs/step.png"));
 
-                var completions = new List<Completion>(_step.GetAll().Select(x => new Completion(x, string.Format("* {0}", x), "Step", stepImageSource, "Step")));
+                var completions = new List<Completion>(_step.GetAll().Select(x => new Completion(x, x, "Step", stepImageSource, "Step")));
 
                 BitmapSource conceptImageSource = new BitmapImage(new Uri("pack://application:,,,/Gauge.VisualStudio;component/assets/glyphs/concept.png"));
-                completions.AddRange(_concept.GetAllConcepts().Select(x => new Completion(x.StepValue, string.Format("* {0}", x.StepValue), "Concept", conceptImageSource, "Concept")));
+                completions.AddRange(_concept.GetAllConcepts().Select(x => new Completion(x.StepValue, x.StepValue, "Concept", conceptImageSource, "Concept")));
 
                 var snapshot = _buffer.CurrentSnapshot;
                 var snapshotPoint = session.GetTriggerPoint(snapshot);
@@ -74,15 +79,18 @@ namespace Gauge.VisualStudio.AutoComplete
                     start -= 1;
 
                 var applicableTo = snapshot.CreateTrackingSpan(new SnapshotSpan(start, triggerPoint), SpanTrackingMode.EdgeInclusive);
-
-                completionSets.Add(new CompletionSet("Gauge", "Gauge", applicableTo, completions, null));
+                completionSets.Add(new CompletionSet("Gauge", "Gauge",
+                    applicableTo, completions, null));
             }
 
             public void Dispose()
             {
-                _disposed = true;
+                if (!_disposed)
+                {
+                    GC.SuppressFinalize(this);
+                    _disposed = true;
+                }
             }
         }
-
     }
 }

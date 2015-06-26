@@ -14,10 +14,10 @@
 
 using System;
 using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.OLE.Interop;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 
@@ -25,10 +25,12 @@ namespace Gauge.VisualStudio.AutoComplete
 {
     internal sealed class AutoCompleteCommandFilter : IOleCommandTarget
     {
+        private readonly SVsServiceProvider _serviceProvider;
         private ICompletionSession _currentSession;
 
-        public AutoCompleteCommandFilter(IWpfTextView textView, ICompletionBroker broker)
+        public AutoCompleteCommandFilter(IWpfTextView textView, ICompletionBroker broker, SVsServiceProvider serviceProvider)
         {
+            _serviceProvider = serviceProvider;
             _currentSession = null;
 
             TextView = textView;
@@ -41,103 +43,98 @@ namespace Gauge.VisualStudio.AutoComplete
 
         public int Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
         {
-            var handled = false;
-            var hresult = VSConstants.S_OK;
-
-            if (pguidCmdGroup == VSConstants.VSStd2K)
+            if (VsShellUtilities.IsInAutomationFunction(_serviceProvider))
             {
-                switch ((VSConstants.VSStd2KCmdID)nCmdID)
+                return Next.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
+            }
+            var commandID = nCmdID;
+            var typedChar = char.MinValue;
+            if (pguidCmdGroup == VSConstants.VSStd2K && nCmdID == (uint)VSConstants.VSStd2KCmdID.TYPECHAR)
+            {
+                typedChar = (char)(ushort)Marshal.GetObjectForNativeVariant(pvaIn);
+            }
+
+
+            if (nCmdID == (uint)VSConstants.VSStd2KCmdID.RETURN
+                || nCmdID == (uint)VSConstants.VSStd2KCmdID.TAB
+                || (char.IsWhiteSpace(typedChar) || char.IsPunctuation(typedChar)))
+            {
+                if (_currentSession != null && !_currentSession.IsDismissed)
                 {
-                    case VSConstants.VSStd2KCmdID.AUTOCOMPLETE:
-                    case VSConstants.VSStd2KCmdID.COMPLETEWORD:
-                        handled = StartSession();
-                        break;
-                    case VSConstants.VSStd2KCmdID.TYPECHAR:
-                        var lineText = TextView.Caret.Position.BufferPosition.GetContainingLine().GetText().Trim();
-                        var stepRegex = new Regex(@"^(\*\s?\w*).*$", RegexOptions.Compiled);
-                        //the current character isn't yet available in the buffer!, add it to the text to check
-                        if (stepRegex.IsMatch(string.Format("{0}{1}", lineText, GetTypeChar(pvaIn))))
-                        {
-                            StartSession();
-                        }
-                        Filter();
-                        break;
-                    case VSConstants.VSStd2KCmdID.RETURN:
-                        handled = Complete(false);
-                        break;
-                    case VSConstants.VSStd2KCmdID.TAB:
-                        handled = Complete(true);
-                        break;
-                    case VSConstants.VSStd2KCmdID.CANCEL:
-                        handled = Cancel();
-                        break;
+                    if (_currentSession.SelectedCompletionSet.SelectionStatus.IsSelected)
+                    {
+                        _currentSession.Commit();
+                        return VSConstants.S_OK;
+                    }
+                    _currentSession.Dismiss();
                 }
             }
 
-            if (!handled)
-                hresult = Next.Exec(pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
+            var retVal = Next.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
+            var handled = false;
 
-            return hresult;
-        }
-
-        private static char GetTypeChar(IntPtr pvaIn)
-        {
-            return (char)(ushort)Marshal.GetObjectForNativeVariant(pvaIn);
-        }
-
-        private void Filter()
-        {
-            if (_currentSession == null)
-                return;
-
-            _currentSession.SelectedCompletionSet.SelectBestMatch();
-            _currentSession.SelectedCompletionSet.Recalculate();
-        }
-
-        private bool Cancel()
-        {
-            if (_currentSession == null)
-                return false;
-
-            _currentSession.Dismiss();
-
-            return true;
-        }
-
-        private bool Complete(bool force)
-        {
-            if (_currentSession == null)
-                return false;
-
-            if (!_currentSession.SelectedCompletionSet.SelectionStatus.IsSelected && !force)
+            switch ((VSConstants.VSStd2KCmdID)commandID)
             {
-                _currentSession.Dismiss();
-                return false;
+                case VSConstants.VSStd2KCmdID.COMPLETEWORD:
+                case VSConstants.VSStd2KCmdID.AUTOCOMPLETE:
+                    if (_currentSession == null || _currentSession.IsDismissed)
+                    {
+                        TriggerCompletion();
+                        var lineText = TextView.Caret.Position.BufferPosition.GetContainingLine().GetText().Trim();
+                        if (!string.IsNullOrEmpty(lineText))
+                            _currentSession.Filter();
+                    }
+                    else
+                    {
+                        _currentSession.Filter();
+                    }
+                    handled = true;
+                    break;
+                case VSConstants.VSStd2KCmdID.TYPECHAR:
+                    if (!typedChar.Equals(char.MinValue) && char.IsLetterOrDigit(typedChar))
+                    {
+                        if (_currentSession == null || _currentSession.IsDismissed)
+                        {
+                            TriggerCompletion();
+                            _currentSession.Filter();
+                        }
+                        else
+                        {
+                            _currentSession.Filter();
+                        }
+                        handled = true;
+                    }
+                    break;
+                case VSConstants.VSStd2KCmdID.BACKSPACE:
+                case VSConstants.VSStd2KCmdID.DELETE:
+                    if (_currentSession != null && !_currentSession.IsDismissed)
+                        _currentSession.Filter();
+                    handled = true;
+                    break;
             }
-            _currentSession.Commit();
-            return true;
+            return handled ? VSConstants.S_OK : retVal;
         }
 
-        private bool StartSession()
+        private void TriggerCompletion()
         {
-            if (_currentSession != null)
-                return false;
+            var caretPoint = TextView.Caret.Position.Point.GetPoint(
+                textBuffer => (!textBuffer.ContentType.IsOfType("projection")), 
+                            PositionAffinity.Predecessor);
+            if (!caretPoint.HasValue) return;
 
-            var caret = TextView.Caret.Position.BufferPosition;
-            var snapshot = caret.Snapshot;
+            _currentSession = Broker.CreateCompletionSession
+                (TextView,
+                    caretPoint.Value.Snapshot.CreateTrackingPoint(caretPoint.Value.Position, PointTrackingMode.Positive),
+                    true);
 
-            _currentSession = !Broker.IsCompletionActive(TextView)
-                ? Broker.CreateCompletionSession(TextView,
-                    snapshot.CreateTrackingPoint(caret, PointTrackingMode.Positive), true)
-                : Broker.GetSessions(TextView)[0];
-            _currentSession.Dismissed += (sender, args) => _currentSession = null;
+            _currentSession.Dismissed += OnSessionDismissed;
+            _currentSession.Start();
+        }
 
-            if (!_currentSession.IsStarted)
-            {
-                _currentSession.Start();
-            }
-
-            return true;
+        private void OnSessionDismissed(object sender, EventArgs e)
+        {
+            _currentSession.Dismissed -= OnSessionDismissed;
+            _currentSession = null;
         }
 
         public int QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText)

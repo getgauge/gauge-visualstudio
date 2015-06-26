@@ -18,6 +18,7 @@ using Gauge.VisualStudio.GotoDefn;
 using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.OLE.Interop;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.TextManager.Interop;
 using Microsoft.VisualStudio.Utilities;
@@ -37,11 +38,13 @@ namespace Gauge.VisualStudio
             [Import]
             private ICompletionBroker _completionBroker;
 
+            [Import]
+            internal SVsServiceProvider ServiceProvider { get; set; }
             public void VsTextViewCreated(IVsTextView textViewAdapter)
             {
                 var view = _adaptersFactory.GetWpfTextView(textViewAdapter);
 
-                var autoCompleteCommandFilter = new AutoCompleteCommandFilter(view, _completionBroker);
+                var autoCompleteCommandFilter = new AutoCompleteCommandFilter(view, _completionBroker, ServiceProvider);
 
                 IOleCommandTarget next;
                 textViewAdapter.AddCommandFilter(autoCompleteCommandFilter, out next);
