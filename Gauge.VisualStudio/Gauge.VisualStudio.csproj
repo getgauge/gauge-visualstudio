@@ -225,7 +225,6 @@
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="GaugePackage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SolutionEventsListener.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="TestRunner\GaugeRunner.cs" />
     <Compile Include="TestRunner\TestContainer.cs" />

@@ -32,15 +32,12 @@ namespace Gauge.VisualStudio
     [ProvideMenuResource("Menus.ctmenu", 1)]
     public sealed class GaugePackage : Package
     {
-        private SolutionEventsListener _solutionEventsListener;
         private Events2 _dteEvents;
         private CodeModelEvents _documentEvents;
 
         protected override void Initialize()
         {
             Debug.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", ToString()));
-            _solutionEventsListener = new SolutionEventsListener(this);
-            _solutionEventsListener.StartListeningForChanges();
             ErrorListLogger.Initialize(this);
               
             // Add our command handlers for menu (commands must exist in the .vsct file)
