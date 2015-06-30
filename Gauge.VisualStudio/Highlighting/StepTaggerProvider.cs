@@ -40,8 +40,8 @@ namespace Gauge.VisualStudio.Highlighting
             _events2 = GaugeDTEProvider.DTE.Events as Events2;
             _codeModelEvents = _events2.CodeModelEvents;
 
-//            _codeModelEvents.ElementAdded += element => RefreshUsages();
-//            _codeModelEvents.ElementChanged += (element, change) => RefreshUsages();
+            _codeModelEvents.ElementAdded += element => RefreshUsages();
+            _codeModelEvents.ElementChanged += (element, change) => RefreshUsages();
             _codeModelEvents.ElementDeleted += (parent, element) => RefreshUsages();
         }
 

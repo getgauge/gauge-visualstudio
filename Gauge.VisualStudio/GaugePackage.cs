@@ -33,7 +33,6 @@ namespace Gauge.VisualStudio
     public sealed class GaugePackage : Package
     {
         private Events2 _dteEvents;
-        private CodeModelEvents _documentEvents;
 
         protected override void Initialize()
         {
