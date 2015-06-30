@@ -66,7 +66,7 @@ namespace Gauge.VisualStudio.Models
             try
             {
                 return GetAllConcepts().FirstOrDefault(
-                            concept => string.Compare(Step.GetStepValueFromInput(concept.StepValue), Step.GetStepValueFromInput(lineText)) == 0);
+                            concept => string.Compare(Step.GetParsedStepValueFromInput(concept.StepValue), Step.GetParsedStepValueFromInput(lineText)) == 0);
             }
             catch
             {

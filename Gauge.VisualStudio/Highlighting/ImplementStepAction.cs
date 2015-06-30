@@ -112,7 +112,7 @@ namespace Gauge.VisualStudio.Highlighting
                 }
 
                 var codeAttribute = implementationFunction.AddAttribute("Step",
-                    _step.GetParsedStepValue(containingLine).ToLiteral(), -1);
+                    _step.GetParameterizedStepValue(containingLine).ToLiteral(), -1);
 
                 if (codeAttribute == null)
                 {

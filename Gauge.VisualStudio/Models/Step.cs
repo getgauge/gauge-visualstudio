@@ -39,11 +39,9 @@ namespace Gauge.VisualStudio.Models
             return GetAllStepsFromGauge(_project).Select(x => x.ParameterizedStepValue);
         }
 
-        public string GetParsedStepValue(ITextSnapshotLine input)
+        public string GetParameterizedStepValue(ITextSnapshotLine input)
         {
-            var stepValueFromInput = GetStepValueFromInput(GetStepText(input));
-            return GetAllStepsFromGauge(_project).First(value => value.StepValue == stepValueFromInput)
-                   .ParameterizedStepValue;
+            return GetStepValueFromInput(GetStepText(input)).ParameterizedStepValue;
         }
 
         private static EnvDTE.Project ActiveProject
@@ -104,7 +102,12 @@ namespace Gauge.VisualStudio.Models
             return DateTime.Now.Ticks/TimeSpan.TicksPerMillisecond;
         }
 
-        internal static string GetStepValueFromInput(string input)
+        internal static string GetParsedStepValueFromInput(string input)
+        {
+            return GetStepValueFromInput(input).StepValue;
+        }
+
+        private static ProtoStepValue GetStepValueFromInput(string input)
         {
             var gaugeApiConnection = GaugeDTEProvider.GetApiConnectionFor(ActiveProject);
             var stepsRequest = GetStepValueRequest.CreateBuilder().SetStepText(input).Build();
@@ -115,7 +118,7 @@ namespace Gauge.VisualStudio.Models
                 .Build();
 
             var bytes = gaugeApiConnection.WriteAndReadApiMessage(apiMessage);
-            return bytes.StepValueResponse.StepValue.StepValue;
+            return bytes.StepValueResponse.StepValue;
         }
     }
 }

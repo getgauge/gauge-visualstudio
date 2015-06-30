@@ -22,7 +22,7 @@ namespace Gauge.VisualStudio.Models
         {
             try
             {
-                return Step.GetStepValueFromInput(StepText).CompareTo(Step.GetStepValueFromInput(givenText))==0;
+                return Step.GetParsedStepValueFromInput(StepText).CompareTo(Step.GetParsedStepValueFromInput(givenText))==0;
             }
             catch
             {
