@@ -14,6 +14,8 @@
 
 using System;
 using System.Runtime.InteropServices;
+using Gauge.CSharp.Lib.Attribute;
+using Gauge.VisualStudio.Classification;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.OLE.Interop;
@@ -77,45 +79,46 @@ namespace Gauge.VisualStudio.AutoComplete
                 case VSConstants.VSStd2KCmdID.COMPLETEWORD:
                 case VSConstants.VSStd2KCmdID.AUTOCOMPLETE:
                     if (_currentSession == null || _currentSession.IsDismissed)
-                    {
                         TriggerCompletion();
-                        var lineText = TextView.Caret.Position.BufferPosition.GetContainingLine().GetText().Trim();
-                        if (!string.IsNullOrEmpty(lineText))
-                            _currentSession.Filter();
-                    }
-                    else
-                    {
-                        _currentSession.Filter();
-                    }
+                    Filter();
                     handled = true;
                     break;
                 case VSConstants.VSStd2KCmdID.TYPECHAR:
                     if (!typedChar.Equals(char.MinValue) && char.IsLetterOrDigit(typedChar))
                     {
                         if (_currentSession == null || _currentSession.IsDismissed)
-                        {
                             TriggerCompletion();
-                            _currentSession.Filter();
-                        }
-                        else
-                        {
-                            _currentSession.Filter();
-                        }
+                        Filter();
                         handled = true;
                     }
                     break;
                 case VSConstants.VSStd2KCmdID.BACKSPACE:
                 case VSConstants.VSStd2KCmdID.DELETE:
-                    if (_currentSession != null && !_currentSession.IsDismissed)
-                        _currentSession.Filter();
+                    TriggerCompletion(true);
+                    Filter();
                     handled = true;
                     break;
             }
             return handled ? VSConstants.S_OK : retVal;
         }
 
-        private void TriggerCompletion()
+        private void Filter()
         {
+            if (_currentSession == null || _currentSession.IsDismissed) return;
+//            _currentSession.Filter();
+            _currentSession.SelectedCompletionSet.SelectBestMatch();
+            _currentSession.SelectedCompletionSet.Recalculate();
+        }
+
+        private void TriggerCompletion(bool force = false)
+        {
+            if (force && _currentSession != null && !_currentSession.IsDismissed)
+            {
+                _currentSession.Dismiss();
+            }
+            var lineText = TextView.Caret.Position.BufferPosition.GetContainingLine().GetText().Trim();
+            if (!Parser.StepRegex.IsMatch(lineText)) return;
+
             var caretPoint = TextView.Caret.Position.Point.GetPoint(
                 textBuffer => (!textBuffer.ContentType.IsOfType("projection")), 
                             PositionAffinity.Predecessor);
@@ -132,7 +135,7 @@ namespace Gauge.VisualStudio.AutoComplete
 
         private void OnSessionDismissed(object sender, EventArgs e)
         {
-            _currentSession.Dismissed -= OnSessionDismissed;
+             _currentSession.Dismissed -= OnSessionDismissed;
             _currentSession = null;
         }
 
