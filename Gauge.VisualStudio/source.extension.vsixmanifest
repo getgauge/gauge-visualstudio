@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
-    <Identity Id="Gauge.VisualStudio.ThoughtWorks.9731a722-d394-4c99-9df7-758867938fd6" Version="0.0.5" Language="en-US" Publisher="ThoughtWorks Inc." />
-    <DisplayName>+</DisplayName>
+    <Identity Id="Gauge.VisualStudio.ThoughtWorks.9731a722-d394-4c99-9df7-758867938fd6" Version="0.0.7" Language="en-US" Publisher="ThoughtWorks Inc." />
+    <DisplayName>Gauge.VisualStudio</DisplayName>
     <Description xml:space="preserve">Visual Studio Extension for Gauge</Description>
     <MoreInfo>http://getgauge.io</MoreInfo>
     <License>LICENSE.txt</License>

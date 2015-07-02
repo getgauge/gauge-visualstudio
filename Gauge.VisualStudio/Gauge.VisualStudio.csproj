@@ -199,6 +199,7 @@
   <ItemGroup>
     <Compile Include="AutoComplete\AutoCompleteCommandFilter.cs" />
     <Compile Include="AutoComplete\CompletionSource.cs" />
+    <Compile Include="AutoComplete\GaugeCompletionSet.cs" />
     <Compile Include="Classification\Classifier.cs" />
     <Compile Include="Classification\ClassifierProvider.cs" />
     <Compile Include="Classification\Formats.cs" />
