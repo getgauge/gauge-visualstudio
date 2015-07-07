@@ -80,6 +80,7 @@
     <Reference Include="Microsoft.VisualStudio.Shell.Interop.12.0">
       <EmbedInteropTypes>true</EmbedInteropTypes>
     </Reference>
+    <Reference Include="Microsoft.VisualStudio.TemplateWizardInterface, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.VisualStudio.TestPlatform.Core">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Microsoft Visual Studio 12.0\Common7\IDE\CommonExtensions\Microsoft\TestWindow\Microsoft.VisualStudio.TestPlatform.Core.dll</HintPath>
     </Reference>
@@ -289,7 +290,11 @@
     <Resource Include="Resources\Images.png" />
     <Content Include="Resources\Package.ico" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <TemplateReference Include="GaugeProjectTemplate.csproj">
+      <PathToProject>../GaugeProjectTemplate/GaugeProjectTemplate.csproj</PathToProject>
+    </TemplateReference>
+  </ItemGroup>
   <ItemGroup>
     <Page Include="UI\ClassPicker.xaml">
       <Generator>MSBuild:Compile</Generator>

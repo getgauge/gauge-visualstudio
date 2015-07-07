@@ -1,0 +1,37 @@
+<VSTemplate Version="3.0.0" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" Type="Project">
+  <TemplateData>
+    <Name>Gauge Test Project</Name>
+    <Description>Create new Gauge Test Project</Description>
+    <DefaultName>GaugeProject</DefaultName>
+    
+    <ProjectType>CSharp</ProjectType>
+    <ProjectSubType></ProjectSubType>
+    <SortOrder>1000</SortOrder>
+    <CreateNewFolder>true</CreateNewFolder>    
+    <ProvideDefaultName>true</ProvideDefaultName>
+    <LocationField>Enabled</LocationField>
+    <EnableLocationBrowseButton>true</EnableLocationBrowseButton>
+    <Icon>sw-file-icon.png</Icon>
+    <TemplateID>9fc50395-63c5-4d6c-9fad-a7e00a4de11a</TemplateID>
+    <!-- Indicates how many parent folders this item template should appear in -->
+    <NumberOfParentCategoriesToRollUp>1</NumberOfParentCategoriesToRollUp>
+  </TemplateData>
+  <TemplateContent>
+    <Project TargetFileName="GaugeProjectTemplate.csproj" File="GaugeProjectTemplate.csproj" ReplaceParameters="true">
+      <Folder Name="Env" TargetFolderName="Env">
+        <Folder Name="default" TargetFolderName="default">
+          <ProjectItem ReplaceParameters="false" TargetFileName="default.properties">default.properties</ProjectItem>
+        </Folder>
+      </Folder>
+      <ProjectItem ReplaceParameters="false" TargetFileName="manifest.json">manifest.json</ProjectItem>
+      <ProjectItem ReplaceParameters="true" TargetFileName="packages.config">packages.config</ProjectItem>
+      <Folder Name="Properties" TargetFolderName="Properties">
+        <ProjectItem ReplaceParameters="true" TargetFileName="AssemblyInfo.cs">AssemblyInfo.cs</ProjectItem>
+      </Folder>
+      <Folder Name="Specs" TargetFolderName="Specs">
+        <ProjectItem ReplaceParameters="false" TargetFileName="hello_world.spec">hello_world.spec</ProjectItem>
+      </Folder>
+      <ProjectItem ReplaceParameters="true" TargetFileName="StepImplementation.cs">StepImplementation.cs</ProjectItem>
+    </Project>
+  </TemplateContent>
+</VSTemplate>
