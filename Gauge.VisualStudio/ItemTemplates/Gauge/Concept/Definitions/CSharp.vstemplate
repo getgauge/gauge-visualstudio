@@ -5,7 +5,7 @@
     <DefaultName>Concept</DefaultName>
     <Name>Concept</Name>
     <Description>A Gauge Concept file.</Description>
-    <Icon>/assets/glyphs/concept.png</Icon>
+    <Icon>logo.png</Icon>
     <NumberOfParentCategoriesToRollUp>1</NumberOfParentCategoriesToRollUp>
     <TemplateID>e21665b3-93a8-4156-b7a6-b334e25c5aa5</TemplateID>
   </TemplateData>

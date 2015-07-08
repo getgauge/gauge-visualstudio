@@ -2,7 +2,7 @@
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
     <Identity Id="Gauge.VisualStudio.ThoughtWorks.9731a722-d394-4c99-9df7-758867938fd6" Version="0.0.5" Language="en-US" Publisher="ThoughtWorks Inc." />
-    <DisplayName>+</DisplayName>
+    <DisplayName>Gauge.VisualStudio</DisplayName>
     <Description xml:space="preserve">Visual Studio Extension for Gauge</Description>
     <MoreInfo>http://getgauge.io</MoreInfo>
     <License>LICENSE.txt</License>
@@ -22,5 +22,6 @@
     <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="Gauge.VisualStudio" Path="|Gauge.VisualStudio|" />
     <Asset Type="UnitTestExtension" d:Source="Project" d:ProjectName="Gauge.VisualStudio" Path="|Gauge.VisualStudio|" />
     <Asset Type="Microsoft.VisualStudio.ItemTemplate" Path="Output\ItemTemplates" />
+    <Asset Type="Microsoft.VisualStudio.ProjectTemplate" Path="Output\ProjectTemplates" />
   </Assets>
 </PackageManifest>

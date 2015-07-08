@@ -262,6 +262,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ItemTemplates\Gauge\Concept\concept.cpt" />
+    <Resource Include="ItemTemplates\Gauge\Concept\logo.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
     <Content Include="ItemTemplates\Gauge\Specification\Definitions\CSharp.vstemplate" />
     <Content Include="ItemTemplates\Gauge\Concept\Definitions\CSharp.vstemplate" />
     <None Include="packages.config" />
@@ -277,6 +280,9 @@
     <Resource Include="assets\glyphs\concept.png" />
     <Resource Include="assets\glyphs\step.png" />
     <None Include="ItemTemplates\Gauge\Specification\specification.spec" />
+    <Resource Include="ItemTemplates\Gauge\Specification\logo.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
     <Content Include="LICENSE.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>

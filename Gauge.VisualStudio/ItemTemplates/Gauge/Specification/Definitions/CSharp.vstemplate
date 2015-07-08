@@ -5,7 +5,7 @@
     <DefaultName>Specification</DefaultName>
     <Name>Specification</Name>
     <Description>A Gauge Specification file.</Description>    
-    <Icon>/assets/glyphs/concept.png</Icon>
+    <Icon>logo.png</Icon>
     <NumberOfParentCategoriesToRollUp>1</NumberOfParentCategoriesToRollUp>
     <TemplateID>9a641277-95af-4865-8110-960e0904024f</TemplateID>
   </TemplateData>
