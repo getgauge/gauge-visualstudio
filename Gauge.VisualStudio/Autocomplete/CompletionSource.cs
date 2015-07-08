@@ -15,8 +15,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Linq;
-using System.Windows.Media.Imaging;
 using Gauge.VisualStudio.Models;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
@@ -62,28 +60,7 @@ namespace Gauge.VisualStudio.AutoComplete
                 var snapshot = _buffer.CurrentSnapshot;
                 var snapshotPoint = session.GetTriggerPoint(snapshot);
                 if (!snapshotPoint.HasValue) return;
-                var triggerPoint = snapshotPoint.Value;
-                var line = triggerPoint.GetContainingLine();
-
-                BitmapSource stepImageSource = new BitmapImage(new Uri("pack://application:,,,/Gauge.VisualStudio;component/assets/glyphs/step.png"));
-
-                var prefix = line.GetText().TrimStart('*').TrimStart(' ');
-                var applicableCompletions = prefix.Length < 1 ? _step.GetAll() : _step.GetAll().Where(s => s.StartsWith(prefix));
-                var stepCompletions = applicableCompletions.Select(x => new Completion(x, x, "Step", stepImageSource, "Step"));
-                var completions = new List<Completion>(stepCompletions);
-
-                BitmapSource conceptImageSource = new BitmapImage(new Uri("pack://application:,,,/Gauge.VisualStudio;component/assets/glyphs/concept.png"));
-                var applicableContextCompletions = prefix.Length < 1 ? _concept.GetAllConcepts() : _concept.GetAllConcepts().Where(s => s.StepValue.StartsWith(prefix));
-                completions.AddRange(applicableContextCompletions.Select(x => new Completion(x.StepValue, x.StepValue, "Concept", conceptImageSource, "Concept")));
-
-                if (completions.Count <= 0) return;
-
-                var start = triggerPoint;
-                while (start > line.Start && !char.IsWhiteSpace((start - 1).GetChar()))
-                    start -= 1;
-
-                var applicableTo = snapshot.CreateTrackingSpan(new SnapshotSpan(start, triggerPoint), SpanTrackingMode.EdgeInclusive);
-                completionSets.Add(new CompletionSet("Gauge", "Gauge", applicableTo, completions, null));
+                completionSets.Add(new GaugeCompletionSet(snapshotPoint.Value, _step, _concept));
             }
 
             public void Dispose()

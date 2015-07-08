@@ -1,7 +1,6 @@
 <VSTemplate Version="3.0.0" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" Type="Item">
   <TemplateData>
     <ProjectType>CSharp</ProjectType>
-    
     <DefaultName>Concept</DefaultName>
     <Name>Concept</Name>
     <Description>A Gauge Concept file.</Description>
@@ -11,7 +10,6 @@
   </TemplateData>
   <TemplateContent>
     <References />
-
     <ProjectItem TargetFileName="$fileinputname$.cpt" ReplaceParameters="true">concept.cpt</ProjectItem>
   </TemplateContent>
 </VSTemplate>

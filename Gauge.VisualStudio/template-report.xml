@@ -4,6 +4,8 @@
     <ItemTemplate Path="ItemTemplates\Gauge\Concept\Definitions\CSharp.vstemplate" Name="Concept" Description="A Gauge Concept file." ProjectType="CSharp" ProjectSubType="" />
     <ItemTemplate Path="ItemTemplates\Gauge\Specification\Definitions\CSharp.vstemplate" Name="Specification" Description="A Gauge Specification file." ProjectType="CSharp" ProjectSubType="" />
   </ItemTemplates>
-  <ProjectTemplates />
+  <ProjectTemplates>
+    <ProjectTemplate Path="..\GaugeProjectTemplate\_Definitions\_project.vstemplate.xml" Name="Gauge Test Project" Description="Create new Gauge Test Project" ProjectType="CSharp" ProjectSubType="" />
+  </ProjectTemplates>
   <Snippets />
 </TemplateReport>
