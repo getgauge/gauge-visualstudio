@@ -18,7 +18,7 @@ using Microsoft.VisualStudio.Text;
 
 namespace Gauge.VisualStudio.Classification
 {
-    static class Parser
+    public static class Parser
     {
         internal const char DummyChar = '~';
 

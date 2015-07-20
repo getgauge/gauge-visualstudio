@@ -97,7 +97,7 @@ namespace Gauge.VisualStudio.Models
             return nextLineText.Trim() == string.Empty && currentLine.LineNumber < currentLine.Snapshot.LineCount ? NextLineText(nextLine) : nextLineText;
         }
 
-        private static long GenerateMessageId()
+        public static long GenerateMessageId()
         {
             return DateTime.Now.Ticks/TimeSpan.TicksPerMillisecond;
         }

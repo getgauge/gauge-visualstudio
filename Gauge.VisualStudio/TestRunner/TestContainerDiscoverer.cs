@@ -17,6 +17,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Threading.Tasks;
+using Gauge.VisualStudio.Models;
+using main;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.TestWindow.Extensibility;
 
@@ -26,7 +28,8 @@ namespace Gauge.VisualStudio.TestRunner
     public class TestContainerDiscoverer : ITestContainerDiscoverer
     {
         private readonly IServiceProvider _serviceProvider;
-
+        
+                
         [ImportingConstructor]
         public TestContainerDiscoverer([Import(typeof(SVsServiceProvider))] IServiceProvider serviceProvider)
         {
@@ -38,13 +41,18 @@ namespace Gauge.VisualStudio.TestRunner
             get { return TestExecutor.ExecutorUri; }
         }
 
+        
         public IEnumerable<ITestContainer> TestContainers
         {
             get
             {
                 var testContainers = new ConcurrentBag<TestContainer>();
-                Parallel.ForEach(GaugeDTEProvider.GetAllSpecs(_serviceProvider),
-                    s => testContainers.Add(new TestContainer(this, s)));
+                var specs = Specification.GetAllSpecsFromGauge();
+                SpecsHolder.Specs = specs; 
+                Parallel.ForEach(specs, s => testContainers.Add(new TestContainer(this, s.FileName)));
+                
+//                Parallel.ForEach(GaugeDTEProvider.GetAllSpecs(_serviceProvider),
+//                    s => testContainers.Add(new TestContainer(this, s)));
                 return testContainers;
             }
         }

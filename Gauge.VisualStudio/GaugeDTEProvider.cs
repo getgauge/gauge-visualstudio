@@ -110,6 +110,11 @@ namespace Gauge.VisualStudio
             return ApiConnections[DTE.ActiveDocument.ProjectItem.ContainingProject.SlugifiedName()];
         }
 
+        public static List<GaugeApiConnection> GetAllApiConnections()
+        {
+            return ApiConnections.Values.ToList();
+        }
+
         private static void StartGaugeAsDaemon(Project gaugeProject, int openPort)
         {
             var gaugeStartInfo = new ProcessStartInfo

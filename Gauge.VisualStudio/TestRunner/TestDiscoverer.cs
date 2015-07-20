@@ -13,9 +13,14 @@
 // limitations under the License.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Gauge.VisualStudio.Classification;
+using Gauge.VisualStudio.Models;
+using main;
+using Microsoft.VisualStudio.PlatformUI.OleComponentSupport;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
@@ -30,27 +35,33 @@ namespace Gauge.VisualStudio.TestRunner
         public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger logger,
             ITestCaseDiscoverySink discoverySink)
         {
-            GetSpecs(sources, discoverySink);
+            var testCases = GetSpecs(sources, discoverySink);
+            foreach (var aTestCase in testCases)
+            {
+                discoverySink.SendTestCase(aTestCase);
+            }
         }
 
         public static List<TestCase> GetSpecs(IEnumerable<string> sources, ITestCaseDiscoverySink discoverySink)
         {
             var testCases = new List<TestCase>();
 
-            Parallel.ForEach(sources, spec =>
+            foreach (var protoSpec in SpecsHolder.Specs)
             {
-                var source = File.ReadAllText(spec);
+                var scenarios = (from item in protoSpec.ItemsList
+                    where item.HasScenario
+                    select item
+                    );
 
-                var scenarios = Parser.GetScenarios(source);
-                var specificationName = Parser.GetSpecificationName(source);
+                var specificationName = protoSpec.SpecHeading;
                 var scenarioIndex = 0;
 
                 foreach (var scenario in scenarios)
                 {
-                    var testCase = new TestCase(string.Format("{0}.{1}", specificationName, scenario), TestExecutor.ExecutorUri, spec)
+                    var testCase = new TestCase(string.Format("{0}.{1}", specificationName, scenario.Scenario.ScenarioHeading), TestExecutor.ExecutorUri, protoSpec.FileName)
                     {
-                        CodeFilePath = spec,
-                        DisplayName = scenario,
+                        CodeFilePath = protoSpec.FileName,
+                        DisplayName = scenario.Scenario.ScenarioHeading,
                         // Ugly hack below - I don't know how else to pass the scenario index to GaugeRunner
                         // LocalExtensionData returns a null despite setting it here
                         LineNumber = scenarioIndex
@@ -61,11 +72,10 @@ namespace Gauge.VisualStudio.TestRunner
                         discoverySink.SendTestCase(testCase);
                     }
                     testCases.Add(testCase);
-                    
+
                     scenarioIndex++;
                 }
-            });
-
+            }
             return testCases;
         }
     }
