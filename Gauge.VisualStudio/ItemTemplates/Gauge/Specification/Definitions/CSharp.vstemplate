@@ -1,0 +1,15 @@
+<VSTemplate Version="3.0.0" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" Type="Item">
+  <TemplateData>
+    <ProjectType>CSharp</ProjectType>
+    <DefaultName>Specification</DefaultName>
+    <Name>Specification</Name>
+    <Description>A Gauge Specification file.</Description>    
+    <Icon>logo.png</Icon>
+    <NumberOfParentCategoriesToRollUp>1</NumberOfParentCategoriesToRollUp>
+    <TemplateID>9a641277-95af-4865-8110-960e0904024f</TemplateID>
+  </TemplateData>
+  <TemplateContent>
+    <References />
+    <ProjectItem TargetFileName="$fileinputname$.spec" ReplaceParameters="true">specification.spec</ProjectItem>
+  </TemplateContent>
+</VSTemplate>

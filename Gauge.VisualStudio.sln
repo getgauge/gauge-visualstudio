@@ -9,6 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauge.VisualStudio.Tests", 
 	ProjectSection(ProjectDependencies) = postProject
 		{DC3355B9-8179-48A6-9A01-0E96F2FB842E} = {DC3355B9-8179-48A6-9A01-0E96F2FB842E}
 	EndProjectSection
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GaugeProjectTemplate", "GaugeProjectTemplate\GaugeProjectTemplate.csproj", "{C095C38E-A58F-4E66-8E57-F0A91CCA7974}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,6 +25,8 @@ Global
 		{754095AA-91B0-40E4-98AD-3FD8746DB95D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{754095AA-91B0-40E4-98AD-3FD8746DB95D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{754095AA-91B0-40E4-98AD-3FD8746DB95D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C095C38E-A58F-4E66-8E57-F0A91CCA7974}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C095C38E-A58F-4E66-8E57-F0A91CCA7974}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
