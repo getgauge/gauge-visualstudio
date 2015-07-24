@@ -233,7 +233,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="TestRunner\GaugeRunner.cs" />
-    <Compile Include="TestRunner\SpecsHolder.cs" />
     <Compile Include="TestRunner\TestContainer.cs" />
     <Compile Include="TestRunner\TestContainerDiscoverer.cs" />
     <Compile Include="TestRunner\TestDiscoverer.cs" />

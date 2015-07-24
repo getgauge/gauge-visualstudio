@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.Text;
 
@@ -22,12 +23,12 @@ namespace Gauge.VisualStudio.Classification
     {
         internal const char DummyChar = '~';
 
-        private static readonly Regex ScenarioHeadingRegex = new Regex(@"(\#\#.*)$", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
-        private static readonly Regex ScenarioHeadingRegexAlt = new Regex(@".+[\n\r]-+", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
+        private static readonly Regex ScenarioHeadingRegex = new Regex(@"\#\#(?<heading>.+)[\n\r]+", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
+        private static readonly Regex ScenarioHeadingRegexAlt = new Regex(@"(?<heading>.+)[\n\r]+[\s]*-+", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
 
-        private static readonly Regex SpecHeadingRegex = new Regex(@"(\#.*)$", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
-        private static readonly Regex SpecHeadingRegexAlt = new Regex(@".+[\n\r]=+", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
-
+        private static readonly Regex SpecHeadingRegex = new Regex(@"\#(?<heading>.+)[\n\r]*", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
+        private static readonly Regex SpecHeadingRegexAlt = new Regex(@"(?<heading>.+)[\n\r][\s]*=+", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
+        
         public static readonly Regex StepRegex = new Regex(@"[ ]*\*([\w ]*(?<stat>""[\w ]+"")*(?<dyn>\<[\w ]+\>)*)*", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
 
         private static readonly Regex TagsRegex = new Regex(@"\s*tags\s*:\s*(?<tag>[\w\s]+)(,(?<tag>[\w\s]+))*", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
@@ -49,22 +50,22 @@ namespace Gauge.VisualStudio.Classification
         {
             var match = SpecHeadingRegex.Match(text);
             if (match.Success)
-                return match.Value;
+                return match.Groups["heading"].Value.Trim();
             match = SpecHeadingRegexAlt.Match(text);
-            return match.Success ? match.Value : string.Empty;
+            return match.Success ? match.Groups["heading"].Value.Trim() : string.Empty;
         }
 
         public static IEnumerable<string> GetScenarios(string text)
         {
             var matches = ScenarioHeadingRegex.Matches(text);
-            foreach (Match match in matches)
+            foreach (Capture capture in from Match match in matches from Capture capture in match.Groups["heading"].Captures select capture)
             {
-                yield return match.Value;
+                yield return capture.Value.Trim();
             }
             matches = ScenarioHeadingRegexAlt.Matches(text);
-            foreach (Match match in matches)
+            foreach (Capture capture in from Match match in matches from Capture capture in match.Groups["heading"].Captures select capture)
             {
-                yield return match.Value;
+                yield return capture.Value.Trim();
             }
         }
 
