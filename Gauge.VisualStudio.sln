@@ -9,6 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauge.VisualStudio.Tests", 
 	ProjectSection(ProjectDependencies) = postProject
 		{DC3355B9-8179-48A6-9A01-0E96F2FB842E} = {DC3355B9-8179-48A6-9A01-0E96F2FB842E}
 	EndProjectSection
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GaugeProjectTemplate", "GaugeProjectTemplate\GaugeProjectTemplate.csproj", "{C095C38E-A58F-4E66-8E57-F0A91CCA7974}"
 EndProject
 Global
