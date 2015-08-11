@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using EnvDTE;
 using Gauge.VisualStudio.Classification;
 using Gauge.VisualStudio.Models;
 using Microsoft.VisualStudio;

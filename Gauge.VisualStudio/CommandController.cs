@@ -15,6 +15,7 @@
 using System.ComponentModel.Composition;
 using Gauge.VisualStudio.AutoComplete;
 using Gauge.VisualStudio.GotoDefn;
+using Gauge.VisualStudio.Refactor;
 using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.OLE.Interop;
@@ -53,6 +54,10 @@ namespace Gauge.VisualStudio
                 var gotoDefnCommandFilter = new GotoDefnCommandFilter(view);
                 textViewAdapter.AddCommandFilter(gotoDefnCommandFilter, out next);
                 gotoDefnCommandFilter.Next = next;
+
+                var refactorCommandFilter = new RenameCommandFilter(view);
+                textViewAdapter.AddCommandFilter(refactorCommandFilter, out next);
+                refactorCommandFilter.Next = next;
             }
         }
     }
