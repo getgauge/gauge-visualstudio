@@ -13,6 +13,8 @@
 // limitations under the License.
 
 using System;
+using Gauge.VisualStudio.Classification;
+using Gauge.VisualStudio.UI;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Text.Editor;
@@ -41,7 +43,33 @@ namespace Gauge.VisualStudio.Refactor
 
         public int Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
         {
-            return Next.Exec(pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
+            var hresult = VSConstants.S_OK;
+            switch ((VSConstants.VSStd2KCmdID)nCmdID)
+            {
+                case VSConstants.VSStd2KCmdID.RENAME:
+                    var caretBufferPosition = _view.Caret.Position.BufferPosition;
+                    var originalText = caretBufferPosition.GetContainingLine().GetText();
+                    if (!Parser.StepRegex.IsMatch(originalText))
+                        return hresult;
+
+                    var refactorDialog = new RefactorDialog(originalText);
+                    var showModal = refactorDialog.ShowModal();
+                    if (!showModal.HasValue || !showModal.Value)
+                    {
+                        return hresult;
+                    }
+
+                    var stepText = refactorDialog.StepText;
+
+                    // need to update Gauge.CSharp.Lib
+                    // requires refactoring of Lib
+
+                    return hresult;
+                default:
+                    hresult = Next.Exec(pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
+                    break;
+            }
+            return hresult;
         }
     }
 }

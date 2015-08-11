@@ -14,7 +14,6 @@
 
 using System;
 using Gauge.VisualStudio.Classification;
-using Gauge.VisualStudio.Models;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Text.Editor;
@@ -24,8 +23,6 @@ namespace Gauge.VisualStudio.GotoDefn
 {
     internal sealed class GotoDefnCommandFilter : IOleCommandTarget
     {
-        private readonly Concept _concept = new Concept();
-
         public GotoDefnCommandFilter(IWpfTextView textView)
         {
             TextView = textView;

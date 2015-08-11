@@ -243,6 +243,9 @@
     <Compile Include="TestRunner\TestContainerDiscoverer.cs" />
     <Compile Include="TestRunner\TestDiscoverer.cs" />
     <Compile Include="TestRunner\TestExecutor.cs" />
+    <Compile Include="UI\Refactor.xaml.cs">
+      <DependentUpon>Refactor.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\ClassPicker.xaml.cs">
       <DependentUpon>ClassPicker.xaml</DependentUpon>
     </Compile>
@@ -304,6 +307,10 @@
     </TemplateReference>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="UI\Refactor.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="UI\ClassPicker.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
