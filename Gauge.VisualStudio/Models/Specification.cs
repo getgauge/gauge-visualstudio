@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using main;
+using Gauge.Messages;
 
 namespace Gauge.VisualStudio.Models
 {

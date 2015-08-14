@@ -26,7 +26,7 @@
                 <ColumnDefinition Width="30*"/>
                 <ColumnDefinition Width="30*"/>
             </Grid.ColumnDefinitions>
-            <Button Name="BtnOk" Content="OK" Grid.Column="0" Margin="0,0,5,10" Padding="2" Click="BtnOk_Click" />
+            <Button Name="BtnOk" Content="OK" Grid.Column="0" Margin="0,0,5,10" Padding="2" Click="BtnOk_Click" IsDefault="True"/>
             <Button Name="BtnCancel" Content="Cancel" Grid.Column="1" Margin="5,0,0,10" Padding="2" Click="BtnCancel_Click" />
         </Grid>
     </StackPanel>

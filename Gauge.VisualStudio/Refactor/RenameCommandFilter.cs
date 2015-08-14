@@ -13,11 +13,15 @@
 // limitations under the License.
 
 using System;
+using Gauge.Messages;
 using Gauge.VisualStudio.Classification;
 using Gauge.VisualStudio.UI;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text.Editor;
+using IServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
 
 namespace Gauge.VisualStudio.Refactor
 {
@@ -48,10 +52,11 @@ namespace Gauge.VisualStudio.Refactor
             {
                 case VSConstants.VSStd2KCmdID.RENAME:
                     var caretBufferPosition = _view.Caret.Position.BufferPosition;
-                    var originalText = caretBufferPosition.GetContainingLine().GetText();
-                    if (!Parser.StepRegex.IsMatch(originalText))
+                    var stepText = caretBufferPosition.GetContainingLine().GetText();
+                    if (!Parser.StepRegex.IsMatch(stepText))
                         return hresult;
 
+                    var originalText = stepText.TrimStart('*').Trim();
                     var refactorDialog = new RefactorDialog(originalText);
                     var showModal = refactorDialog.ShowModal();
                     if (!showModal.HasValue || !showModal.Value)
@@ -59,10 +64,40 @@ namespace Gauge.VisualStudio.Refactor
                         return hresult;
                     }
 
-                    var stepText = refactorDialog.StepText;
+                    var newText = refactorDialog.StepText;
+                    var progressDialog = CreateProgressDialog();
+                    var serviceProvider = Package.GetGlobalService(typeof (IServiceProvider)) as IServiceProvider;
+                    var runningDocumentTable = new RunningDocumentTable(new ServiceProvider(serviceProvider));
+                    var startWaitDialog = progressDialog.StartWaitDialog("Gauge - Renaming",
+                        string.Format("Original: {0}", originalText), string.Format("To: {0}", newText), null,
+                        "Refactoring Step", 0, false, true);
+                    if (startWaitDialog == VSConstants.S_OK)
+                    {
+                        GaugeDTEProvider.DTE.UndoContext.Open("GaugeRefactoring");
+                        var performRefactoringRequest = PerformRefactoringRequest
+                            .CreateBuilder()
+                            .SetNewStep(newText)
+                            .SetOldStep(originalText)
+                            .Build();
+                        var apiConnection = GaugeDTEProvider.GetApiConnectionForActiveDocument();
+                        var apiMessage = APIMessage.CreateBuilder()
+                            .SetPerformRefactoringRequest(performRefactoringRequest)
+                            .SetMessageType(APIMessage.Types.APIMessageType.PerformRefactoringRequest)
+                            .SetMessageId(7)
+                            .Build();
+                        var response = apiConnection.WriteAndReadApiMessage(apiMessage);
+                        int cancelled;
+                        progressDialog.EndWaitDialog(out cancelled);
 
-                    // need to update Gauge.CSharp.Lib
-                    // requires refactoring of Lib
+                        var vsPersistDocData = runningDocumentTable.FindDocument(GaugeDTEProvider.DTE.ActiveDocument.FullName) as IVsPersistDocData;
+                        if (vsPersistDocData!=null)
+                        {
+                            vsPersistDocData.ReloadDocData((uint) _VSRELOADDOCDATA.RDD_IgnoreNextFileChange);
+                        }
+                        GaugeDTEProvider.DTE.UndoContext.Close();
+                        if (!response.PerformRefactoringResponse.Success)
+                            return VSConstants.S_FALSE;
+                    }
 
                     return hresult;
                 default:
@@ -70,6 +105,16 @@ namespace Gauge.VisualStudio.Refactor
                     break;
             }
             return hresult;
+        }
+
+        private static IVsThreadedWaitDialog2 CreateProgressDialog()
+        {
+            IVsThreadedWaitDialog2 dialog;
+            var oleServiceProvider = Package.GetGlobalService(typeof (IServiceProvider)) as IServiceProvider;
+            var dialogFactory = new ServiceProvider(oleServiceProvider)
+                .GetService(typeof (SVsThreadedWaitDialogFactory)) as IVsThreadedWaitDialogFactory;
+            dialogFactory.CreateInstance(out dialog);
+            return dialog;
         }
     }
 }

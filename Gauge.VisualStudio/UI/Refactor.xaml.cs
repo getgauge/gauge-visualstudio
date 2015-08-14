@@ -24,6 +24,7 @@ namespace Gauge.VisualStudio.UI
         {
             InitializeComponent();
             StepTextBox.Text = stepText;
+            StepTextBox.Focus();
             StepTextBox.SelectAll();
             WindowStartupLocation=WindowStartupLocation.CenterScreen;
         }
@@ -31,7 +32,7 @@ namespace Gauge.VisualStudio.UI
         private void BtnOk_Click(object sender, RoutedEventArgs e)
         {
             StepText=StepTextBox.Text;
-            Close();
+            DialogResult = true;
         }
 
         private void BtnCancel_Click(object sender, RoutedEventArgs e)

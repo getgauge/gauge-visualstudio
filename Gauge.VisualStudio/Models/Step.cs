@@ -16,7 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using main;
+using Gauge.Messages;
 using Microsoft.VisualStudio.Text;
 
 namespace Gauge.VisualStudio.Models

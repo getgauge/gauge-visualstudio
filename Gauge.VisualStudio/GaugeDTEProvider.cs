@@ -22,7 +22,7 @@ using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
 using EnvDTE;
-using Gauge.CSharp.Lib;
+using Gauge.CSharp.Core;
 using Gauge.VisualStudio.Extensions;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
