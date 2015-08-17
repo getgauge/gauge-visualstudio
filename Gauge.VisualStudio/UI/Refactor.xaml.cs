@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Windows;
+using System.Windows.Input;
 
 namespace Gauge.VisualStudio.UI
 {
@@ -38,6 +39,14 @@ namespace Gauge.VisualStudio.UI
         private void BtnCancel_Click(object sender, RoutedEventArgs e)
         {
             Close();
+        }
+
+        private void RefactorDialog_OnKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key==Key.Escape)
+            {
+                DialogResult = false;
+            }
         }
     }
 }
