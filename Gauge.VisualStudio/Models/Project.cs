@@ -56,6 +56,15 @@ namespace Gauge.VisualStudio.Models
             _implementations = GetGaugeImplementations(element.ProjectItem.ContainingProject);
         }
 
+        internal static void RefreshImplementationsForActiveProject()
+        {
+            var activeDocument = GaugeDTEProvider.DTE.ActiveDocument;
+            if (activeDocument!=null)
+            {
+                _implementations = GetGaugeImplementations(activeDocument.ProjectItem.ContainingProject);
+            }
+        }
+
         private static List<Implementation> GetGaugeImplementations(EnvDTE.Project containingProject = null)
         {
             containingProject = containingProject ?? GaugeDTEProvider.DTE.ActiveDocument.ProjectItem.ContainingProject;

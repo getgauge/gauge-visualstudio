@@ -74,7 +74,8 @@ namespace Gauge.VisualStudio.Refactor
                         "Refactoring Step", 0, false, true);
                     if (startWaitDialog == VSConstants.S_OK)
                     {
-                        GaugeDTEProvider.DTE.UndoContext.Open("GaugeRefactoring");
+                        var undoContext = GaugeDTEProvider.DTE.UndoContext;
+                        undoContext.Open("GaugeRefactoring");
                         try
                         {
                             var response = RefactorUsingGaugeDaemon(newText, originalText);
@@ -83,12 +84,13 @@ namespace Gauge.VisualStudio.Refactor
                                 return VSConstants.S_FALSE;
 
                             ReloadChangedDocuments(response);
+                            Models.Project.RefreshImplementationsForActiveProject();
                         }
                         finally
                         {
                             int cancelled;
                             progressDialog.EndWaitDialog(out cancelled);
-                            GaugeDTEProvider.DTE.UndoContext.Close();
+                            undoContext.Close();
                         }
                     }
                     return hresult;
