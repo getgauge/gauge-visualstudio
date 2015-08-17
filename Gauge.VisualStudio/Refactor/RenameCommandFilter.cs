@@ -51,12 +51,15 @@ namespace Gauge.VisualStudio.Refactor
             switch ((VSConstants.VSStd2KCmdID)nCmdID)
             {
                 case VSConstants.VSStd2KCmdID.RENAME:
+
                     var caretBufferPosition = _view.Caret.Position.BufferPosition;
-                    var stepText = caretBufferPosition.GetContainingLine().GetText();
-                    if (!Parser.StepRegex.IsMatch(stepText))
+                    var currentLine = caretBufferPosition.GetContainingLine();
+                    var lineText = currentLine.GetText();
+                    if (!Parser.StepRegex.IsMatch(lineText))
                         return hresult;
 
-                    var originalText = stepText.TrimStart('*').Trim();
+                    var originalText = Models.Step.GetStepText(currentLine);
+
                     var refactorDialog = new RefactorDialog(originalText);
                     var showModal = refactorDialog.ShowModal();
                     if (!showModal.HasValue || !showModal.Value)
@@ -66,8 +69,6 @@ namespace Gauge.VisualStudio.Refactor
 
                     var newText = refactorDialog.StepText;
                     var progressDialog = CreateProgressDialog();
-                    var serviceProvider = Package.GetGlobalService(typeof (IServiceProvider)) as IServiceProvider;
-                    var runningDocumentTable = new RunningDocumentTable(new ServiceProvider(serviceProvider));
                     var startWaitDialog = progressDialog.StartWaitDialog("Gauge - Renaming",
                         string.Format("Original: {0}", originalText), string.Format("To: {0}", newText), null,
                         "Refactoring Step", 0, false, true);
@@ -76,30 +77,12 @@ namespace Gauge.VisualStudio.Refactor
                         GaugeDTEProvider.DTE.UndoContext.Open("GaugeRefactoring");
                         try
                         {
-                            var performRefactoringRequest = PerformRefactoringRequest
-                                .CreateBuilder()
-                                .SetNewStep(newText)
-                                .SetOldStep(originalText)
-                                .Build();
-                            var apiConnection = GaugeDTEProvider.GetApiConnectionForActiveDocument();
-                            var apiMessage = APIMessage.CreateBuilder()
-                                .SetPerformRefactoringRequest(performRefactoringRequest)
-                                .SetMessageType(APIMessage.Types.APIMessageType.PerformRefactoringRequest)
-                                .SetMessageId(7)
-                                .Build();
-                            var response = apiConnection.WriteAndReadApiMessage(apiMessage);
+                            var response = RefactorUsingGaugeDaemon(newText, originalText);
 
                             if (!response.PerformRefactoringResponse.Success)
                                 return VSConstants.S_FALSE;
 
-                            foreach (var file in response.PerformRefactoringResponse.FilesChangedList)
-                            {
-                                var vsPersistDocData = runningDocumentTable.FindDocument(file) as IVsPersistDocData;
-                                if (vsPersistDocData != null)
-                                {
-                                    vsPersistDocData.ReloadDocData((uint)_VSRELOADDOCDATA.RDD_IgnoreNextFileChange);
-                                }
-                            }
+                            ReloadChangedDocuments(response);
                         }
                         finally
                         {
@@ -114,6 +97,38 @@ namespace Gauge.VisualStudio.Refactor
                     break;
             }
             return hresult;
+        }
+
+        private static APIMessage RefactorUsingGaugeDaemon(string newText, string originalText)
+        {
+            var performRefactoringRequest = PerformRefactoringRequest
+                .CreateBuilder()
+                .SetNewStep(newText)
+                .SetOldStep(originalText)
+                .Build();
+            var apiConnection = GaugeDTEProvider.GetApiConnectionForActiveDocument();
+            var apiMessage = APIMessage.CreateBuilder()
+                .SetPerformRefactoringRequest(performRefactoringRequest)
+                .SetMessageType(APIMessage.Types.APIMessageType.PerformRefactoringRequest)
+                .SetMessageId(7)
+                .Build();
+            var response = apiConnection.WriteAndReadApiMessage(apiMessage);
+            return response;
+        }
+
+        private static void ReloadChangedDocuments(APIMessage response)
+        {
+            var serviceProvider = Package.GetGlobalService(typeof(IServiceProvider)) as IServiceProvider;
+            var runningDocumentTable = new RunningDocumentTable(new ServiceProvider(serviceProvider));
+
+            foreach (var file in response.PerformRefactoringResponse.FilesChangedList)
+            {
+                var vsPersistDocData = runningDocumentTable.FindDocument(file) as IVsPersistDocData;
+                if (vsPersistDocData != null)
+                {
+                    vsPersistDocData.ReloadDocData((uint) _VSRELOADDOCDATA.RDD_IgnoreNextFileChange);
+                }
+            }
         }
 
         private static IVsThreadedWaitDialog2 CreateProgressDialog()
