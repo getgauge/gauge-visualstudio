@@ -19,6 +19,7 @@ using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using EnvDTE80;
+using Gauge.VisualStudio.Loggers;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;

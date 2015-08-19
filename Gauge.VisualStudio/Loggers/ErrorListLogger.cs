@@ -15,7 +15,7 @@
 using System;
 using Microsoft.VisualStudio.Shell;
 
-namespace Gauge.VisualStudio
+namespace Gauge.VisualStudio.Loggers
 {
     internal static class ErrorListLogger
     {
