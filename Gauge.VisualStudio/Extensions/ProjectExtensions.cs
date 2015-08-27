@@ -14,6 +14,8 @@
 
 using System.IO;
 using EnvDTE;
+using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Shell.Interop;
 
 namespace Gauge.VisualStudio.Extensions
 {
@@ -31,6 +33,14 @@ namespace Gauge.VisualStudio.Extensions
             var specsDirExists= Directory.Exists(Path.Combine(directoryName, "specs"));
 
             return specsDirExists && manifestExists;
+        }
+
+        public static Project ToProject(this IVsHierarchy hierarchy)
+        {
+            object objProj;
+            hierarchy.GetProperty(VSConstants.VSITEMID_ROOT, (int)__VSHPROPID.VSHPROPID_ExtObject, out objProj);
+
+            return objProj as Project;
         }
     }
 }

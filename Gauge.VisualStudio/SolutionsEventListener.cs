@@ -21,7 +21,7 @@ namespace Gauge.VisualStudio
     public class SolutionsEventListener : IVsSolutionEvents    {
         public int OnAfterOpenProject(IVsHierarchy pHierarchy, int fAdded)
         {
-            var project = pHierarchy.GetProjectFromHierarchy();
+            var project = pHierarchy.ToProject();
 
             if (!project.IsGaugeProject())
                 return VSConstants.S_OK;
@@ -43,7 +43,7 @@ namespace Gauge.VisualStudio
 
         public int OnBeforeCloseProject(IVsHierarchy pHierarchy, int fRemoved)
         {
-            var project = pHierarchy.GetProjectFromHierarchy();
+            var project = pHierarchy.ToProject();
             var slugifiedName = project.SlugifiedName();
 
             GaugeDaemonHelper.KillChildProcess(slugifiedName);
