@@ -120,7 +120,7 @@ namespace Gauge.VisualStudio.Highlighting
                 }
 
                 targetClass.ProjectItem.Save();
-                Project.RefreshImplementations(targetClass as CodeElement);
+                Project.RefreshImplementations(targetClass.ProjectItem);
                 Project.NavigateToFunction(implementationFunction);
                 _unimplementedStepTagger.MarkTagImplemented(_span);
                 _enabled = false;

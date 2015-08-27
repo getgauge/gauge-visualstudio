@@ -28,11 +28,18 @@ namespace Gauge.VisualStudio.Extensions
 
         public static bool IsGaugeProject(this Project project)
         {
-            var directoryName = Path.GetDirectoryName(project.FileName);
-            var manifestExists = File.Exists(Path.Combine(directoryName, "manifest.json"));
-            var specsDirExists= Directory.Exists(Path.Combine(directoryName, "specs"));
+            try
+            {
+                var directoryName = Path.GetDirectoryName(project.FileName);
+                var manifestExists = File.Exists(Path.Combine(directoryName, "manifest.json"));
+                var specsDirExists = Directory.Exists(Path.Combine(directoryName, "specs"));
 
-            return specsDirExists && manifestExists;
+                return specsDirExists && manifestExists;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public static Project ToProject(this IVsHierarchy hierarchy)

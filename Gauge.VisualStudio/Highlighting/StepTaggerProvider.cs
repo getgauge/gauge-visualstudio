@@ -15,6 +15,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
+using EnvDTE;
 using EnvDTE80;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
@@ -32,6 +33,8 @@ namespace Gauge.VisualStudio.Highlighting
         private readonly Dictionary<ITextView, UnimplementedStepTagger> _taggers = new Dictionary<ITextView, UnimplementedStepTagger>();
         private readonly Events2 _events2;
         private CodeModelEvents _codeModelEvents;
+        private ProjectItemsEvents _projectItemsEvents;
+        private DocumentEvents _documentEvents;
 
         public StepTaggerProvider()
         {
@@ -39,10 +42,18 @@ namespace Gauge.VisualStudio.Highlighting
 
             _events2 = GaugePackage.DTE.Events as Events2;
             _codeModelEvents = _events2.CodeModelEvents;
+            _projectItemsEvents = _events2.ProjectItemsEvents;
+            _documentEvents = _events2.DocumentEvents;
 
             _codeModelEvents.ElementAdded += element => RefreshUsages();
             _codeModelEvents.ElementChanged += (element, change) => RefreshUsages();
             _codeModelEvents.ElementDeleted += (parent, element) => RefreshUsages();
+
+            _projectItemsEvents.ItemAdded += item => RefreshUsages();
+            _projectItemsEvents.ItemRemoved += item => RefreshUsages();
+            _projectItemsEvents.ItemRenamed += (item, name) => RefreshUsages();
+
+            _documentEvents.DocumentSaved += document => RefreshUsages();
         }
 
         public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag

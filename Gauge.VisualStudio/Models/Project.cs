@@ -32,6 +32,8 @@ namespace Gauge.VisualStudio.Models
         private static Events2 _events2;
         private static CodeModelEvents _codeModelEvents;
         private static List<Implementation> _implementations;
+        private static DocumentEvents _documentEvents;
+        private ProjectItemsEvents _projectItemsEvents;
 
         public Project()
         {
@@ -41,19 +43,25 @@ namespace Gauge.VisualStudio.Models
             _events2 = GaugePackage.DTE.Events as Events2;
             _codeModelEvents = _events2.CodeModelEvents;
 
-            _codeModelEvents.ElementAdded += RefreshImplementations;
-            _codeModelEvents.ElementChanged += (element, change) => RefreshImplementations(element);
-            _codeModelEvents.ElementDeleted += (parent, element) => RefreshImplementations(element);
+            _projectItemsEvents = _events2.ProjectItemsEvents;
+            _documentEvents = _events2.DocumentEvents;
+            _documentEvents.DocumentSaved += document => RefreshImplementations(document.ProjectItem);
+            _projectItemsEvents.ItemAdded += RefreshImplementations;
+            _projectItemsEvents.ItemRemoved += RefreshImplementations;
+            _projectItemsEvents.ItemRenamed += (item, name) => RefreshImplementations(item);
+            _codeModelEvents.ElementAdded += element => RefreshImplementations(element.ProjectItem);
+            _codeModelEvents.ElementChanged += (element, change) => RefreshImplementations(element.ProjectItem);
+            _codeModelEvents.ElementDeleted += (parent, element) => RefreshImplementations(element.ProjectItem);
+        }
+
+        internal static void RefreshImplementations(ProjectItem projectItem)
+        {
+            _implementations = GetGaugeImplementations(projectItem.ContainingProject);
         }
 
         internal IEnumerable<Implementation> Implementations
         {
             get { return _implementations; }
-        }
-
-        internal static void RefreshImplementations(CodeElement element)
-        {
-            _implementations = GetGaugeImplementations(element.ProjectItem.ContainingProject);
         }
 
         internal static void RefreshImplementationsForActiveProject()
