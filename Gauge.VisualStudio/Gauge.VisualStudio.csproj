@@ -220,7 +220,7 @@
     <Compile Include="Extensions\DocumentExtensions.cs" />
     <Compile Include="Extensions\ProjectExtensions.cs" />
     <Compile Include="GaugeContentTypeDefinitions.cs" />
-    <Compile Include="GaugeDTEProvider.cs" />
+    <Compile Include="GaugeClassifierProvider.cs" />
     <Compile Include="GotoDefn\GotoDefnCommandFilter.cs" />
     <Compile Include="Guids.cs" />
     <Compile Include="Highlighting\ImplementStepAction.cs" />

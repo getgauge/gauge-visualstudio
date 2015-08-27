@@ -13,16 +13,13 @@
 // limitations under the License.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Linq;
 using EnvDTE;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Utilities;
-using VSLangProj;
 
 namespace Gauge.VisualStudio
 {
@@ -30,7 +27,7 @@ namespace Gauge.VisualStudio
     [Export(typeof(IClassifierProvider))]
     [Order(Before = "default")]
     [ContentType(GaugeContentTypeDefinitions.GaugeContentType)]
-    internal class GaugeDTEProvider : IClassifierProvider
+    internal class GaugeClassifierProvider : IClassifierProvider
     {
         [Import(typeof(SVsServiceProvider))]
         internal IServiceProvider ServiceProvider = null;
@@ -40,37 +37,6 @@ namespace Gauge.VisualStudio
         public IClassifier GetClassifier(ITextBuffer buffer)
         {
             return null;
-        }
-
-        public static IEnumerable<VSProject> GetGaugeProjects(IServiceProvider service)
-        {
-            var projects = GaugePackage.DTE.Solution.Projects;
-            for (var i = 1; i <= projects.Count; i++)
-            {
-                var vsProject = projects.Item(i).Object as VSProject;
-                if (vsProject == null || vsProject.References.Find("Gauge.CSharp.Lib") == null) continue;
-                yield return vsProject;
-            }
-        }
-
-        public static IEnumerable<string> GetAllSpecs(IServiceProvider service)
-        {
-            var specs = new List<string>();
-            foreach (var gaugeProject in GetGaugeProjects(service))
-                specs.AddRange(ScanProject(gaugeProject.Project.ProjectItems));
-
-            return specs.Where(s => s.EndsWith(".spec") | s.EndsWith(".md"));
-        }
-
-        private static IEnumerable<string> ScanProject(IEnumerable projectItems)
-        {
-            foreach (ProjectItem item in projectItems)
-            {
-                yield return item.FileNames[0];
-
-                foreach (var childItem in ScanProject(item.ProjectItems))
-                    yield return childItem;
-            }
         }
     }
 }

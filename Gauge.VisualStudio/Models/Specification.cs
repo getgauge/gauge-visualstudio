@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Gauge.Messages;
 
 namespace Gauge.VisualStudio.Models
 {
     public class Specification
     {
-        public static List<ProtoSpec> GetAllSpecsFromGauge()
+        public static IEnumerable<string> GetAllSpecsFromGauge()
         {
             var specifications = new List<ProtoSpec>();
             foreach (var apiConnection in GaugeDaemonHelper.GetAllApiConnections())
@@ -21,7 +22,7 @@ namespace Gauge.VisualStudio.Models
                 specifications.AddRange(bytes.AllSpecsResponse.SpecsList);
             }
 
-            return specifications;
+            return specifications.Select(spec => spec.FileName);
         }
     }
 }

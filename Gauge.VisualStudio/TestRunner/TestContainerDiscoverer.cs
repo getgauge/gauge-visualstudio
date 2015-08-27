@@ -17,6 +17,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Threading.Tasks;
+using Gauge.VisualStudio.Models;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.TestWindow.Extensibility;
 
@@ -45,8 +46,7 @@ namespace Gauge.VisualStudio.TestRunner
             get
             {
                 var testContainers = new ConcurrentBag<TestContainer>();
-                //This should be changed with an API call to get all specs Specification.GetAllSpecsFromGauge()
-                var specs = GaugeDTEProvider.GetAllSpecs(_serviceProvider);
+                var specs = Specification.GetAllSpecsFromGauge();
                 Parallel.ForEach(specs, s => testContainers.Add(new TestContainer(this, s)));
                 return testContainers;
             }
