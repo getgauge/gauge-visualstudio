@@ -6,7 +6,7 @@ namespace Gauge.VisualStudio.Loggers
     {
         internal static void Log(string message)
         {
-            var statusBar = GaugeDTEProvider.DTE.StatusBar;
+            var statusBar = GaugePackage.DTE.StatusBar;
             statusBar.Text = message;
             statusBar.Highlight(true);
             Console.WriteLine(message);

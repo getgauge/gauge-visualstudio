@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.IO;
 using EnvDTE;
 
 namespace Gauge.VisualStudio.Extensions
@@ -21,6 +22,15 @@ namespace Gauge.VisualStudio.Extensions
         public static string SlugifiedName(this Project project)
         {
             return project.Name.Replace('.', '_');
+        }
+
+        public static bool IsGaugeProject(this Project project)
+        {
+            var directoryName = Path.GetDirectoryName(project.FileName);
+            var manifestExists = File.Exists(Path.Combine(directoryName, "manifest.json"));
+            var specsDirExists= Directory.Exists(Path.Combine(directoryName, "specs"));
+
+            return specsDirExists && manifestExists;
         }
     }
 }

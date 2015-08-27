@@ -1,0 +1,113 @@
+// Copyright [2014, 2015] [ThoughtWorks Inc.](www.thoughtworks.com)
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Net.NetworkInformation;
+using EnvDTE;
+using Gauge.CSharp.Core;
+using Gauge.VisualStudio.Exceptions;
+using Gauge.VisualStudio.Extensions;
+using Gauge.VisualStudio.Loggers;
+using Process = System.Diagnostics.Process;
+
+namespace Gauge.VisualStudio
+{
+    public class GaugeDaemonHelper
+    {
+        internal static readonly Dictionary<string, GaugeApiConnection> ApiConnections = new Dictionary<string, GaugeApiConnection>();
+
+        internal static readonly Dictionary<string, Process> ChildProcesses = new Dictionary<string, Process>();
+
+        public static GaugeApiConnection GetApiConnectionForActiveDocument()
+        {
+            return GetApiConnectionFor(GaugePackage.DTE.ActiveDocument.ProjectItem.ContainingProject);
+        }
+
+        public static List<GaugeApiConnection> GetAllApiConnections()
+        {
+            return ApiConnections.Values.ToList();
+        }
+
+        internal static GaugeApiConnection StartGaugeAsDaemon(Project gaugeProject)
+        {
+            var openPort = GetOpenPort();
+            var gaugeStartInfo = new ProcessStartInfo
+            {
+                WorkingDirectory = Path.GetDirectoryName(gaugeProject.FullName),
+                UseShellExecute = false,
+                FileName = "gauge.exe",
+                CreateNoWindow = true,
+                Arguments = String.Format("--daemonize")
+            };
+
+            gaugeStartInfo.EnvironmentVariables["GAUGE_API_PORT"] = openPort.ToString(CultureInfo.InvariantCulture);
+
+            var gaugeProcess = new Process
+            {
+                StartInfo = gaugeStartInfo
+            };
+            if (gaugeProcess.Start())
+                ChildProcesses.Add(gaugeProject.SlugifiedName(), gaugeProcess);
+
+            return new GaugeApiConnection(new TcpClientWrapper(openPort));
+        }
+
+        public static GaugeApiConnection GetApiConnectionFor(Project project)
+        {
+            GaugeApiConnection apiConnection;
+            if (ApiConnections.TryGetValue(project.SlugifiedName(), out apiConnection))
+                return apiConnection;
+            ErrorListLogger.AddError(String.Format("Gauge API not initialized for project: {0}", project.FullName));
+            throw new GaugeApiInitializationException();
+        }
+
+        private static int GetOpenPort()
+        {
+            const int scanStart = 1000;
+            const int scanEnd = 2000;
+            var properties = IPGlobalProperties.GetIPGlobalProperties();
+            var tcpEndPoints = properties.GetActiveTcpListeners();
+
+            var portsInUse = tcpEndPoints.Select(p => p.Port).ToList();
+            var unusedPort = 0;
+
+            for (var port = scanStart; port < scanEnd; port++)
+            {
+                if (portsInUse.Contains(port)) continue;
+                unusedPort = port;
+                break;
+            }
+            return unusedPort;
+        }
+
+        public static void KillChildProcess(string slugifiedName)
+        {
+            if (ApiConnections.ContainsKey(slugifiedName))
+            {
+                ApiConnections[slugifiedName].Dispose();
+                ApiConnections.Remove(slugifiedName);
+            }
+            if (ChildProcesses.ContainsKey(slugifiedName))
+            {
+                ChildProcesses[slugifiedName].Kill();
+                ChildProcesses.Remove(slugifiedName);
+            }
+        }
+    }
+}

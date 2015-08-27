@@ -18,11 +18,13 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
+using EnvDTE;
 using EnvDTE80;
 using Gauge.VisualStudio.Loggers;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using Process = System.Diagnostics.Process;
 
 namespace Gauge.VisualStudio
 {
@@ -33,13 +35,21 @@ namespace Gauge.VisualStudio
     [ProvideMenuResource("Menus.ctmenu", 1)]
     public sealed class GaugePackage : Package
     {
-        private Events2 _dteEvents;
+        private Events2 _DTEEvents;
+        private IVsSolution _solution;
+        private readonly SolutionsEventListener _solutionsEventListener = new SolutionsEventListener();
+        private uint _solutionCookie;
 
         protected override void Initialize()
         {
             Debug.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", ToString()));
             ErrorListLogger.Initialize(this);
-              
+
+            DTE = (DTE) GetService(typeof (DTE));
+
+            _solution = GetService(typeof(SVsSolution)) as IVsSolution;
+            _solution.AdviseSolutionEvents(_solutionsEventListener, out _solutionCookie);
+
             // Add our command handlers for menu (commands must exist in the .vsct file)
             var mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
             if (null != mcs)
@@ -50,38 +60,40 @@ namespace Gauge.VisualStudio
                 {
                     var menuCommand = sender as OleMenuCommand;
 
-                    if (menuCommand != null)
-                    {
-                        menuCommand.Visible = false;
-                        menuCommand.Enabled = false;
+                    if (menuCommand == null) return;
 
-                        string itemFullPath;
+                    menuCommand.Visible = false;
+                    menuCommand.Enabled = false;
 
-                        IVsHierarchy hierarchy;
-                        uint itemid;
+                    string itemFullPath;
 
-                        if (!IsSingleProjectItemSelection(out hierarchy, out itemid)) return;
+                    IVsHierarchy hierarchy;
+                    uint itemid;
 
-                        ((IVsProject)hierarchy).GetMkDocument(itemid, out itemFullPath);
-                        var transformFileInfo = new FileInfo(itemFullPath);
+                    if (!IsSingleProjectItemSelection(out hierarchy, out itemid)) return;
 
-                        var isGaugeFile =
-                            string.Compare(".spec", transformFileInfo.Extension, StringComparison.OrdinalIgnoreCase) ==
-                            0;
-                        if (transformFileInfo.Directory == null) return;
+                    ((IVsProject)hierarchy).GetMkDocument(itemid, out itemFullPath);
+                    var transformFileInfo = new FileInfo(itemFullPath);
 
-                        if (!isGaugeFile) return;
+                    var isGaugeFile =
+                        string.Compare(".spec", transformFileInfo.Extension, StringComparison.OrdinalIgnoreCase) ==
+                        0;
+                    if (transformFileInfo.Directory == null) return;
 
-                        menuCommand.Visible = true;
-                        menuCommand.Enabled = true;
-                    }
+                    if (!isGaugeFile) return;
+
+                    menuCommand.Visible = true;
+                    menuCommand.Enabled = true;
                 };
                 mcs.AddCommand(menuItem);
             }
             base.Initialize();
         }
 
-        private void MenuItemCallback(object sender, EventArgs e)
+        public static DTE DTE { get; private set; }
+
+        //TODO : Move to a separate class
+        private static void MenuItemCallback(object sender, EventArgs e)
         {
             string itemFullPath;
 

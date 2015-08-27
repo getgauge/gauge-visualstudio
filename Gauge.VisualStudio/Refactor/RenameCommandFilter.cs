@@ -74,7 +74,7 @@ namespace Gauge.VisualStudio.Refactor
                         "Refactoring Step", 0, false, true);
                     if (startWaitDialog == VSConstants.S_OK)
                     {
-                        var undoContext = GaugeDTEProvider.DTE.UndoContext;
+                        var undoContext = GaugePackage.DTE.UndoContext;
                         undoContext.Open("GaugeRefactoring");
                         try
                         {
@@ -108,7 +108,7 @@ namespace Gauge.VisualStudio.Refactor
                 .SetNewStep(newText)
                 .SetOldStep(originalText)
                 .Build();
-            var apiConnection = GaugeDTEProvider.GetApiConnectionForActiveDocument();
+            var apiConnection = GaugeDaemonHelper.GetApiConnectionForActiveDocument();
             var apiMessage = APIMessage.CreateBuilder()
                 .SetPerformRefactoringRequest(performRefactoringRequest)
                 .SetMessageType(APIMessage.Types.APIMessageType.PerformRefactoringRequest)

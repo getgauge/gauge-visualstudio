@@ -37,7 +37,7 @@ namespace Gauge.VisualStudio.Highlighting
         {
             if (_events2 != null) return;
 
-            _events2 = GaugeDTEProvider.DTE.Events as Events2;
+            _events2 = GaugePackage.DTE.Events as Events2;
             _codeModelEvents = _events2.CodeModelEvents;
 
             _codeModelEvents.ElementAdded += element => RefreshUsages();

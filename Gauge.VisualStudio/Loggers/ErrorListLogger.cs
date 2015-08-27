@@ -24,7 +24,6 @@ namespace Gauge.VisualStudio.Loggers
         public static void Initialize(IServiceProvider serviceProvider)
         {
             if (_errorListProvider != null) return;
-            Console.WriteLine("*** Initialized error list provider");
             _errorListProvider = new ErrorListProvider(serviceProvider);
         }
 

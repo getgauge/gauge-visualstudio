@@ -8,7 +8,7 @@ namespace Gauge.VisualStudio.Models
         public static List<ProtoSpec> GetAllSpecsFromGauge()
         {
             var specifications = new List<ProtoSpec>();
-            foreach (var apiConnection in GaugeDTEProvider.GetAllApiConnections())
+            foreach (var apiConnection in GaugeDaemonHelper.GetAllApiConnections())
             {
                 var specsRequest = GetAllSpecsRequest.DefaultInstance;
                 var apiMessage = APIMessage.CreateBuilder()

@@ -12,29 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using EnvDTE;
+using System;
 
-namespace Gauge.VisualStudio.Models
+namespace Gauge.VisualStudio.Exceptions
 {
-    class ConceptImplementation : Implementation
+    internal class GaugeApiInitializationException : Exception
     {
-        private readonly Concept _concept;
+        private const string ErrorMessage = "Failed to initialize Gauge API";
 
-        public ConceptImplementation(Concept concept)
+        public GaugeApiInitializationException() : base(ErrorMessage)
         {
-            _concept = concept;
-            StepText = _concept.StepValue;
-        }
-
-        public override void NavigateToImplementation()
-        {
-            var dte = GaugePackage.DTE;
-            var window = dte.ItemOperations.OpenFile(_concept.FilePath);
-            window.Activate();
-
-            var textSelection = window.Selection as TextSelection;
-            if (textSelection != null)
-                textSelection.MoveTo(_concept.LineNumber, 0);
+            
         }
     }
 }

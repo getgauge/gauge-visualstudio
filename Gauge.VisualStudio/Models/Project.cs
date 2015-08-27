@@ -38,7 +38,7 @@ namespace Gauge.VisualStudio.Models
             _implementations = GetGaugeImplementations();
             if (_events2 != null) return;
 
-            _events2 = GaugeDTEProvider.DTE.Events as Events2;
+            _events2 = GaugePackage.DTE.Events as Events2;
             _codeModelEvents = _events2.CodeModelEvents;
 
             _codeModelEvents.ElementAdded += RefreshImplementations;
@@ -58,7 +58,7 @@ namespace Gauge.VisualStudio.Models
 
         internal static void RefreshImplementationsForActiveProject()
         {
-            var activeDocument = GaugeDTEProvider.DTE.ActiveDocument;
+            var activeDocument = GaugePackage.DTE.ActiveDocument;
             if (activeDocument!=null)
             {
                 _implementations = GetGaugeImplementations(activeDocument.ProjectItem.ContainingProject);
@@ -67,7 +67,7 @@ namespace Gauge.VisualStudio.Models
 
         private static List<Implementation> GetGaugeImplementations(EnvDTE.Project containingProject = null)
         {
-            containingProject = containingProject ?? GaugeDTEProvider.DTE.ActiveDocument.ProjectItem.ContainingProject;
+            containingProject = containingProject ?? GaugePackage.DTE.ActiveDocument.ProjectItem.ContainingProject;
             var allClasses = GetAllClasses(containingProject);
 
             var gaugeImplementations = new List<Implementation>();
@@ -93,7 +93,7 @@ namespace Gauge.VisualStudio.Models
                     var allAttributes = GetCodeElementsFor(function.Attributes, vsCMElement.vsCMElementAttribute);
 
                     var attribute =
-                        allAttributes.FirstOrDefault(a => a.FullName == typeof (CSharp.Lib.Attribute.Step).FullName) as
+                        allAttributes.FirstOrDefault(a => a.Name == "Step") as
                             CodeAttribute;
                     if (attribute != null)
                         gaugeImplementations.Add(new StepImplementation(function, attribute.Value.Trim('"')));
@@ -117,7 +117,7 @@ namespace Gauge.VisualStudio.Models
 
         internal static IEnumerable<CodeElement> GetAllClasses(EnvDTE.Project containingProject = null)
         {
-            containingProject = containingProject ?? GaugeDTEProvider.DTE.ActiveDocument.ProjectItem.ContainingProject;
+            containingProject = containingProject ?? GaugePackage.DTE.ActiveDocument.ProjectItem.ContainingProject;
 
             return containingProject.CodeModel == null
                 ? Enumerable.Empty<CodeElement>()
@@ -131,7 +131,7 @@ namespace Gauge.VisualStudio.Models
         }
         private static CodeClass AddClass(string className, EnvDTE.Project project = null)
         {
-            project = project ?? GaugeDTEProvider.DTE.ActiveDocument.ProjectItem.ContainingProject;
+            project = project ?? GaugePackage.DTE.ActiveDocument.ProjectItem.ContainingProject;
 
             var codeDomProvider = CodeDomProvider.CreateProvider("CSharp");
 

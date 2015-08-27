@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Gauge.Messages;
+using Gauge.VisualStudio.Exceptions;
 using Microsoft.VisualStudio.Text;
 
 namespace Gauge.VisualStudio.Models
@@ -41,12 +42,13 @@ namespace Gauge.VisualStudio.Models
 
         public string GetParameterizedStepValue(ITextSnapshotLine input)
         {
-            return GetStepValueFromInput(GetStepText(input)).ParameterizedStepValue;
+            var stepValueFromInput = GetStepValueFromInput(GetStepText(input));
+            return stepValueFromInput == null ? string.Empty : stepValueFromInput.ParameterizedStepValue;
         }
 
         private static EnvDTE.Project ActiveProject
         {
-            get { return GaugeDTEProvider.DTE.ActiveDocument.ProjectItem.ContainingProject; }
+            get { return GaugePackage.DTE.ActiveDocument.ProjectItem.ContainingProject; }
         }
 
         public static string GetStepText(ITextSnapshotLine line)
@@ -67,18 +69,26 @@ namespace Gauge.VisualStudio.Models
             return tableRegex.IsMatch(nextLineText);
         }
 
-        private static IList<ProtoStepValue> GetAllStepsFromGauge(EnvDTE.Project project)
+        private static IEnumerable<ProtoStepValue> GetAllStepsFromGauge(EnvDTE.Project project)
         {
-            var gaugeApiConnection = GaugeDTEProvider.GetApiConnectionFor(project);
-            var stepsRequest = GetAllStepsRequest.DefaultInstance;
-            var apiMessage = APIMessage.CreateBuilder()
-                .SetMessageId(GenerateMessageId())
-                .SetMessageType(APIMessage.Types.APIMessageType.GetAllStepsRequest)
-                .SetAllStepsRequest(stepsRequest)
-                .Build();
+            try
+            {
+                var gaugeApiConnection = GaugeDaemonHelper.GetApiConnectionFor(project);
+                var stepsRequest = GetAllStepsRequest.DefaultInstance;
+                var apiMessage = APIMessage.CreateBuilder()
+                    .SetMessageId(GenerateMessageId())
+                    .SetMessageType(APIMessage.Types.APIMessageType.GetAllStepsRequest)
+                    .SetAllStepsRequest(stepsRequest)
+                    .Build();
 
-            var bytes = gaugeApiConnection.WriteAndReadApiMessage(apiMessage);
-            return bytes.AllStepsResponse.AllStepsList;
+                var bytes = gaugeApiConnection.WriteAndReadApiMessage(apiMessage);
+                return bytes.AllStepsResponse.AllStepsList;
+
+            }
+            catch (GaugeApiInitializationException)
+            {
+                return Enumerable.Empty<ProtoStepValue>();
+            }
         }
 
         private static string NextLineText(ITextSnapshotLine currentLine)
@@ -104,21 +114,29 @@ namespace Gauge.VisualStudio.Models
 
         internal static string GetParsedStepValueFromInput(string input)
         {
-            return GetStepValueFromInput(input).StepValue;
+            var stepValueFromInput = GetStepValueFromInput(input);
+            return stepValueFromInput == null ? string.Empty : stepValueFromInput.StepValue;
         }
 
         private static ProtoStepValue GetStepValueFromInput(string input)
         {
-            var gaugeApiConnection = GaugeDTEProvider.GetApiConnectionFor(ActiveProject);
-            var stepsRequest = GetStepValueRequest.CreateBuilder().SetStepText(input).Build();
-            var apiMessage = APIMessage.CreateBuilder()
-                .SetMessageId(GenerateMessageId())
-                .SetMessageType(APIMessage.Types.APIMessageType.GetStepValueRequest)
-                .SetStepValueRequest(stepsRequest)
-                .Build();
+            try
+            {
+                var gaugeApiConnection = GaugeDaemonHelper.GetApiConnectionFor(ActiveProject);
+                var stepsRequest = GetStepValueRequest.CreateBuilder().SetStepText(input).Build();
+                var apiMessage = APIMessage.CreateBuilder()
+                    .SetMessageId(GenerateMessageId())
+                    .SetMessageType(APIMessage.Types.APIMessageType.GetStepValueRequest)
+                    .SetStepValueRequest(stepsRequest)
+                    .Build();
 
-            var bytes = gaugeApiConnection.WriteAndReadApiMessage(apiMessage);
-            return bytes.StepValueResponse.StepValue;
+                var bytes = gaugeApiConnection.WriteAndReadApiMessage(apiMessage);
+                return bytes.StepValueResponse.StepValue;
+            }
+            catch (GaugeApiInitializationException)
+            {
+                return default(ProtoStepValue);
+            }
         }
     }
 }

@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Gauge.Messages;
+using Gauge.VisualStudio.Exceptions;
 
 namespace Gauge.VisualStudio.Models
 {
@@ -29,7 +30,7 @@ namespace Gauge.VisualStudio.Models
         }
 
         public Concept() 
-            : this(GaugeDTEProvider.DTE.ActiveDocument.ProjectItem.ContainingProject)
+            : this(GaugePackage.DTE.ActiveDocument.ProjectItem.ContainingProject)
         {
         }
 
@@ -43,17 +44,25 @@ namespace Gauge.VisualStudio.Models
             {
                 return Enumerable.Empty<Concept>();
             }
-            var gaugeApiConnection = GaugeDTEProvider.GetApiConnectionFor(_project);
-            var conceptsRequest = GetAllConceptsRequest.DefaultInstance;
-            var apiMessage = APIMessage.CreateBuilder()
-                .SetMessageId(GenerateMessageId())
-                .SetMessageType(APIMessage.Types.APIMessageType.GetAllConceptsRequest)
-                .SetAllConceptsRequest(conceptsRequest)
-                .Build();
+            try
+            {
+                var gaugeApiConnection = GaugeDaemonHelper.GetApiConnectionFor(_project);
+                var conceptsRequest = GetAllConceptsRequest.DefaultInstance;
+                var apiMessage = APIMessage.CreateBuilder()
+                    .SetMessageId(GenerateMessageId())
+                    .SetMessageType(APIMessage.Types.APIMessageType.GetAllConceptsRequest)
+                    .SetAllConceptsRequest(conceptsRequest)
+                    .Build();
 
-            var bytes = gaugeApiConnection.WriteAndReadApiMessage(apiMessage);
+                var bytes = gaugeApiConnection.WriteAndReadApiMessage(apiMessage);
 
-            return bytes.AllConceptsResponse.ConceptsList.Select(info => new Concept { StepValue = info.StepValue.ParameterizedStepValue, FilePath = info.Filepath, LineNumber = info.LineNumber });
+                return bytes.AllConceptsResponse.ConceptsList.Select(info => new Concept { StepValue = info.StepValue.ParameterizedStepValue, FilePath = info.Filepath, LineNumber = info.LineNumber });
+
+            }
+            catch (GaugeApiInitializationException)
+            {
+                return Enumerable.Empty<Concept>();
+            }
         }
 
         private static long GenerateMessageId()
