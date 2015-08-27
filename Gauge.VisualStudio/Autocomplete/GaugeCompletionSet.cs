@@ -24,22 +24,22 @@ namespace Gauge.VisualStudio.AutoComplete
 {
     internal sealed class GaugeCompletionSet : CompletionSet
     {
-        readonly List<Completion> _gaugeCompletions = new List<Completion>();
-
         public GaugeCompletionSet(SnapshotPoint triggerPoint, Step step, Concept concept)
         {
             var line = triggerPoint.GetContainingLine();
 
             BitmapSource stepImageSource = new BitmapImage(new Uri("pack://application:,,,/Gauge.VisualStudio;component/assets/glyphs/step.png"));
 
+            var concepts = concept.GetAllConcepts();
             var prefix = line.GetText().TrimStart('*').TrimStart(' ');
-            var applicableCompletions = prefix.Length < 1 ? step.GetAll() : step.GetAll().Where(s => s.StartsWith(prefix));
+            var steps = step.GetAll().Where(s => concepts.All(c => string.Compare(c.StepValue, s) != 0));
+            var applicableCompletions = prefix.Length < 1 ? steps : steps.Where(s => s.StartsWith(prefix));
             var stepCompletions = applicableCompletions.Select(x => new Completion(x, x, "Step", stepImageSource, "Step"));
             _gaugeCompletions.AddRange(stepCompletions);
 
             BitmapSource conceptImageSource = new BitmapImage(new Uri("pack://application:,,,/Gauge.VisualStudio;component/assets/glyphs/concept.png"));
-            var applicableContextCompletions = prefix.Length < 1 ? concept.GetAllConcepts() : concept.GetAllConcepts().Where(s => s.StepValue.StartsWith(prefix));
-            _gaugeCompletions.AddRange(applicableContextCompletions.Select(x => new Completion(x.StepValue, x.StepValue, "Concept", conceptImageSource, "Concept")));
+            var applicableConceptCompletions = prefix.Length < 1 ? concepts : concepts.Where(s => s.StepValue.StartsWith(prefix));
+            _gaugeCompletions.AddRange(applicableConceptCompletions.Select(x => new Completion(x.StepValue, x.StepValue, "Concept", conceptImageSource, "Concept")));
 
             if (_gaugeCompletions.Count <= 0) return;
 
@@ -51,6 +51,8 @@ namespace Gauge.VisualStudio.AutoComplete
             Moniker = "Gauge";
             DisplayName = "Gauge";
         }
+
+        readonly List<Completion> _gaugeCompletions = new List<Completion>();
 
         public override IList<Completion> Completions
         {
