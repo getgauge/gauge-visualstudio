@@ -215,7 +215,8 @@
     <Compile Include="CommandController.cs" />
     <Compile Include="Exceptions\ConventionViolationException.cs" />
     <Compile Include="Exceptions\GaugeAPIInitializationException.cs" />
-    <Compile Include="GaugeDaemonHelper.cs" />
+    <Compile Include="Helpers\DTEHelper.cs" />
+    <Compile Include="Helpers\GaugeDaemonHelper.cs" />
     <Compile Include="Loggers\ErrorListLogger.cs" />
     <Compile Include="Extensions\DocumentExtensions.cs" />
     <Compile Include="Extensions\ProjectExtensions.cs" />

@@ -75,9 +75,7 @@ namespace Gauge.VisualStudio
                     ((IVsProject)hierarchy).GetMkDocument(itemid, out itemFullPath);
                     var transformFileInfo = new FileInfo(itemFullPath);
 
-                    var isGaugeFile =
-                        string.Compare(".spec", transformFileInfo.Extension, StringComparison.OrdinalIgnoreCase) ==
-                        0;
+                    var isGaugeFile = string.Compare(".spec", transformFileInfo.Extension, StringComparison.OrdinalIgnoreCase) == 0;
                     if (transformFileInfo.Directory == null) return;
 
                     if (!isGaugeFile) return;

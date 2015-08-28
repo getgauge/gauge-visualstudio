@@ -18,6 +18,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Gauge.Messages;
 using Gauge.VisualStudio.Exceptions;
+using Gauge.VisualStudio.Helpers;
 using Microsoft.VisualStudio.Text;
 
 namespace Gauge.VisualStudio.Models

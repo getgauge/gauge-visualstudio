@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Gauge.VisualStudio.Extensions;
+using Gauge.VisualStudio.Helpers;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 

@@ -25,6 +25,7 @@ namespace Gauge.VisualStudio.TestRunner
         public const string ExecutorUriString = "executor://gaugespecexecutor/v1";
         public static readonly Uri ExecutorUri = new Uri(ExecutorUriString);
         private bool _cancelled;
+        readonly GaugeRunner _gaugeRunner = new GaugeRunner();
 
         public void RunTests(IEnumerable<TestCase> tests, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
@@ -32,7 +33,7 @@ namespace Gauge.VisualStudio.TestRunner
             foreach (var testCase in tests)
             {
                 if (_cancelled) break;
-                GaugeRunner.Run(testCase, runContext.IsBeingDebugged, frameworkHandle);
+                _gaugeRunner.Run(testCase, runContext.IsBeingDebugged, frameworkHandle);
             }
         }
 

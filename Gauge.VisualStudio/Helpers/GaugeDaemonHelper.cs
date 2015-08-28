@@ -26,7 +26,7 @@ using Gauge.VisualStudio.Extensions;
 using Gauge.VisualStudio.Loggers;
 using Process = System.Diagnostics.Process;
 
-namespace Gauge.VisualStudio
+namespace Gauge.VisualStudio.Helpers
 {
     public class GaugeDaemonHelper
     {
@@ -100,13 +100,25 @@ namespace Gauge.VisualStudio
         {
             if (ApiConnections.ContainsKey(slugifiedName))
             {
-                ApiConnections[slugifiedName].Dispose();
                 ApiConnections.Remove(slugifiedName);
+                try
+                {
+                    ApiConnections[slugifiedName].Dispose();
+                }
+                catch
+                {
+                }
             }
             if (ChildProcesses.ContainsKey(slugifiedName))
             {
-                ChildProcesses[slugifiedName].Kill();
                 ChildProcesses.Remove(slugifiedName);
+                try
+                {
+                    ChildProcesses[slugifiedName].Kill();
+                }
+                catch
+                {
+                }
             }
         }
     }

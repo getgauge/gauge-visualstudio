@@ -27,19 +27,16 @@ namespace Gauge.VisualStudio.TestRunner
     public class TestContainerDiscoverer : ITestContainerDiscoverer
     {
         private readonly IServiceProvider _serviceProvider;
-        
                 
         [ImportingConstructor]
         public TestContainerDiscoverer([Import(typeof(SVsServiceProvider))] IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
         }
-
         public Uri ExecutorUri
         {
             get { return TestExecutor.ExecutorUri; }
         }
-
         
         public IEnumerable<ITestContainer> TestContainers
         {
