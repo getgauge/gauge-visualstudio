@@ -62,17 +62,27 @@ namespace Gauge.VisualStudio.Highlighting
         {
             foreach (var span in spans)
             {
-                var line = span.Start.GetContainingLine();
-                var text = line.GetText();
-                var match = Parser.StepRegex.Match(text);
-                var point = span.Start.Add(match.Index);
-                var unimplementedStepSpan = new SnapshotSpan(span.Snapshot, new Span(point.Position, match.Length));
-                if (!match.Success || _project.GetStepImplementation(line) != null)
-                    continue;
+                TagSpan<UnimplementedStepTag> tagSpan;
+                try
+                {
+                    var line = span.Start.GetContainingLine();
+                    var text = line.GetText();
+                    var match = Parser.StepRegex.Match(text);
+                    var point = span.Start.Add(match.Index);
+                    var unimplementedStepSpan = new SnapshotSpan(span.Snapshot, new Span(point.Position, match.Length));
+                    if (!match.Success || _project.GetStepImplementation(line) != null)
+                        continue;
 
-                var actions = GetSmartTagActions(unimplementedStepSpan);
-                var unimplementedStepTag = new UnimplementedStepTag(SmartTagType.Ephemeral, actions);
-                yield return new TagSpan<UnimplementedStepTag>(unimplementedStepSpan, unimplementedStepTag);
+                    var actions = GetSmartTagActions(unimplementedStepSpan);
+                    var unimplementedStepTag = new UnimplementedStepTag(SmartTagType.Ephemeral, actions);
+                    tagSpan = new TagSpan<UnimplementedStepTag>(unimplementedStepSpan, unimplementedStepTag);
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    //hack - sometimes the span is out of range!
+                    continue;
+                }
+                yield return tagSpan;
             }
         }
 
