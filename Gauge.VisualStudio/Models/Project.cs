@@ -23,6 +23,7 @@ using System.Reflection;
 using EnvDTE;
 using EnvDTE80;
 using Microsoft.VisualStudio.Text;
+using CodeAttributeArgument = EnvDTE80.CodeAttributeArgument;
 using CodeNamespace = EnvDTE.CodeNamespace;
 
 namespace Gauge.VisualStudio.Models
@@ -103,8 +104,11 @@ namespace Gauge.VisualStudio.Models
                     var attribute =
                         allAttributes.FirstOrDefault(a => a.Name == "Step") as
                             CodeAttribute;
-                    if (attribute != null)
-                        gaugeImplementations.Add(new StepImplementation(function, attribute.Value.Trim('"')));
+
+                    if (attribute == null) continue;
+
+                    var codeAttributeArguments = attribute.Children.DynamicSelect<CodeAttributeArgument>();
+                    gaugeImplementations.AddRange(codeAttributeArguments.Select(argument => new StepImplementation(function, argument.Value.Trim('"'))));
                 }
             }
             return gaugeImplementations;
