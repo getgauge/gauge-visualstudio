@@ -107,8 +107,11 @@ namespace Gauge.VisualStudio.Models
 
                     if (attribute == null) continue;
 
-                    var codeAttributeArguments = attribute.Children.DynamicSelect<CodeAttributeArgument>();
-                    gaugeImplementations.AddRange(codeAttributeArguments.Select(argument => new StepImplementation(function, argument.Value.Trim('"'))));
+                    var stepImplementations = from CodeAttributeArgument argument in attribute.Children
+                        where argument != null
+                        select new StepImplementation(function, argument.Value.Trim('"'));
+
+                    gaugeImplementations.AddRange(stepImplementations);
                 }
             }
             return gaugeImplementations;
