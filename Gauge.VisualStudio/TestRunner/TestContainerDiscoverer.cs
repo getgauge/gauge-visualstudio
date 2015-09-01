@@ -16,7 +16,10 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Linq;
 using System.Threading.Tasks;
+using EnvDTE;
+using Gauge.VisualStudio.Extensions;
 using Gauge.VisualStudio.Models;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.TestWindow.Extensibility;
@@ -26,13 +29,29 @@ namespace Gauge.VisualStudio.TestRunner
     [Export(typeof(ITestContainerDiscoverer))]
     public class TestContainerDiscoverer : ITestContainerDiscoverer
     {
-        private readonly IServiceProvider _serviceProvider;
-                
+        private List<TestContainer> _cachedTestContainers;
+        private DocumentEvents _documentEvents;
+        private ProjectItemsEvents _solutionItemEvents;
+
         [ImportingConstructor]
         public TestContainerDiscoverer([Import(typeof(SVsServiceProvider))] IServiceProvider serviceProvider)
         {
-            _serviceProvider = serviceProvider;
+            var dte = serviceProvider.GetService(typeof(DTE)) as DTE;
+            _documentEvents = dte.Events.DocumentEvents;
+            _solutionItemEvents = dte.Events.SolutionItemsEvents;
+
+            _solutionItemEvents.ItemAdded += item => UpdateTestContainersIfGaugeSpecFile(item.Document);
+            _solutionItemEvents.ItemRemoved += item => UpdateTestContainersIfGaugeSpecFile(item.Document);
+            _solutionItemEvents.ItemRenamed += (item, s) => UpdateTestContainersIfGaugeSpecFile(item.Document);
+            _documentEvents.DocumentSaved += UpdateTestContainersIfGaugeSpecFile;
         }
+
+        private void UpdateTestContainersIfGaugeSpecFile(Document doc)
+        {
+            if (doc.IsGaugeSpecFile())
+                UpdateTestContainers();
+        }
+
         public Uri ExecutorUri
         {
             get { return TestExecutor.ExecutorUri; }
@@ -42,13 +61,21 @@ namespace Gauge.VisualStudio.TestRunner
         {
             get
             {
-                var testContainers = new ConcurrentBag<TestContainer>();
-                var specs = Specification.GetAllSpecsFromGauge();
-                Parallel.ForEach(specs, s => testContainers.Add(new TestContainer(this, s)));
-                return testContainers;
+                if (_cachedTestContainers==null)
+                    UpdateTestContainers();
+                return _cachedTestContainers;
             }
         }
 
+        private void UpdateTestContainers()
+        {
+            var testContainers = new ConcurrentBag<TestContainer>();
+            var specs = Specification.GetAllSpecsFromGauge();
+            Parallel.ForEach(specs, s => testContainers.Add(new TestContainer(this, s)));
+            _cachedTestContainers = testContainers.ToList();
+            TestContainersUpdated(this, EventArgs.Empty);
+        }
+
         public event EventHandler TestContainersUpdated;
-    }
+   }
 }
