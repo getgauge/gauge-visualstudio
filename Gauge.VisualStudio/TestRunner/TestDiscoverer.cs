@@ -45,6 +45,8 @@ namespace Gauge.VisualStudio.TestRunner
                 var specificationName = Parser.GetSpecificationName(source);
                 var scenarioIndex = 0;
 
+                var spectrait = new Trait(Path.GetFileNameWithoutExtension(spec), "Spec");
+
                 foreach (var scenario in scenarios)
                 {
                     var testCase = new TestCase(string.Format("{0}.{1}", specificationName, scenario), TestExecutor.ExecutorUri, spec)
@@ -55,7 +57,7 @@ namespace Gauge.VisualStudio.TestRunner
                         // LocalExtensionData returns a null despite setting it here
                         LineNumber = scenarioIndex
                     };
-
+                    testCase.Traits.Add(spectrait);
                     if (discoverySink != null)
                     {
                         discoverySink.SendTestCase(testCase);
