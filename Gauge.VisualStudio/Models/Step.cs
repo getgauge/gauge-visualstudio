@@ -119,6 +119,13 @@ namespace Gauge.VisualStudio.Models
             return stepValueFromInput == null ? string.Empty : stepValueFromInput.StepValue;
         }
 
+        internal static string GetFindRegex(string input)
+        {
+            string parsedValue = GetParsedStepValueFromInput(input);
+            parsedValue = parsedValue.Replace("* ", "");
+            return parsedValue.Replace("{}", "(.)*");
+        }
+
         private static ProtoStepValue GetStepValueFromInput(string input)
         {
             try

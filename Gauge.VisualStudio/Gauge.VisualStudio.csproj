@@ -238,6 +238,7 @@
     <Compile Include="Models\StepImplementation.cs" />
     <Compile Include="PkgCmdID.cs" />
     <Compile Include="Refactor\RenameCommandFilter.cs" />
+    <Compile Include="References\FindReferencesCommandFilter.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
