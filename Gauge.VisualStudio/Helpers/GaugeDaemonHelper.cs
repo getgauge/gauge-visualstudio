@@ -30,9 +30,11 @@ namespace Gauge.VisualStudio.Helpers
 {
     public class GaugeDaemonHelper
     {
-        internal static readonly Dictionary<string, GaugeApiConnection> ApiConnections = new Dictionary<string, GaugeApiConnection>();
+        private static readonly Dictionary<string, GaugeApiConnection> ApiConnections = new Dictionary<string, GaugeApiConnection>();
 
-        internal static readonly Dictionary<string, Process> ChildProcesses = new Dictionary<string, Process>();
+        private static readonly Dictionary<string, Process> ChildProcesses = new Dictionary<string, Process>();
+
+        private static readonly HashSet<int> ApiPorts = new HashSet<int>();
 
         public static GaugeApiConnection GetApiConnectionForActiveDocument()
         {
@@ -44,9 +46,15 @@ namespace Gauge.VisualStudio.Helpers
             return ApiConnections.Values.ToList();
         }
 
+        public static void AddApiConnection(string project, GaugeApiConnection apiConnection)
+        {
+            ApiConnections.Add(project, apiConnection);
+        }
+
         internal static GaugeApiConnection StartGaugeAsDaemon(Project gaugeProject)
         {
             var openPort = GetOpenPort();
+            ApiPorts.Add(openPort);
             var gaugeStartInfo = new ProcessStartInfo
             {
                 WorkingDirectory = Path.GetDirectoryName(gaugeProject.FullName),
@@ -120,6 +128,16 @@ namespace Gauge.VisualStudio.Helpers
                 {
                 }
             }
+        }
+
+        public static bool ContainsApiConnectionFor(string slugifiedName)
+        {
+            return ApiConnections.ContainsKey(slugifiedName);
+        }
+
+        public static List<int> GetAllApiPorts()
+        {
+            return ApiPorts.ToList();
         }
     }
 }

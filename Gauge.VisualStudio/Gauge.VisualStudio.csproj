@@ -250,6 +250,7 @@
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="SolutionsEventListener.cs" />
     <Compile Include="TestRunner\GaugeRunner.cs" />
+    <Compile Include="TestRunner\GaugeTestRunSettings.cs" />
     <Compile Include="TestRunner\TestContainer.cs" />
     <Compile Include="TestRunner\TestContainerDiscoverer.cs" />
     <Compile Include="TestRunner\TestDiscoverer.cs" />

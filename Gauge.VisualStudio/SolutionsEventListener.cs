@@ -28,11 +28,11 @@ namespace Gauge.VisualStudio
                 return VSConstants.S_OK;
 
             var slugifiedName = project.SlugifiedName();
-            if (GaugeDaemonHelper.ApiConnections.ContainsKey(slugifiedName))
+            if (GaugeDaemonHelper.ContainsApiConnectionFor(slugifiedName))
                 return VSConstants.S_OK;
 
             var apiConnection = GaugeDaemonHelper.StartGaugeAsDaemon(project);
-            GaugeDaemonHelper.ApiConnections.Add(slugifiedName, apiConnection);
+            GaugeDaemonHelper.AddApiConnection(slugifiedName, apiConnection);
 
             return VSConstants.S_OK;
         }

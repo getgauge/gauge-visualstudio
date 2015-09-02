@@ -23,7 +23,7 @@ namespace Gauge.VisualStudio.Extensions
     {
         public static string SlugifiedName(this Project project)
         {
-            return project.Name.Replace('.', '_');
+            return project == null ? "" : project.Name.Replace('.', '_');
         }
 
         public static bool IsGaugeProject(this Project project)
