@@ -29,7 +29,7 @@ namespace Gauge.VisualStudio.Classification
         private static readonly Regex SpecHeadingRegex = new Regex(@"\#(?<heading>.+)[\n\r]*", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
         private static readonly Regex SpecHeadingRegexAlt = new Regex(@"(?<heading>.+)[\n\r][\s]*=+", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
 
-        public static readonly Regex StepRegex = new Regex(@"[ ]*\*(([^{}""]*)(?<stat>"".*"")*(?<dyn><[^<>]>)*)*", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
+        public static readonly Regex StepRegex = new Regex(@"[ ]*\*(([^{}""\n\r]*)(?<stat>"".*"")*(?<dyn><[^<>\n\r]>)*)*", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
 
         private static readonly Regex TagsRegex = new Regex(@"\s*tags\s*:\s*(?<tag>[\w\s]+)(,(?<tag>[\w\s]+))*", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
 
