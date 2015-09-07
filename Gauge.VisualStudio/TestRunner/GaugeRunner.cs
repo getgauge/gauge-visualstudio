@@ -26,13 +26,6 @@ namespace Gauge.VisualStudio.TestRunner
 {
     public class GaugeRunner
     {
-        private readonly DTE _dte;
-
-        public GaugeRunner()
-        {
-            _dte = DTEHelper.GetCurrent();
-            _dte.Solution.SolutionBuild.Build(true);
-        }
         public void Run(TestCase testCase, bool isBeingDebugged, IFrameworkHandle frameworkHandle)
         {
             var result = new TestResult(testCase);
@@ -55,12 +48,14 @@ namespace Gauge.VisualStudio.TestRunner
                     }
                 };
 
-                var activeConfiguration = _dte.Solution.SolutionBuild.ActiveConfiguration.Name;
-                var buildOutputPath = string.Format("{0}\\bin\\{1}", projectRoot, activeConfiguration);
-                if (Directory.EnumerateFileSystemEntries(buildOutputPath).Any())
+                var _dte = DTEHelper.GetCurrent();
+                var buildOutputPath = BuildOutputPath(_dte, projectRoot);
+                if (_dte.Solution.SolutionBuild.LastBuildInfo != 0 || !BuildOutputExists(_dte, projectRoot))
                 {
-                    p.StartInfo.EnvironmentVariables["gauge_custom_build_path"] = buildOutputPath;
+                    _dte.Solution.SolutionBuild.Build(true);
                 }
+
+                p.StartInfo.EnvironmentVariables["gauge_custom_build_path"] = buildOutputPath;
 
                 if (isBeingDebugged)
                 {
@@ -98,6 +93,19 @@ namespace Gauge.VisualStudio.TestRunner
             }
 
             frameworkHandle.RecordResult(result);
+        }
+
+        private static bool BuildOutputExists(_DTE _dte, string projectRoot)
+        {
+            var buildOutputPath = BuildOutputPath(_dte, projectRoot);
+            return Directory.Exists(buildOutputPath) && Directory.EnumerateFileSystemEntries(buildOutputPath).Any();
+        }
+
+        private static string BuildOutputPath(_DTE _dte, string projectRoot)
+        {
+            var activeConfiguration = _dte.Solution.SolutionBuild.ActiveConfiguration.Name;
+            var buildOutputPath = string.Format("{0}\\bin\\{1}", projectRoot, activeConfiguration);
+            return buildOutputPath;
         }
 
         private static string GetTestCasePath(TestCase testCase, string rootPath)
