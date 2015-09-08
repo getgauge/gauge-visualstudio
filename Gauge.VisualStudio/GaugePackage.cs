@@ -20,6 +20,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using EnvDTE;
 using EnvDTE80;
+using Gauge.VisualStudio.Extensions;
 using Gauge.VisualStudio.Loggers;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
@@ -73,12 +74,8 @@ namespace Gauge.VisualStudio
                     if (!IsSingleProjectItemSelection(out hierarchy, out itemid)) return;
 
                     ((IVsProject)hierarchy).GetMkDocument(itemid, out itemFullPath);
-                    var transformFileInfo = new FileInfo(itemFullPath);
 
-                    var isGaugeFile = string.Compare(".spec", transformFileInfo.Extension, StringComparison.OrdinalIgnoreCase) == 0;
-                    if (transformFileInfo.Directory == null) return;
-
-                    if (!isGaugeFile) return;
+                    if (!itemFullPath.IsGaugeSpecFile()) return;
 
                     menuCommand.Visible = true;
                     menuCommand.Enabled = true;

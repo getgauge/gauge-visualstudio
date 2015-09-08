@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.IO;
 using System.Linq;
 using EnvDTE;
 
@@ -21,7 +22,12 @@ namespace Gauge.VisualStudio.Extensions
     {
         public static bool IsGaugeSpecFile(this Document document)
         {
-            return new[] {".spec", ".cpt"}.Any(document.Name.EndsWith);
-        } 
+            return document.FullName.IsGaugeSpecFile();
+        }
+
+        public static bool IsGaugeSpecFile(this string filePath)
+        {
+            return File.Exists(filePath) && new[] { ".spec", ".cpt" }.Any(filePath.EndsWith);
+        }
     }
 }
