@@ -5,7 +5,7 @@ Visual Studio plugin for Gauge - wires up Visual Studio features to Gauge.
 
 Open Visual Studio Extension Manager - `Tools` -> `Extensions and Updates`. Search for `Gauge.VisualStudio`.
 
-The extension resides [here](https://visualstudiogallery.msdn.microsoft.com/d34964c5-3bf8-4138-be63-01214cb1db3e) on the Visual Studio Gallery.
+The extension resides [here](https://visualstudiogallery.msdn.microsoft.com/dd8ea767-aa75-4771-98f4-6c8a9055ca92) on the Visual Studio Gallery.
 
 ## Features Supported (And Usage)
 
