@@ -31,7 +31,7 @@ namespace Gauge.VisualStudio.Models
                 specifications.AddRange(specsList);
             }
 
-            return specifications.Select(spec => spec.FileName);
+            return specifications.Select(spec => spec.FileName).Distinct();
         }
 
         public static IEnumerable<ProtoSpec> GetAllSpecs(IEnumerable<int> apiPorts)
@@ -40,7 +40,7 @@ namespace Gauge.VisualStudio.Models
             {
                 var gaugeApiConnection = new GaugeApiConnection(new TcpClientWrapper(i));
                 return GetSpecsFromGauge(gaugeApiConnection);
-            });
+            }).Distinct();
         }
 
         private static IEnumerable<ProtoSpec> GetSpecsFromGauge(GaugeApiConnection apiConnection)

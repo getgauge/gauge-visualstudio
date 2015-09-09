@@ -16,6 +16,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Gauge.Messages;
 using Gauge.VisualStudio.Models;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
@@ -33,10 +34,10 @@ namespace Gauge.VisualStudio.TestRunner
         {
             var settingsProvider = discoveryContext.RunSettings.GetSettings(GaugeTestRunSettings.SettingsName) 
                 as GaugeTestRunSettingsService;
-            GetSpecs(settingsProvider.Settings, discoverySink);
+            GetSpecs(settingsProvider.Settings, discoverySink, sources);
         }
 
-        public static List<TestCase> GetSpecs(GaugeTestRunSettings testRunSettings, ITestCaseDiscoverySink discoverySink)
+        public static List<TestCase> GetSpecs(GaugeTestRunSettings testRunSettings, ITestCaseDiscoverySink discoverySink, IEnumerable<string> sources)
         {
             var testCases = new ConcurrentBag<TestCase>();
 
@@ -44,8 +45,13 @@ namespace Gauge.VisualStudio.TestRunner
 
             Parallel.ForEach(protoSpecs, spec =>
             {
+                if (sources.All(s => string.CompareOrdinal(s, spec.FileName) != 0))
+                    return;
+
                 var scenarioIndex = 0;
-                foreach (var scenario in spec.ItemsList.Where(item => item.HasScenario).Select(item => item.Scenario))
+                var scenarios = spec.ItemsList.Where(item => item.HasScenario).Select(item => item.Scenario);
+
+                foreach (var scenario in scenarios)
                 {
                     var testCase = new TestCase(string.Format("[{0}].[{1}]", spec.SpecHeading, scenario.ScenarioHeading),
                         TestExecutor.ExecutorUri, spec.FileName)

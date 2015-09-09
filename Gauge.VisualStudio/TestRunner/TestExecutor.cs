@@ -40,7 +40,7 @@ namespace Gauge.VisualStudio.TestRunner
         public void RunTests(IEnumerable<string> sources, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
             var gaugeTestRunSettingsService = runContext.RunSettings.GetSettings(GaugeTestRunSettings.SettingsName) as GaugeTestRunSettingsService;
-            var testCases = TestDiscoverer.GetSpecs(gaugeTestRunSettingsService.Settings, null);
+            var testCases = TestDiscoverer.GetSpecs(gaugeTestRunSettingsService.Settings, null, sources);
             RunTests(testCases, runContext, frameworkHandle);
         }
 

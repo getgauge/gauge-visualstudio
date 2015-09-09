@@ -29,6 +29,7 @@ namespace Gauge.VisualStudio.TestRunner
         public void Run(TestCase testCase, bool isBeingDebugged, IFrameworkHandle frameworkHandle)
         {
             var result = new TestResult(testCase);
+            frameworkHandle.RecordStart(testCase);
             var projectRoot = GetProjectRootPath(new FileInfo(testCase.Source).Directory);
             try
             {
@@ -91,8 +92,8 @@ namespace Gauge.VisualStudio.TestRunner
                 result.Outcome = TestOutcome.Failed;
                 result.ErrorMessage = string.Format("{0}\n{1}", ex.Message, ex.StackTrace);
             }
-
             frameworkHandle.RecordResult(result);
+            frameworkHandle.RecordEnd(testCase, result.Outcome);
         }
 
         private static bool BuildOutputExists(_DTE _dte, string projectRoot)

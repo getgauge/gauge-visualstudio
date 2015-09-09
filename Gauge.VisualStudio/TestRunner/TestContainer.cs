@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestWindow.Extensibility;
 using Microsoft.VisualStudio.TestWindow.Extensibility.Model;
@@ -25,13 +26,13 @@ namespace Gauge.VisualStudio.TestRunner
     public class TestContainer : ITestContainer
     {
         private readonly ITestContainerDiscoverer _testContainerDiscoverer;
-        private DateTime _timeStamp;
+        private readonly string _checksum;
 
         public TestContainer(ITestContainerDiscoverer testContainerDiscoverer, string s)
         {
             _testContainerDiscoverer = testContainerDiscoverer;
             Source = s;
-            _timeStamp = GetSourceTimeStamp();
+            _checksum = GetChecksum(s);
         }
 
         public IDeploymentData DeployAppContainer()
@@ -45,8 +46,8 @@ namespace Gauge.VisualStudio.TestRunner
             if (testContainer == null)
                 return -1;
 
-            var result = String.Compare(Source, testContainer.Source, StringComparison.OrdinalIgnoreCase);
-            return result != 0 ? result : _timeStamp.CompareTo(testContainer._timeStamp);
+            var result = string.Compare(Source, testContainer.Source, StringComparison.OrdinalIgnoreCase);
+            return result != 0 ? result : string.Compare(_checksum, testContainer._checksum, StringComparison.Ordinal);
         }
 
         public ITestContainer Snapshot()
@@ -81,11 +82,16 @@ namespace Gauge.VisualStudio.TestRunner
             get { return false; }
         }
 
-        private DateTime GetSourceTimeStamp()
+        private static string GetChecksum(string file)
         {
-            if (!String.IsNullOrEmpty(Source) && File.Exists(Source))
-                return File.GetLastWriteTime(Source);
-            return DateTime.MinValue;
+            if (string.IsNullOrEmpty(file) || !File.Exists(file))
+                return string.Empty;
+
+            using (var stream = File.OpenRead(file))
+            {
+                var checksum = new SHA256Managed().ComputeHash(stream);
+                return BitConverter.ToString(checksum).Replace("-", string.Empty);
+            }
         }
     }
 }

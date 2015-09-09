@@ -23,6 +23,7 @@ using Gauge.VisualStudio.Extensions;
 using Gauge.VisualStudio.Models;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.TestWindow.Extensibility;
+using IServiceProvider = System.IServiceProvider;
 
 namespace Gauge.VisualStudio.TestRunner
 {
@@ -40,16 +41,16 @@ namespace Gauge.VisualStudio.TestRunner
             _documentEvents = dte.Events.DocumentEvents;
             _solutionItemEvents = dte.Events.SolutionItemsEvents;
 
-            _solutionItemEvents.ItemAdded += item => UpdateTestContainersIfGaugeSpecFile(item.Document);
-            _solutionItemEvents.ItemRemoved += item => UpdateTestContainersIfGaugeSpecFile(item.Document);
-            _solutionItemEvents.ItemRenamed += (item, s) => UpdateTestContainersIfGaugeSpecFile(item.Document);
-            _documentEvents.DocumentSaved += UpdateTestContainersIfGaugeSpecFile;
+            _solutionItemEvents.ItemAdded += item => UpdateTestContainersIfGaugeSpecFile(item.Document, true);
+            _solutionItemEvents.ItemRemoved += item => UpdateTestContainersIfGaugeSpecFile(item.Document, true);
+            _solutionItemEvents.ItemRenamed += (item, s) => UpdateTestContainersIfGaugeSpecFile(item.Document, true);
+            _documentEvents.DocumentSaved += doc => UpdateTestContainersIfGaugeSpecFile(doc, false);
         }
 
-        private void UpdateTestContainersIfGaugeSpecFile(Document doc)
+        private void UpdateTestContainersIfGaugeSpecFile(Document doc, bool refresh)
         {
             if (doc.IsGaugeSpecFile())
-                UpdateTestContainers();
+                UpdateTestContainers(refresh);
         }
 
         public Uri ExecutorUri
@@ -62,17 +63,20 @@ namespace Gauge.VisualStudio.TestRunner
             get
             {
                 if (_cachedTestContainers==null)
-                    UpdateTestContainers();
+                    UpdateTestContainers(true);
                 return _cachedTestContainers;
             }
         }
 
-        private void UpdateTestContainers()
+        private void UpdateTestContainers(bool refresh)
         {
-            var testContainers = new ConcurrentBag<TestContainer>();
-            var specs = Specification.GetAllSpecsFromGauge();
-            Parallel.ForEach(specs, s => testContainers.Add(new TestContainer(this, s)));
-            _cachedTestContainers = testContainers.ToList();
+            if (refresh)
+            {
+                var testContainers = new ConcurrentBag<TestContainer>();
+                var specs = Specification.GetAllSpecsFromGauge();
+                Parallel.ForEach(specs, s => testContainers.Add(new TestContainer(this, s)));
+                _cachedTestContainers = testContainers.ToList();
+            }
             TestContainersUpdated(this, EventArgs.Empty);
         }
 
