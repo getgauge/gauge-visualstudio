@@ -57,11 +57,6 @@ namespace Gauge.VisualStudio.TestRunner
                         LineNumber = scenarioIndex
                     };
 
-                    if (discoverySink != null)
-                    {
-                        discoverySink.SendTestCase(testCase);
-                    }
-
                     testCase.Traits.Add("Spec", spec.SpecHeading);
 
                     foreach (var tag in scenario.TagsList.Union(spec.TagsList))
@@ -69,6 +64,11 @@ namespace Gauge.VisualStudio.TestRunner
                         testCase.Traits.Add("Tag", tag);
                     }
                     testCases.Add(testCase);
+
+                    if (discoverySink != null)
+                    {
+                        discoverySink.SendTestCase(testCase);
+                    }
 
                     scenarioIndex++;
                 }
