@@ -47,6 +47,25 @@ namespace Gauge.VisualStudio.Models
             return stepValueFromInput == null ? string.Empty : stepValueFromInput.ParameterizedStepValue;
         }
 
+        public static Step Parse(ITextSnapshotLine input)
+        {
+            var stepValueFromInput = GetStepValueFromInput(GetStepText(input));
+            
+
+            if (stepValueFromInput == null) return default(Step);
+
+            return new Step()
+            {
+                Text = stepValueFromInput.ParameterizedStepValue,
+                Parameters = stepValueFromInput.ParametersList.ToList()
+            };
+        }
+
+        public string Text { get; set; }
+
+        public List<string> Parameters { get; set; }
+
+
         private static EnvDTE.Project ActiveProject
         {
             get { return GaugePackage.DTE.ActiveDocument.ProjectItem.ContainingProject; }

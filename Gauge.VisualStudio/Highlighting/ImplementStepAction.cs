@@ -100,14 +100,10 @@ namespace Gauge.VisualStudio.Highlighting
                 }
                 else
                 {
-                    var stepText = _trackingSpan.GetText(_snapshot);
-                    var matches = Parser.StepRegex.Match(stepText);
-
-                    var paramCount = matches.Groups["stat"].Captures.Count + matches.Groups["dyn"].Captures.Count;
-
-                    for (var i = 1; i <= paramCount; i++)
+                    var step = Step.Parse(containingLine);
+                    foreach (var parameter in step.Parameters)
                     {
-                        implementationFunction.AddParameter(string.Format("param{0}", i), vsCMTypeRef.vsCMTypeRefString);
+                        implementationFunction.AddParameter(parameter, vsCMTypeRef.vsCMTypeRefString);
                     }
                 }
 
