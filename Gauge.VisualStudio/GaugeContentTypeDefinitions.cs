@@ -21,9 +21,9 @@ namespace Gauge.VisualStudio
     internal sealed class GaugeContentTypeDefinitions
     {
         public const string GaugeContentType = "Gauge";
-        private const string SpecFileExtension = ".spec";
-        private const string MarkdownFileExtension = ".md";
-        private const string ConceptFileExtension = ".cpt";
+        internal const string SpecFileExtension = ".spec";
+        internal const string MarkdownFileExtension = ".md";
+        internal const string ConceptFileExtension = ".cpt";
 
         [Export]
         [Name(GaugeContentType)]
@@ -36,17 +36,14 @@ namespace Gauge.VisualStudio
         internal static ClassificationTypeDefinition GaugeClassificationTypeDefinition = null;
 
         [Export]
-        [FileExtension(SpecFileExtension)]
         [ContentType(GaugeContentType)]
         internal static FileExtensionToContentTypeDefinition GaugeFileExtensionDefinition = null;
 
         [Export]
-        [FileExtension(MarkdownFileExtension)]
         [ContentType(GaugeContentType)]
         internal static FileExtensionToContentTypeDefinition GaugeMarkdownFileExtensionDefinition = null;
 
         [Export]
-        [FileExtension(ConceptFileExtension)]
         [ContentType(GaugeContentType)]
         internal static FileExtensionToContentTypeDefinition GaugeConceptFileExtensionDefinition = null;
     }

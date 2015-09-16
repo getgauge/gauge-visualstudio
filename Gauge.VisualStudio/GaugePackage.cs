@@ -34,6 +34,15 @@ namespace Gauge.VisualStudio
     [Guid(GuidList.GuidGaugeVsPackagePkgString)]
     [ProvideAutoLoad(UIContextGuids80.SolutionExists)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
+    [ProvideEditorFactory(typeof(GaugeEditorFactory), 112)]
+    [ProvideEditorLogicalView(typeof(GaugeEditorFactory), VSConstants.LOGVIEWID.TextView_string)]
+    [ProvideEditorExtension(typeof(GaugeEditorFactory), GaugeContentTypeDefinitions.SpecFileExtension, 32)]
+    [ProvideEditorExtension(typeof(GaugeEditorFactory), GaugeContentTypeDefinitions.ConceptFileExtension, 32)]
+    [ProvideEditorExtension(typeof(GaugeEditorFactory), GaugeContentTypeDefinitions.MarkdownFileExtension, 32)]
+    [ProvideLanguageService(typeof(GaugeLanguageInfo), GaugeLanguageInfo.LanguageName, GaugeLanguageInfo.LanguageResourceId,
+        DefaultToInsertSpaces = true,
+        EnableLineNumbers = true,
+        RequestStockColors = true)]
     public sealed class GaugePackage : Package
     {
         private Events2 _DTEEvents;
@@ -44,12 +53,14 @@ namespace Gauge.VisualStudio
         protected override void Initialize()
         {
             Debug.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", ToString()));
+            RegisterEditorFactory(new GaugeEditorFactory(this));
             ErrorListLogger.Initialize(this);
 
             DTE = (DTE) GetService(typeof (DTE));
 
             _solution = GetService(typeof(SVsSolution)) as IVsSolution;
             _solution.AdviseSolutionEvents(_solutionsEventListener, out _solutionCookie);
+
 
             // Add our command handlers for menu (commands must exist in the .vsct file)
             var mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
