@@ -27,7 +27,7 @@ namespace Gauge.VisualStudio.Extensions
 
         public static bool IsGaugeSpecFile(this string filePath)
         {
-            return File.Exists(filePath) && new[] { ".spec", ".cpt" }.Any(filePath.EndsWith);
+            return File.Exists(filePath) && new[] { ".spec", ".cpt", ".md" }.Any(filePath.EndsWith);
         }
     }
 }

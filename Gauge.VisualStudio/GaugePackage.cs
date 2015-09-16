@@ -12,20 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Globalization;
-using System.IO;
 using System.Runtime.InteropServices;
 using EnvDTE;
 using EnvDTE80;
-using Gauge.VisualStudio.Extensions;
 using Gauge.VisualStudio.Loggers;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
-using Process = System.Diagnostics.Process;
 
 namespace Gauge.VisualStudio
 {
@@ -49,11 +44,11 @@ namespace Gauge.VisualStudio
         private IVsSolution _solution;
         private readonly SolutionsEventListener _solutionsEventListener = new SolutionsEventListener();
         private uint _solutionCookie;
+        private FormatMenuCommand formatMenuCommand;
 
         protected override void Initialize()
         {
             Debug.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", ToString()));
-            RegisterEditorFactory(new GaugeEditorFactory(this));
             ErrorListLogger.Initialize(this);
 
             DTE = (DTE) GetService(typeof (DTE));
@@ -63,122 +58,13 @@ namespace Gauge.VisualStudio
 
 
             // Add our command handlers for menu (commands must exist in the .vsct file)
-            var mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
-            if (null != mcs)
-            {
-                var menuCommandId = new CommandID(GuidList.GuidGaugeVsPackageCmdSet, (int)PkgCmdIdList.formatCommand);
-                var menuItem = new OleMenuCommand(MenuItemCallback, menuCommandId);
-                menuItem.BeforeQueryStatus += delegate(object sender, EventArgs args)
-                {
-                    var menuCommand = sender as OleMenuCommand;
+            formatMenuCommand = new FormatMenuCommand(this);
+            formatMenuCommand.Register();
 
-                    if (menuCommand == null) return;
-
-                    menuCommand.Visible = false;
-                    menuCommand.Enabled = false;
-
-                    string itemFullPath;
-
-                    IVsHierarchy hierarchy;
-                    uint itemid;
-
-                    if (!IsSingleProjectItemSelection(out hierarchy, out itemid)) return;
-
-                    ((IVsProject)hierarchy).GetMkDocument(itemid, out itemFullPath);
-
-                    if (!itemFullPath.IsGaugeSpecFile()) return;
-
-                    menuCommand.Visible = true;
-                    menuCommand.Enabled = true;
-                };
-                mcs.AddCommand(menuItem);
-            }
+            RegisterEditorFactory(new GaugeEditorFactory(this));
             base.Initialize();
         }
 
         public static DTE DTE { get; private set; }
-
-        //TODO : Move to a separate class
-        private static void MenuItemCallback(object sender, EventArgs e)
-        {
-            string itemFullPath;
-
-            IVsHierarchy hierarchy;
-            uint itemid;
-
-            if (!IsSingleProjectItemSelection(out hierarchy, out itemid)) return;
-
-            ((IVsProject)hierarchy).GetMkDocument(itemid, out itemFullPath);
-            var gaugeFile = new FileInfo(itemFullPath);
-
-            var arguments = string.Format(@"--simple-console --format {0}", gaugeFile.Name);
-            var p = new Process
-            {
-                StartInfo =
-                {
-                    WorkingDirectory = gaugeFile.Directory.ToString(),
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    CreateNoWindow = true,
-                    FileName = "gauge.exe",
-                    RedirectStandardError = true,
-                    Arguments = arguments,
-                }
-            };
-
-            p.Start();
-            p.WaitForExit();
-        }
-
-        public static bool IsSingleProjectItemSelection(out IVsHierarchy hierarchy, out uint itemid)
-        {
-            hierarchy = null;
-            itemid = VSConstants.VSITEMID_NIL;
-
-            var monitorSelection = GetGlobalService(typeof(SVsShellMonitorSelection)) as IVsMonitorSelection;
-            var solution = GetGlobalService(typeof(SVsSolution)) as IVsSolution;
-            if (monitorSelection == null || solution == null)
-            {
-                return false;
-            }
-
-            var hierarchyPtr = IntPtr.Zero;
-            var selectionContainerPtr = IntPtr.Zero;
-
-            try
-            {
-                IVsMultiItemSelect multiItemSelect = null;
-                var hr = monitorSelection.GetCurrentSelection(out hierarchyPtr, out itemid, out multiItemSelect,
-                    out selectionContainerPtr);
-
-                if (ErrorHandler.Failed(hr) || hierarchyPtr == IntPtr.Zero || itemid == VSConstants.VSITEMID_NIL)
-                {
-                    return false;
-                }
-
-                if (multiItemSelect != null) return false;
-
-                if (itemid == VSConstants.VSITEMID_ROOT) return false;
-
-                hierarchy = Marshal.GetObjectForIUnknown(hierarchyPtr) as IVsHierarchy;
-                if (hierarchy == null) return false;
-
-                Guid guidProjectId;
-
-                return !ErrorHandler.Failed(solution.GetGuidOfProject(hierarchy, out guidProjectId));
-            }
-            finally
-            {
-                if (selectionContainerPtr != IntPtr.Zero)
-                {
-                    Marshal.Release(selectionContainerPtr);
-                }
-
-                if (hierarchyPtr != IntPtr.Zero)
-                {
-                    Marshal.Release(hierarchyPtr);
-                }
-            }
-        }
     }
 }
