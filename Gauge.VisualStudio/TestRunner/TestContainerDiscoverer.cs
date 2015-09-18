@@ -21,7 +21,9 @@ using System.Threading.Tasks;
 using EnvDTE;
 using Gauge.VisualStudio.Extensions;
 using Gauge.VisualStudio.Models;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.TestWindow.Extensibility;
 using IServiceProvider = System.IServiceProvider;
 
@@ -30,6 +32,7 @@ namespace Gauge.VisualStudio.TestRunner
     [Export(typeof(ITestContainerDiscoverer))]
     public class TestContainerDiscoverer : ITestContainerDiscoverer
     {
+        private readonly IServiceProvider _serviceProvider;
         private List<TestContainer> _cachedTestContainers;
         private DocumentEvents _documentEvents;
         private ProjectItemsEvents _solutionItemEvents;
@@ -37,7 +40,8 @@ namespace Gauge.VisualStudio.TestRunner
         [ImportingConstructor]
         public TestContainerDiscoverer([Import(typeof(SVsServiceProvider))] IServiceProvider serviceProvider)
         {
-            var dte = serviceProvider.GetService(typeof(DTE)) as DTE;
+            _serviceProvider = serviceProvider;
+            var dte = _serviceProvider.GetService(typeof(DTE)) as DTE;
             _documentEvents = dte.Events.DocumentEvents;
             _solutionItemEvents = dte.Events.SolutionItemsEvents;
 
@@ -45,6 +49,15 @@ namespace Gauge.VisualStudio.TestRunner
             _solutionItemEvents.ItemRemoved += item => UpdateTestContainersIfGaugeSpecFile(item.Document, true);
             _solutionItemEvents.ItemRenamed += (item, s) => UpdateTestContainersIfGaugeSpecFile(item.Document, true);
             _documentEvents.DocumentSaved += doc => UpdateTestContainersIfGaugeSpecFile(doc, false);
+            EnsureProjectBuildIsUpToDate(dte    );
+        }
+
+        private void EnsureProjectBuildIsUpToDate(_DTE dte)
+        {
+            if (!IsProjectBuildUpToDate())
+            {
+                dte.Solution.SolutionBuild.Build(true);
+            }
         }
 
         private void UpdateTestContainersIfGaugeSpecFile(Document doc, bool refresh)
@@ -68,8 +81,15 @@ namespace Gauge.VisualStudio.TestRunner
             }
         }
 
+        private bool IsProjectBuildUpToDate()
+        {
+            var buildManager = _serviceProvider.GetService(typeof (SVsSolutionBuildManager)) as IVsSolutionBuildManager3;
+            return buildManager.AreProjectsUpToDate(0) == VSConstants.S_OK;
+        }
+
         private void UpdateTestContainers(bool refresh)
         {
+            var initialSearch = _cachedTestContainers == null;
             if (refresh)
             {
                 var testContainers = new ConcurrentBag<TestContainer>();
@@ -77,7 +97,8 @@ namespace Gauge.VisualStudio.TestRunner
                 Parallel.ForEach(specs, s => testContainers.Add(new TestContainer(this, s)));
                 _cachedTestContainers = testContainers.ToList();
             }
-            TestContainersUpdated(this, EventArgs.Empty);
+            if(!initialSearch)
+                TestContainersUpdated(this, EventArgs.Empty);
         }
 
         public event EventHandler TestContainersUpdated;

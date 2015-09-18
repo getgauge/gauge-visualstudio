@@ -16,7 +16,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Gauge.Messages;
 using Gauge.VisualStudio.Models;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
@@ -25,8 +24,6 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 namespace Gauge.VisualStudio.TestRunner
 {
     [DefaultExecutorUri(TestExecutor.ExecutorUriString)]
-    [FileExtension(".spec")]
-    [FileExtension(".md")]
     public class TestDiscoverer : ITestDiscoverer
     {
         public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger logger,

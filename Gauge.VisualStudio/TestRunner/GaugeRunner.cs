@@ -14,8 +14,6 @@
 
 using System;
 using System.IO;
-using System.Linq;
-using EnvDTE;
 using Gauge.VisualStudio.Exceptions;
 using Gauge.VisualStudio.Helpers;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
@@ -49,14 +47,7 @@ namespace Gauge.VisualStudio.TestRunner
                     }
                 };
 
-                var _dte = DTEHelper.GetCurrent();
-                var buildOutputPath = BuildOutputPath(_dte, projectRoot);
-                if (_dte.Solution.SolutionBuild.LastBuildInfo != 0 || !BuildOutputExists(_dte, projectRoot))
-                {
-                    _dte.Solution.SolutionBuild.Build(true);
-                }
-
-                p.StartInfo.EnvironmentVariables["gauge_custom_build_path"] = buildOutputPath;
+                p.StartInfo.EnvironmentVariables["gauge_custom_build_path"] = BuildOutputPath(projectRoot);
 
                 if (isBeingDebugged)
                 {
@@ -84,6 +75,7 @@ namespace Gauge.VisualStudio.TestRunner
                 else
                 {
                     result.ErrorMessage = error;
+                    result.Messages.Add(new TestResultMessage(TestResultMessage.StandardErrorCategory, error));
                     result.Outcome = TestOutcome.Failed;
                 }
             }
@@ -96,15 +88,10 @@ namespace Gauge.VisualStudio.TestRunner
             frameworkHandle.RecordEnd(testCase, result.Outcome);
         }
 
-        private static bool BuildOutputExists(_DTE _dte, string projectRoot)
+        private static string BuildOutputPath(string projectRoot)
         {
-            var buildOutputPath = BuildOutputPath(_dte, projectRoot);
-            return Directory.Exists(buildOutputPath) && Directory.EnumerateFileSystemEntries(buildOutputPath).Any();
-        }
-
-        private static string BuildOutputPath(_DTE _dte, string projectRoot)
-        {
-            var activeConfiguration = _dte.Solution.SolutionBuild.ActiveConfiguration.Name;
+            var dte = DTEHelper.GetCurrent();
+            var activeConfiguration = dte.Solution.SolutionBuild.ActiveConfiguration.Name;
             var buildOutputPath = string.Format("{0}\\bin\\{1}", projectRoot, activeConfiguration);
             return buildOutputPath;
         }
