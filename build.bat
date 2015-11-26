@@ -1,1 +1,1 @@
-powershell.exe -ExecutionPolicy Bypass -NoLogo -NonInteractive -NoProfile -WindowStyle Hidden -File ".\build.ps1"
+powershell.exe -ExecutionPolicy Bypass -NoLogo -NonInteractive -NoProfile -File ".\build.ps1"
