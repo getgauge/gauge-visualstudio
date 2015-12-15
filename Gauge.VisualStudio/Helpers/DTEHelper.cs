@@ -20,7 +20,7 @@ namespace Gauge.VisualStudio.Helpers
             if (!"vstest.executionengine.x86".Equals(testRunnerProcess.ProcessName, StringComparison.OrdinalIgnoreCase))
                 return null;
 
-            string progId = String.Format("!{0}.DTE.{1}:{2}", "VisualStudio", "12.0", GetVisualStudioProcessId(testRunnerProcess.Id));
+            var progId = string.Format("!{0}.DTE.{1}:{2}", "VisualStudio", "12.0", GetVisualStudioProcessId(testRunnerProcess.Id));
 
             object runningObject = null;
 
@@ -100,7 +100,7 @@ namespace Gauge.VisualStudio.Helpers
 
         internal static void AttachToProcess(int parentProcessId)
         {
-            var runnerProcessId = DTEHelper.GetRunnerProcessId(parentProcessId);
+            var runnerProcessId = GetRunnerProcessId(parentProcessId);
             if (runnerProcessId == -1) return;
             var dte = GetCurrent();
             foreach (EnvDTE.Process process in dte.Debugger.LocalProcesses)

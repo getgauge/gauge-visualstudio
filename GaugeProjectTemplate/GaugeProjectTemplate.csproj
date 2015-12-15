@@ -33,10 +33,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Gauge.CSharp.Lib, Version=0.4.3, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Gauge.CSharp.Lib, Version=_GaugeLibVersion, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath Condition="Exists('packages\Gauge.CSharp.Lib.0.4.3.0\lib\net45\Gauge.CSharp.Lib.dll')">packages\Gauge.CSharp.Lib.0.4.3.0\lib\net45\Gauge.CSharp.Lib.dll</HintPath>
-      <HintPath Condition="Exists('..\packages\Gauge.CSharp.Lib.0.4.3.0\lib\net45\Gauge.CSharp.Lib.dll')">..\packages\Gauge.CSharp.Lib.0.4.3.0\lib\net45\Gauge.CSharp.Lib.dll</HintPath>
+      <HintPath Condition="Exists('packages\Gauge.CSharp.Lib._GaugeLibVersion.0\lib\net45\Gauge.CSharp.Lib.dll')">packages\Gauge.CSharp.Lib._GaugeLibVersion.0\lib\net45\Gauge.CSharp.Lib.dll</HintPath>
+      <HintPath Condition="Exists('..\packages\Gauge.CSharp.Lib._GaugeLibVersion.0\lib\net45\Gauge.CSharp.Lib.dll')">..\packages\Gauge.CSharp.Lib._GaugeLibVersion.0\lib\net45\Gauge.CSharp.Lib.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -62,7 +62,7 @@
     <Content Include="_preprocess.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>

@@ -61,7 +61,7 @@ namespace Gauge.VisualStudio.Helpers
                 UseShellExecute = false,
                 FileName = "gauge.exe",
                 CreateNoWindow = true,
-                Arguments = String.Format("--daemonize")
+                Arguments = "--daemonize"
             };
 
             gaugeStartInfo.EnvironmentVariables["GAUGE_API_PORT"] = openPort.ToString(CultureInfo.InvariantCulture);
