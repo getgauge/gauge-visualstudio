@@ -41,28 +41,30 @@ namespace Gauge.VisualStudio
     public sealed class GaugePackage : Package
     {
         private Events2 _DTEEvents;
-        private IVsSolution _solution;
-        private readonly SolutionsEventListener _solutionsEventListener = new SolutionsEventListener();
-        private uint _solutionCookie;
+        private SolutionsEventListener _solutionsEventListener;
         private FormatMenuCommand formatMenuCommand;
 
         protected override void Initialize()
         {
             Debug.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", ToString()));
+            base.Initialize();
             ErrorListLogger.Initialize(this);
 
             DTE = (DTE) GetService(typeof (DTE));
-
-            _solution = GetService(typeof(SVsSolution)) as IVsSolution;
-            _solution.AdviseSolutionEvents(_solutionsEventListener, out _solutionCookie);
-
 
             // Add our command handlers for menu (commands must exist in the .vsct file)
             formatMenuCommand = new FormatMenuCommand(this);
             formatMenuCommand.Register();
 
             RegisterEditorFactory(new GaugeEditorFactory(this));
-            base.Initialize();
+
+            _solutionsEventListener = new SolutionsEventListener();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            _solutionsEventListener.Dispose();
+            base.Dispose(disposing);
         }
 
         public static DTE DTE { get; private set; }

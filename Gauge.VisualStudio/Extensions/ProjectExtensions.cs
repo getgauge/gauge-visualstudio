@@ -49,5 +49,15 @@ namespace Gauge.VisualStudio.Extensions
 
             return objProj as Project;
         }
+
+        public static string GetProjectOutputPath(this Project project)
+        {
+            var configurationManager = project.ConfigurationManager;
+            var activeConfiguration = configurationManager.ActiveConfiguration;
+            var outputPath = activeConfiguration.Properties.Item("OutputPath").Value.ToString();
+            return Path.IsPathRooted(outputPath)
+                ? outputPath
+                : Path.GetFullPath(Path.Combine(Path.GetDirectoryName(project.FullName), outputPath));
+        }
     }
 }

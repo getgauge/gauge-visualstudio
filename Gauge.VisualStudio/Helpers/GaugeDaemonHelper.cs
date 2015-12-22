@@ -34,7 +34,7 @@ namespace Gauge.VisualStudio.Helpers
 
         private static readonly Dictionary<string, Process> ChildProcesses = new Dictionary<string, Process>();
 
-        private static readonly HashSet<int> ApiPorts = new HashSet<int>();
+        private static readonly Dictionary<string, int> ApiPorts = new Dictionary<string, int>();
 
         public static GaugeApiConnection GetApiConnectionForActiveDocument()
         {
@@ -54,7 +54,9 @@ namespace Gauge.VisualStudio.Helpers
         internal static GaugeApiConnection StartGaugeAsDaemon(Project gaugeProject)
         {
             var openPort = GetOpenPort();
-            ApiPorts.Add(openPort);
+            var slugifiedName = gaugeProject.SlugifiedName();
+
+            ApiPorts.Add(slugifiedName, openPort);
             var gaugeStartInfo = new ProcessStartInfo
             {
                 WorkingDirectory = Path.GetDirectoryName(gaugeProject.FullName),
@@ -65,13 +67,16 @@ namespace Gauge.VisualStudio.Helpers
             };
 
             gaugeStartInfo.EnvironmentVariables["GAUGE_API_PORT"] = openPort.ToString(CultureInfo.InvariantCulture);
+            gaugeStartInfo.EnvironmentVariables["gauge_custom_build_path"] = gaugeProject.GetProjectOutputPath();
 
             var gaugeProcess = new Process
             {
                 StartInfo = gaugeStartInfo
             };
             if (gaugeProcess.Start())
-                ChildProcesses.Add(gaugeProject.SlugifiedName(), gaugeProcess);
+            {
+                ChildProcesses.Add(slugifiedName, gaugeProcess);
+            }
 
             return new GaugeApiConnection(new TcpClientWrapper(openPort));
         }
@@ -81,7 +86,7 @@ namespace Gauge.VisualStudio.Helpers
             GaugeApiConnection apiConnection;
             if (ApiConnections.TryGetValue(project.SlugifiedName(), out apiConnection))
                 return apiConnection;
-            ErrorListLogger.AddError(String.Format("Gauge API not initialized for project: {0}", project.FullName));
+            ErrorListLogger.AddError(string.Format("Gauge API not initialized for project: {0}", project.FullName));
             throw new GaugeApiInitializationException();
         }
 
@@ -108,10 +113,10 @@ namespace Gauge.VisualStudio.Helpers
         {
             if (ApiConnections.ContainsKey(slugifiedName))
             {
-                ApiConnections.Remove(slugifiedName);
                 try
                 {
                     ApiConnections[slugifiedName].Dispose();
+                    ApiConnections.Remove(slugifiedName);
                 }
                 catch
                 {
@@ -119,14 +124,18 @@ namespace Gauge.VisualStudio.Helpers
             }
             if (ChildProcesses.ContainsKey(slugifiedName))
             {
-                ChildProcesses.Remove(slugifiedName);
                 try
                 {
                     ChildProcesses[slugifiedName].Kill();
+                    ChildProcesses.Remove(slugifiedName);
                 }
                 catch
                 {
                 }
+            }
+            if (ApiPorts.ContainsKey(slugifiedName))
+            {
+                ApiPorts.Remove(slugifiedName);
             }
         }
 
@@ -137,7 +146,7 @@ namespace Gauge.VisualStudio.Helpers
 
         public static List<int> GetAllApiPorts()
         {
-            return ApiPorts.ToList();
+            return ApiPorts.Values.ToList();
         }
     }
 }

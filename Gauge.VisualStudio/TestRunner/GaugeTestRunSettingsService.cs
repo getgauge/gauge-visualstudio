@@ -76,7 +76,7 @@ namespace Gauge.VisualStudio.TestRunner
         private string SerializeGaugeSettings()
         {
             var stringWriter = new StringWriter();
-            Serializer.Serialize(stringWriter, Settings);
+            Serializer.Serialize(stringWriter, new GaugeTestRunSettings());
             return stringWriter.ToString();
         }
     }

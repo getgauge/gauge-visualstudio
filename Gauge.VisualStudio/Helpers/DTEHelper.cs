@@ -3,7 +3,10 @@ using System.Linq;
 using System.Management;
 using System.Runtime.InteropServices;
 using EnvDTE;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 using Process = System.Diagnostics.Process;
 using Thread = System.Threading.Thread;
 
@@ -13,6 +16,14 @@ namespace Gauge.VisualStudio.Helpers
     {
         [DllImport("ole32.dll")]
         private static extern int CreateBindCtx(uint reserved, out IBindCtx ppbc);
+
+        public static void EnsureSolutionBuildIsUpToDate()
+        {
+            if (!IsProjectBuildUpToDate())
+            {
+                GaugePackage.DTE.Solution.SolutionBuild.Build(true);
+            }
+        }
 
         internal static DTE GetCurrent()
         {
@@ -54,7 +65,7 @@ namespace Gauge.VisualStudio.Helpers
                         // do nothing.
                     }
 
-                    if (String.IsNullOrEmpty(name) || !String.Equals(name, progId, StringComparison.Ordinal)) continue;
+                    if (string.IsNullOrEmpty(name) || !string.Equals(name, progId, StringComparison.Ordinal)) continue;
 
                     rot.GetObject(runningObjectMoniker, out runningObject);
                     break;
@@ -126,6 +137,12 @@ namespace Gauge.VisualStudio.Helpers
                 return processes.First();
             }
             return -1;
+        }
+
+        private static bool IsProjectBuildUpToDate()
+        {
+            var buildManager = Package.GetGlobalService(typeof(SVsSolutionBuildManager)) as IVsSolutionBuildManager3;
+            return buildManager.AreProjectsUpToDate(0) == VSConstants.S_OK;
         }
     }
 }

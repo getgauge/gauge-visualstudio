@@ -31,10 +31,10 @@ namespace Gauge.VisualStudio.TestRunner
         {
             var settingsProvider = discoveryContext.RunSettings.GetSettings(GaugeTestRunSettings.SettingsName) 
                 as GaugeTestRunSettingsService;
-            GetSpecs(settingsProvider.Settings, discoverySink, sources);
+            GetSpecs(settingsProvider.Settings, discoverySink, sources, logger);
         }
 
-        public static List<TestCase> GetSpecs(GaugeTestRunSettings testRunSettings, ITestCaseDiscoverySink discoverySink, IEnumerable<string> sources)
+        public static List<TestCase> GetSpecs(GaugeTestRunSettings testRunSettings, ITestCaseDiscoverySink discoverySink, IEnumerable<string> sources, IMessageLogger logger)
         {
             var testCases = new ConcurrentBag<TestCase>();
 
@@ -57,8 +57,10 @@ namespace Gauge.VisualStudio.TestRunner
                         DisplayName = scenario.ScenarioHeading,
                         // Ugly hack below - I don't know how else to pass the scenario index to GaugeRunner
                         // LocalExtensionData returns a null despite setting it here
-                        LineNumber = scenarioIndex
+                        LineNumber = scenarioIndex,
                     };
+
+                    logger.SendMessage(TestMessageLevel.Informational, string.Format("Discovered scenario: {0}", testCase.DisplayName));
 
                     testCase.Traits.Add("Spec", spec.SpecHeading);
 

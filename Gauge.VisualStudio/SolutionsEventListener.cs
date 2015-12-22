@@ -12,20 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using Gauge.VisualStudio.Extensions;
 using Gauge.VisualStudio.Helpers;
 using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
 namespace Gauge.VisualStudio
 {
-    public class SolutionsEventListener : IVsSolutionEvents    {
+    public class SolutionsEventListener : IVsSolutionEvents, IDisposable    {
+        private IVsSolution _solution;
+        private uint _solutionCookie;
+
+        public SolutionsEventListener()
+        {
+            _solution = Package.GetGlobalService(typeof(SVsSolution)) as IVsSolution;
+            ErrorHandler.ThrowOnFailure(_solution.AdviseSolutionEvents(this, out _solutionCookie));
+        }
+
         public int OnAfterOpenProject(IVsHierarchy pHierarchy, int fAdded)
         {
             var project = pHierarchy.ToProject();
-
             if (!project.IsGaugeProject())
                 return VSConstants.S_OK;
+
+            DTEHelper.EnsureSolutionBuildIsUpToDate();
 
             var slugifiedName = project.SlugifiedName();
             if (GaugeDaemonHelper.ContainsApiConnectionFor(slugifiedName))
@@ -86,5 +98,16 @@ namespace Gauge.VisualStudio
         {
             return VSConstants.S_OK;
         }
+
+        public void Dispose()
+        {
+            if (_solution == null || _solutionCookie == 0) return;
+
+            GC.SuppressFinalize(this);
+            _solution.UnadviseSolutionEvents(_solutionCookie);
+            _solutionCookie = 0;
+            _solution = null;
+        }
+
     }
 }

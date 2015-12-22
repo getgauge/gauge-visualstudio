@@ -16,91 +16,77 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Linq;
 using System.Threading.Tasks;
 using EnvDTE;
 using Gauge.VisualStudio.Extensions;
 using Gauge.VisualStudio.Models;
-using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.TestWindow.Extensibility;
-using IServiceProvider = System.IServiceProvider;
 
 namespace Gauge.VisualStudio.TestRunner
 {
-    [Export(typeof(ITestContainerDiscoverer))]
+    [Export(typeof (ITestContainerDiscoverer))]
     public class TestContainerDiscoverer : ITestContainerDiscoverer
     {
         private readonly IServiceProvider _serviceProvider;
-        private List<TestContainer> _cachedTestContainers;
-        private DocumentEvents _documentEvents;
-        private ProjectItemsEvents _solutionItemEvents;
+        private readonly DocumentEvents _documentEvents;
+        private readonly ProjectItemsEvents _solutionItemEvents;
+        private readonly BuildEvents _buildEvents;
 
         [ImportingConstructor]
-        public TestContainerDiscoverer([Import(typeof(SVsServiceProvider))] IServiceProvider serviceProvider)
+        public TestContainerDiscoverer([Import(typeof (SVsServiceProvider))] IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
-            var dte = _serviceProvider.GetService(typeof(DTE)) as DTE;
+            var dte = _serviceProvider.GetService(typeof (DTE)) as DTE;
             _documentEvents = dte.Events.DocumentEvents;
             _solutionItemEvents = dte.Events.SolutionItemsEvents;
+            _buildEvents = dte.Events.BuildEvents;
 
-            _solutionItemEvents.ItemAdded += item => UpdateTestContainersIfGaugeSpecFile(item.Document, true);
-            _solutionItemEvents.ItemRemoved += item => UpdateTestContainersIfGaugeSpecFile(item.Document, true);
-            _solutionItemEvents.ItemRenamed += (item, s) => UpdateTestContainersIfGaugeSpecFile(item.Document, true);
-            _documentEvents.DocumentSaved += doc => UpdateTestContainersIfGaugeSpecFile(doc, false);
-            EnsureProjectBuildIsUpToDate(dte    );
+            _solutionItemEvents.ItemAdded += item => UpdateTestContainersIfGaugeSpecFile(item.Document);
+            _solutionItemEvents.ItemRemoved += item => UpdateTestContainersIfGaugeSpecFile(item.Document);
+            _solutionItemEvents.ItemRenamed += (item, s) => UpdateTestContainersIfGaugeSpecFile(item.Document);
+            _documentEvents.DocumentSaved += UpdateTestContainersIfGaugeSpecFile;
+            _buildEvents.OnBuildDone += (scope, action) =>
+            {
+                if (action == vsBuildAction.vsBuildActionBuild || action == vsBuildAction.vsBuildActionRebuildAll)
+                {
+                    RaiseTestContainersUpdated();
+                }
+            };
         }
 
-        private void EnsureProjectBuildIsUpToDate(_DTE dte)
+        private void RaiseTestContainersUpdated()
         {
-            if (!IsProjectBuildUpToDate())
+            if (TestContainersUpdated != null)
             {
-                dte.Solution.SolutionBuild.Build(true);
+                TestContainersUpdated(this, EventArgs.Empty);
             }
         }
 
-        private void UpdateTestContainersIfGaugeSpecFile(Document doc, bool refresh)
+        private void UpdateTestContainersIfGaugeSpecFile(Document doc)
         {
             if (doc.IsGaugeSpecFile())
-                UpdateTestContainers(refresh);
+                RaiseTestContainersUpdated();
         }
 
         public Uri ExecutorUri
         {
             get { return TestExecutor.ExecutorUri; }
         }
-        
+
         public IEnumerable<ITestContainer> TestContainers
         {
-            get
-            {
-                if (_cachedTestContainers==null)
-                    UpdateTestContainers(true);
-                return _cachedTestContainers;
-            }
+            get { return GetTestContainers(); }
         }
 
-        private bool IsProjectBuildUpToDate()
+        private IEnumerable<TestContainer> GetTestContainers()
         {
-            var buildManager = _serviceProvider.GetService(typeof (SVsSolutionBuildManager)) as IVsSolutionBuildManager3;
-            return buildManager.AreProjectsUpToDate(0) == VSConstants.S_OK;
-        }
-
-        private void UpdateTestContainers(bool refresh)
-        {
-            var initialSearch = _cachedTestContainers == null;
-            if (refresh)
-            {
-                var testContainers = new ConcurrentBag<TestContainer>();
-                var specs = Specification.GetAllSpecsFromGauge();
-                Parallel.ForEach(specs, s => testContainers.Add(new TestContainer(this, s)));
-                _cachedTestContainers = testContainers.ToList();
-            }
-            if(!initialSearch)
-                TestContainersUpdated(this, EventArgs.Empty);
+            var testContainers = new ConcurrentBag<TestContainer>();
+            var specs = Specification.GetAllSpecsFromGauge();
+            Parallel.ForEach(specs, s => testContainers.Add(new TestContainer(this, s)));
+            return testContainers;
         }
 
         public event EventHandler TestContainersUpdated;
-   }
+    }
 }

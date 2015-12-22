@@ -18,6 +18,7 @@ using Gauge.VisualStudio.Exceptions;
 using Gauge.VisualStudio.Helpers;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using Process = System.Diagnostics.Process;
 
 namespace Gauge.VisualStudio.TestRunner
@@ -28,6 +29,7 @@ namespace Gauge.VisualStudio.TestRunner
         {
             var result = new TestResult(testCase);
             frameworkHandle.RecordStart(testCase);
+            frameworkHandle.SendMessage(TestMessageLevel.Informational, string.Format("Executing Test: {0}", testCase));
             var projectRoot = GetProjectRootPath(new FileInfo(testCase.Source).Directory);
             try
             {
@@ -46,6 +48,8 @@ namespace Gauge.VisualStudio.TestRunner
                         Arguments = arguments,
                     }
                 };
+
+                frameworkHandle.SendMessage(TestMessageLevel.Informational, string.Format("TestContext : {0}", testCase.LocalExtensionData));
 
                 p.StartInfo.EnvironmentVariables["gauge_custom_build_path"] = BuildOutputPath(projectRoot);
 
