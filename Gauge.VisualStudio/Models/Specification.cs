@@ -17,6 +17,7 @@ using System.Linq;
 using Gauge.CSharp.Core;
 using Gauge.Messages;
 using Gauge.VisualStudio.Helpers;
+using Gauge.VisualStudio.Loggers;
 
 namespace Gauge.VisualStudio.Models
 {
@@ -52,8 +53,15 @@ namespace Gauge.VisualStudio.Models
                 .SetAllSpecsRequest(specsRequest)
                 .Build();
 
+            OutputPaneLogger.Write(string.Format("[Request]: {0}\n", specsRequest));
             var bytes = apiConnection.WriteAndReadApiMessage(apiMessage);
-            return bytes.AllSpecsResponse.SpecsList;
+
+            var specs = bytes.AllSpecsResponse.SpecsList;
+            var specsList = specs.Count > 0 ? 
+                specs.Select(spec => spec.SpecHeading).Aggregate((a, b) => string.Format("{0}, {1}", a, b))
+                : "No specifications retrieved";
+            OutputPaneLogger.Write(string.Format("[Response]: {0}\n", specsList));
+            return specs;
         }
     }
 }
