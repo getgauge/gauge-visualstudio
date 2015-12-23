@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -67,7 +66,14 @@ namespace Gauge.VisualStudio.Helpers
             };
 
             gaugeStartInfo.EnvironmentVariables["GAUGE_API_PORT"] = openPort.ToString(CultureInfo.InvariantCulture);
-            gaugeStartInfo.EnvironmentVariables["gauge_custom_build_path"] = gaugeProject.GetProjectOutputPath();
+            try
+            {
+                gaugeStartInfo.EnvironmentVariables["gauge_custom_build_path"] = gaugeProject.GetProjectOutputPath();
+            }
+            catch
+            {
+                // ignored
+            }
 
             var gaugeProcess = new Process
             {
