@@ -16,6 +16,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Gauge.CSharp.Core;
 using Gauge.Messages;
+using Gauge.VisualStudio.Exceptions;
 using Gauge.VisualStudio.Helpers;
 using Gauge.VisualStudio.Loggers;
 
@@ -26,13 +27,20 @@ namespace Gauge.VisualStudio.Models
         public static IEnumerable<string> GetAllSpecsFromGauge()
         {
             var specifications = new List<ProtoSpec>();
-            foreach (var apiConnection in GaugeDaemonHelper.GetAllApiConnections())
+            try
             {
-                var specsList = GetSpecsFromGauge(apiConnection);
-                specifications.AddRange(specsList);
-            }
+                foreach (var apiConnection in GaugeDaemonHelper.GetAllApiConnections())
+                {
+                    specifications.AddRange(GetSpecsFromGauge(apiConnection));
+                }
 
-            return specifications.Select(spec => spec.FileName).Distinct();
+                return specifications.Select(spec => spec.FileName).Distinct();
+
+            }
+            catch (GaugeApiInitializationException)
+            {
+                return Enumerable.Empty<string>();
+            }
         }
 
         public static IEnumerable<ProtoSpec> GetAllSpecs(IEnumerable<int> apiPorts)

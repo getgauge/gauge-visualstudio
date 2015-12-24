@@ -41,8 +41,7 @@ namespace Gauge.VisualStudio
             if (GaugeDaemonHelper.ContainsApiConnectionFor(slugifiedName))
                 return VSConstants.S_OK;
 
-            var apiConnection = GaugeDaemonHelper.StartGaugeAsDaemon(project);
-            GaugeDaemonHelper.AddApiConnection(slugifiedName, apiConnection);
+            GaugeDaemonHelper.RegisterGaugeProject(project);
 
             return VSConstants.S_OK;
         }
