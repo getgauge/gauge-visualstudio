@@ -320,6 +320,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Gauge.VisualStudio.licenseheader" />
     <None Include="ItemTemplates\Gauge\Concept\concept.cpt" />
     <Resource Include="ItemTemplates\Gauge\Concept\logo.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
