@@ -37,8 +37,6 @@ namespace Gauge.VisualStudio
             if (!project.IsGaugeProject())
                 return VSConstants.S_OK;
 
-            DTEHelper.EnsureSolutionBuildIsUpToDate();
-
             var slugifiedName = project.SlugifiedName();
             if (GaugeDaemonHelper.ContainsApiConnectionFor(slugifiedName))
                 return VSConstants.S_OK;

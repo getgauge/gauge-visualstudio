@@ -28,14 +28,6 @@ namespace Gauge.VisualStudio.Helpers
         [DllImport("ole32.dll")]
         private static extern int CreateBindCtx(uint reserved, out IBindCtx ppbc);
 
-        public static void EnsureSolutionBuildIsUpToDate()
-        {
-            if (!IsProjectBuildUpToDate())
-            {
-                GaugePackage.DTE.Solution.SolutionBuild.Build(true);
-            }
-        }
-
         internal static DTE GetCurrent()
         {
             var testRunnerProcess = Process.GetCurrentProcess();
@@ -148,12 +140,6 @@ namespace Gauge.VisualStudio.Helpers
                 return processes.First();
             }
             return -1;
-        }
-
-        private static bool IsProjectBuildUpToDate()
-        {
-            var buildManager = Package.GetGlobalService(typeof(SVsSolutionBuildManager)) as IVsSolutionBuildManager3;
-            return buildManager.AreProjectsUpToDate(0) == VSConstants.S_OK;
         }
     }
 }
