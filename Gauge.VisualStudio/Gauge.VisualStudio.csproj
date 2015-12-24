@@ -256,6 +256,7 @@
     <Compile Include="GaugeLanguageInfo.cs" />
     <Compile Include="Helpers\DTEHelper.cs" />
     <Compile Include="Helpers\GaugeDaemonHelper.cs" />
+    <Compile Include="Helpers\NativeMethods.cs" />
     <Compile Include="Loggers\ErrorListLogger.cs" />
     <Compile Include="Extensions\DocumentExtensions.cs" />
     <Compile Include="Extensions\ProjectExtensions.cs" />

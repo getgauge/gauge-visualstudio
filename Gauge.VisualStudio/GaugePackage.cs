@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
@@ -38,11 +39,12 @@ namespace Gauge.VisualStudio
         DefaultToInsertSpaces = true,
         EnableLineNumbers = true,
         RequestStockColors = true)]
-    public sealed class GaugePackage : Package
+    public class GaugePackage : Package, IDisposable
     {
         private Events2 _DTEEvents;
         private SolutionsEventListener _solutionsEventListener;
         private FormatMenuCommand formatMenuCommand;
+        private bool _disposed;
 
         protected override void Initialize()
         {
@@ -61,12 +63,26 @@ namespace Gauge.VisualStudio
             _solutionsEventListener = new SolutionsEventListener();
         }
 
-        protected override void Dispose(bool disposing)
+        public static DTE DTE { get; private set; }
+
+        public void Dispose()
         {
-            _solutionsEventListener.Dispose();
-            base.Dispose(disposing);
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
-        public static DTE DTE { get; private set; }
+        protected override void Dispose(bool disposing)
+        {
+            if (_disposed)
+                return;
+
+            if (disposing)
+            {
+                _solutionsEventListener.Dispose();
+            }
+
+            _disposed = true;
+            base.Dispose(disposing);
+        }
     }
 }

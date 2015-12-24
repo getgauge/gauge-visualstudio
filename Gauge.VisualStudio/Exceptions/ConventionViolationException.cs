@@ -16,6 +16,7 @@ using System;
 
 namespace Gauge.VisualStudio.Exceptions
 {
+    [Serializable]
     internal class ConventionViolationException : Exception
     {
         public ConventionViolationException(string message) : base(message)

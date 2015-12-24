@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -23,12 +24,13 @@ using Color = System.Windows.Media.Color;
 
 namespace Gauge.VisualStudio.UI
 {
-    public partial class ClassPicker
+    public partial class ClassPicker : IDisposable
     {
         private readonly IEnumerable<string> _classNames;
         private readonly CSharpCodeProvider _cSharpCodeProvider = new CSharpCodeProvider();
         private readonly SolidColorBrush _redColor = new SolidColorBrush(Color.FromRgb(255,0,0));
         private readonly SolidColorBrush _blackColor = new SolidColorBrush(Color.FromRgb(0,0,0));
+        private bool _disposed;
 
         public string SelectedClass { get; private set; }
 
@@ -61,6 +63,25 @@ namespace Gauge.VisualStudio.UI
         private bool IsValidIdentifier()
         {
             return _cSharpCodeProvider.IsValidIdentifier(ClassListBox.Text);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed)
+                return;
+
+            if (disposing)
+            {
+                _cSharpCodeProvider.Dispose();
+            }
+
+            _disposed = true;
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿// Copyright [2014, 2015] [ThoughtWorks Inc.](www.thoughtworks.com)
+// Copyright [2014, 2015] [ThoughtWorks Inc.](www.thoughtworks.com)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,18 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
+using System.Runtime.InteropServices;
+using Microsoft.VisualStudio.OLE.Interop;
 
-namespace Gauge.VisualStudio.Exceptions
+namespace Gauge.VisualStudio.Helpers
 {
-    [Serializable]
-    internal class GaugeApiInitializationException : Exception
+    internal static class NativeMethods
     {
-        private const string ErrorMessage = "Failed to initialize Gauge API";
-
-        public GaugeApiInitializationException() : base(ErrorMessage)
-        {
-            
-        }
+        [DllImport("ole32.dll")]
+        public static extern int CreateBindCtx(uint reserved, out IBindCtx ppbc);
     }
 }

@@ -15,15 +15,17 @@
 using System;
 using Gauge.VisualStudio.Extensions;
 using Gauge.VisualStudio.Helpers;
+using Gauge.VisualStudio.Loggers;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
 namespace Gauge.VisualStudio
 {
-    public class SolutionsEventListener : IVsSolutionEvents, IDisposable    {
+    public sealed class SolutionsEventListener : IVsSolutionEvents, IDisposable    {
         private IVsSolution _solution;
         private uint _solutionCookie;
+        private bool _disposed;
 
         public SolutionsEventListener()
         {
@@ -43,6 +45,7 @@ namespace Gauge.VisualStudio
 
             GaugeDaemonHelper.RegisterGaugeProject(project);
 
+            StatusBarLogger.Log("Gauge Project detected, build solution to keep test explorer updated.");
             return VSConstants.S_OK;
         }
 
@@ -98,13 +101,24 @@ namespace Gauge.VisualStudio
 
         public void Dispose()
         {
-            if (_solution == null || _solutionCookie == 0) return;
+            Dispose(true);
 
             GC.SuppressFinalize(this);
-            _solution.UnadviseSolutionEvents(_solutionCookie);
-            _solutionCookie = 0;
-            _solution = null;
         }
 
+        private void Dispose(bool disposing)
+        {
+            if (_disposed || _solution == null || _solutionCookie == 0)
+                return;
+
+            if (disposing)
+            {
+                _solution.UnadviseSolutionEvents(_solutionCookie);
+                _solutionCookie = 0;
+                _solution = null;
+            }
+
+            _disposed = true;
+        }
     }
 }

@@ -25,9 +25,6 @@ namespace Gauge.VisualStudio.Helpers
 {
     internal static class DTEHelper
     {
-        [DllImport("ole32.dll")]
-        private static extern int CreateBindCtx(uint reserved, out IBindCtx ppbc);
-
         internal static DTE GetCurrent()
         {
             var testRunnerProcess = Process.GetCurrentProcess();
@@ -44,7 +41,7 @@ namespace Gauge.VisualStudio.Helpers
 
             try
             {
-                Marshal.ThrowExceptionForHR(CreateBindCtx(0, out bindCtx));
+                Marshal.ThrowExceptionForHR(NativeMethods.CreateBindCtx(0, out bindCtx));
                 bindCtx.GetRunningObjectTable(out rot);
                 rot.EnumRunning(out enumMonikers);
 
