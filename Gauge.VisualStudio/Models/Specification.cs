@@ -53,14 +53,14 @@ namespace Gauge.VisualStudio.Models
                 .SetAllSpecsRequest(specsRequest)
                 .Build();
 
-            OutputPaneLogger.Write(string.Format("[Request]: {0}\n", specsRequest));
+            OutputPaneLogger.WriteLine("[Request]: {0}", specsRequest.ToString());
             var bytes = apiConnection.WriteAndReadApiMessage(apiMessage);
 
             var specs = bytes.AllSpecsResponse.SpecsList;
             var specsList = specs.Count > 0 ? 
                 specs.Select(spec => spec.SpecHeading).Aggregate((a, b) => string.Format("{0}, {1}", a, b))
                 : "No specifications retrieved";
-            OutputPaneLogger.Write(string.Format("[Response]: {0}\n", specsList));
+            OutputPaneLogger.WriteLine("[Response]: {0}", specsList);
             return specs;
         }
     }

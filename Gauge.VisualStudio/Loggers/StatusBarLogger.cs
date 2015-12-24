@@ -32,7 +32,12 @@ namespace Gauge.VisualStudio.Loggers
 
     class OutputPaneLogger
     {
-        internal static void Write(string message)
+        internal static void WriteLine(string message, params object[] parameters)
+        {
+            Write(string.Concat(message, "\n"), parameters);
+        }
+
+        internal static void Write(string message, params object[] parameters)
         {
             var outWindow = Package.GetGlobalService(typeof(SVsOutputWindow)) as IVsOutputWindow;
 
@@ -46,7 +51,7 @@ namespace Gauge.VisualStudio.Loggers
             IVsOutputWindowPane customPane;
             outWindow.GetPane(ref customGuid, out customPane);
 
-            customPane.OutputString(message);
+            customPane.OutputString(string.Format(message, parameters));
         }
     }
 }
