@@ -17,7 +17,7 @@
               <CommandFlag>DynamicVisibility</CommandFlag>
           If you do not want an image next to your command, remove the Icon node /> -->
 
-      <Button guid="GuidGaugeVsPackageCmdSet" id="formatCommand" priority="0x0100" type="Button">
+      <Button guid="GuidGaugeVsPackageCmdSet" id="FormatCommand" priority="0x0100" type="Button">
         <Parent guid="GuidGaugeVsPackageCmdSet" id="MyMenuGroup" />
         <Icon guid="guidImages" id="bmpPicArrows" />
         <Strings>
@@ -38,7 +38,7 @@
     <GuidSymbol name="GuidGaugeVsPackageCmdSet" value="{d09143fc-0d23-4d55-9fda-4d90e5da0c3f}">
 
       <IDSymbol name="MyMenuGroup" value="0x1020" />
-      <IDSymbol name="formatCommand" value="0x0100" />
+      <IDSymbol name="FormatCommand" value="0x0100" />
     </GuidSymbol>
     
     

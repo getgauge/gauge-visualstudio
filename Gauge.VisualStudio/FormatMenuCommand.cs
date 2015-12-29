@@ -36,7 +36,7 @@ namespace Gauge.VisualStudio
         public void Register()
         {
             var mcs = _serviceProvider.GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
-            var menuCommandId = new CommandID(GuidList.GuidGaugeVsPackageCmdSet, (int)PkgCmdIdList.formatCommand);
+            var menuCommandId = new CommandID(GuidList.GuidGaugeVsPackageCmdSet, (int)PkgCmdIdList.FormatCommand);
             var menuItem = new OleMenuCommand(MenuItemCallback, menuCommandId);
             menuItem.BeforeQueryStatus += MenuItemOnBeforeQueryStatus;
             mcs.AddCommand(menuItem);
