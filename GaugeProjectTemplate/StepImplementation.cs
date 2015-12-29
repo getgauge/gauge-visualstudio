@@ -22,10 +22,18 @@ namespace _GaugeProjectTemplate
         [Step("Step that takes a table <table>")]
         public void ReadTable(Table table)
         {
-            table.GetColumnNames().ForEach(Console.Write);
-            var rows = table.GetRows();
-            // typeof(rows) = List<List<string>> i.e a 2-dimensional representation of a table.
-            rows.ForEach(list => Console.WriteLine(list.Aggregate((a, b) => string.Format("{0}|{1}", a, b))));
+            Func<string, string, string> aggregateFunc = (a, b) => string.Format("{0}|{1}", a, b);
+            var columnNames = table.GetColumnNames();
+
+            // print column headers
+            Console.WriteLine(columnNames.Aggregate(aggregateFunc));
+
+            //print row cells
+            foreach (var row in table.GetTableRows())
+            {
+                // Get all row cells, and print them in a line
+                Console.WriteLine(columnNames.Select(s => row.GetCell(s)).Aggregate(aggregateFunc));
+            }
         }
-	}
+    }
 }
