@@ -23,6 +23,8 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
 namespace Gauge.VisualStudio.TestRunner
 {
+    [FileExtension(GaugeContentTypeDefinitions.MarkdownFileExtension)]
+    [FileExtension(GaugeContentTypeDefinitions.SpecFileExtension)]
     [DefaultExecutorUri(TestExecutor.ExecutorUriString)]
     public class TestDiscoverer : ITestDiscoverer
     {
