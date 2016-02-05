@@ -83,7 +83,7 @@ namespace Gauge.VisualStudio.TestRunner
         {
             var testContainers = new ConcurrentBag<TestContainer>();
             var specs = Specification.GetAllSpecsFromGauge();
-            Parallel.ForEach(specs, s => testContainers.Add(new TestContainer(this, s)));
+            Parallel.ForEach(specs, s => testContainers.Add(new TestContainer(this, s, DateTime.Now)));
             return testContainers;
         }
 

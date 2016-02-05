@@ -34,6 +34,7 @@ namespace Gauge.VisualStudio.Helpers
         private static readonly Dictionary<string, Process> ChildProcesses = new Dictionary<string, Process>();
 
         private static readonly Dictionary<string, int> ApiPorts = new Dictionary<string, int>();
+
         private static readonly List<Project> GaugeProjects = new List<Project>();
 
         public static GaugeApiConnection GetApiConnectionForActiveDocument()
@@ -145,19 +146,13 @@ namespace Gauge.VisualStudio.Helpers
             };
 
             gaugeStartInfo.EnvironmentVariables["GAUGE_API_PORT"] = openPort.ToString(CultureInfo.InvariantCulture);
-            try
-            {
-                gaugeStartInfo.EnvironmentVariables["gauge_custom_build_path"] = projectOutputPath;
-            }
-            catch
-            {
-                // ignored
-            }
+            gaugeStartInfo.EnvironmentVariables["gauge_custom_build_path"] = projectOutputPath;
 
             var gaugeProcess = new Process
             {
                 StartInfo = gaugeStartInfo
             };
+
             if (gaugeProcess.Start())
             {
                 ChildProcesses.Add(slugifiedName, gaugeProcess);

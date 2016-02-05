@@ -10,4 +10,4 @@ Write-Host -ForegroundColor Yellow "Restoring Nuget Packages..."
 Write-Host -ForegroundColor Yellow "Done."
 
 
-&$msbuild $sln /m /nologo "/p:configuration=release;OutDir=$($outputPath);VisualStudioVersion=12.0" /t:rebuild
+&$msbuild $sln /m /nologo "/p:configuration=release;OutDir=$($outputPath);VisualStudioVersion=14.0" /t:rebuild
