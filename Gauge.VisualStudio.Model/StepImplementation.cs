@@ -28,7 +28,7 @@ namespace Gauge.VisualStudio.Model
 
         public CodeFunction Function
         {
-            get { return _function; } ;
+            get { return _function; }
         }
 
         public override void NavigateToImplementation(DTE dte)
