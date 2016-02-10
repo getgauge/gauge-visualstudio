@@ -12,6 +12,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauge.VisualStudio.Tests", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GaugeProjectTemplate", "GaugeProjectTemplate\GaugeProjectTemplate.csproj", "{C095C38E-A58F-4E66-8E57-F0A91CCA7974}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauge.VisualStudio.TestAdapter", "Gauge.VisualStudio.TestAdapter\Gauge.VisualStudio.TestAdapter.csproj", "{62F2F1DA-2357-4F63-991A-5449B3F31E00}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauge.VisualStudio.Model", "Gauge.VisualStudio.Model\Gauge.VisualStudio.Model.csproj", "{6990376B-FD73-4A61-A26C-3C2FC9429164}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauge.VisualStudio.Core", "Gauge.VisualStudio.Core\Gauge.VisualStudio.Core.csproj", "{24C4951F-15A5-4C76-9A20-2E456A21500E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -28,6 +34,18 @@ Global
 		{754095AA-91B0-40E4-98AD-3FD8746DB95D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C095C38E-A58F-4E66-8E57-F0A91CCA7974}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C095C38E-A58F-4E66-8E57-F0A91CCA7974}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62F2F1DA-2357-4F63-991A-5449B3F31E00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62F2F1DA-2357-4F63-991A-5449B3F31E00}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62F2F1DA-2357-4F63-991A-5449B3F31E00}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62F2F1DA-2357-4F63-991A-5449B3F31E00}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6990376B-FD73-4A61-A26C-3C2FC9429164}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6990376B-FD73-4A61-A26C-3C2FC9429164}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6990376B-FD73-4A61-A26C-3C2FC9429164}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6990376B-FD73-4A61-A26C-3C2FC9429164}.Release|Any CPU.Build.0 = Release|Any CPU
+		{24C4951F-15A5-4C76-9A20-2E456A21500E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{24C4951F-15A5-4C76-9A20-2E456A21500E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{24C4951F-15A5-4C76-9A20-2E456A21500E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{24C4951F-15A5-4C76-9A20-2E456A21500E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

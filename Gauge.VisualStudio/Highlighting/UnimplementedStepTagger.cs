@@ -20,14 +20,14 @@ using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
-using Project = Gauge.VisualStudio.Models.Project;
+using Project = Gauge.VisualStudio.Model.Project;
 
 namespace Gauge.VisualStudio.Highlighting
 {
     internal class UnimplementedStepTagger : ITagger<UnimplementedStepTag>, IDisposable
     {
         private readonly ITextView _textView;
-        private static readonly Project _project = new Project();
+        private static readonly Project _project = new Project(GaugePackage.DTE);
 
         public UnimplementedStepTagger(ITextView textView)
         {

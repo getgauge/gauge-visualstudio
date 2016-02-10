@@ -15,7 +15,7 @@
 using System;
 using EnvDTE;
 using EnvDTE80;
-using Gauge.VisualStudio.Models;
+using Gauge.VisualStudio.Model;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell;
@@ -39,25 +39,25 @@ namespace Gauge.VisualStudio.References
                     var caretBufferPosition = TextView.Caret.Position.BufferPosition;
                     var originalText = caretBufferPosition.GetContainingLine().GetText();
 
-                    string findRegex = Step.GetFindRegex(originalText);
+                    var findRegex = Step.GetFindRegex(GaugePackage.ActiveProject, originalText);
 
-                    DTE2 _dte = ServiceProvider.GlobalProvider.GetService(typeof(DTE)) as DTE2;
+                    var _dte = ServiceProvider.GlobalProvider.GetService(typeof(DTE)) as DTE2;
                     var find = (Find2)_dte.Find;
 
-                    string types = find.FilesOfType;
-                    bool matchCase = find.MatchCase;
-                    bool matchWord = find.MatchWholeWord;
+                    var types = find.FilesOfType;
+                    var matchCase = find.MatchCase;
+                    var matchWord = find.MatchWholeWord;
 
                     find.WaitForFindToComplete = false;
-                    find.Action = EnvDTE.vsFindAction.vsFindActionFindAll;
+                    find.Action = vsFindAction.vsFindActionFindAll;
                     find.Backwards = false;
                     find.MatchInHiddenText = true;
                     find.MatchWholeWord = true;
                     find.MatchCase = false;
-                    find.PatternSyntax = EnvDTE.vsFindPatternSyntax.vsFindPatternSyntaxRegExpr;
-                    find.ResultsLocation = EnvDTE.vsFindResultsLocation.vsFindResults1;
+                    find.PatternSyntax = vsFindPatternSyntax.vsFindPatternSyntaxRegExpr;
+                    find.ResultsLocation = vsFindResultsLocation.vsFindResults1;
                     find.SearchSubfolders = true;
-                    find.Target = EnvDTE.vsFindTarget.vsFindTargetSolution;
+                    find.Target = vsFindTarget.vsFindTargetSolution;
                     find.FindWhat = findRegex;
                     find.Execute();
 

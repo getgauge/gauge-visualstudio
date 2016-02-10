@@ -17,7 +17,7 @@ using Gauge.VisualStudio.Classification;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Text.Editor;
-using Project = Gauge.VisualStudio.Models.Project;
+using Project = Gauge.VisualStudio.Model.Project;
 
 namespace Gauge.VisualStudio.GotoDefn
 {
@@ -46,11 +46,11 @@ namespace Gauge.VisualStudio.GotoDefn
                     //Gauge parses and caches the concepts, its location (file + line number).
                     //The plugin's job is to simply make an api call and fetch this information.
 
-                    var stepImplementation = new Project().GetStepImplementation(caretBufferPosition.GetContainingLine());
+                    var stepImplementation = new Project(GaugePackage.DTE).GetStepImplementation(caretBufferPosition.GetContainingLine());
 
                     if (stepImplementation != null)
                     {
-                        stepImplementation.NavigateToImplementation();
+                        stepImplementation.NavigateToImplementation(GaugePackage.DTE);
                     }
                     return hresult;
                 default:

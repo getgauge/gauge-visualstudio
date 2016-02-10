@@ -14,7 +14,7 @@
 
 using System;
 using System.Runtime.InteropServices;
-using Gauge.VisualStudio.Extensions;
+using Gauge.VisualStudio.Core.Extensions;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell;

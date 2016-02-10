@@ -6,6 +6,7 @@
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -20,7 +21,7 @@
     <AssemblyName>Gauge.VisualStudio</AssemblyName>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>Key.snk</AssemblyOriginatorKeyFile>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -44,9 +45,9 @@
     <Reference Include="Gauge.CSharp.Core">
       <HintPath>..\packages\Gauge.CSharp.Core.0.0.2.0\lib\net45\Gauge.CSharp.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Gauge.CSharp.Lib, Version=0.5.0.0, Culture=neutral, PublicKeyToken=3f92af01a0ea350e, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Gauge.CSharp.Lib.0.5.0.0\lib\net45\Gauge.CSharp.Lib.dll</HintPath>
+    <Reference Include="Gauge.CSharp.Lib, Version=0.5.2.0, Culture=neutral, PublicKeyToken=3f92af01a0ea350e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Gauge.CSharp.Lib.0.5.2.0\lib\net45\Gauge.CSharp.Lib.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Google.ProtocolBuffers, Version=2.4.1.555, Culture=neutral, PublicKeyToken=55f7125234beb589, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -247,17 +248,11 @@
     <Compile Include="Classification\Parser.cs" />
     <Compile Include="Classification\Types.cs" />
     <Compile Include="CommandController.cs" />
-    <Compile Include="Exceptions\ConventionViolationException.cs" />
-    <Compile Include="Exceptions\GaugeAPIInitializationException.cs" />
     <Compile Include="FormatMenuCommand.cs" />
     <Compile Include="GaugeEditorFactory.cs" />
     <Compile Include="GaugeLanguageInfo.cs" />
-    <Compile Include="Helpers\DTEHelper.cs" />
-    <Compile Include="Helpers\GaugeDaemonHelper.cs" />
-    <Compile Include="Helpers\NativeMethods.cs" />
+    <Compile Include="Helpers\DaemonHelper.cs" />
     <Compile Include="Loggers\ErrorListLogger.cs" />
-    <Compile Include="Extensions\DocumentExtensions.cs" />
-    <Compile Include="Extensions\ProjectExtensions.cs" />
     <Compile Include="GaugeContentTypeDefinitions.cs" />
     <Compile Include="GaugeClassifierProvider.cs" />
     <Compile Include="GotoDefn\GotoDefnCommandFilter.cs" />
@@ -268,13 +263,6 @@
     <Compile Include="Highlighting\UnimplementedStepTagger.cs" />
     <Compile Include="Loggers\OutputPaneLogger.cs" />
     <Compile Include="Loggers\StatusBarLogger.cs" />
-    <Compile Include="Models\Concept.cs" />
-    <Compile Include="Models\ConceptImplementation.cs" />
-    <Compile Include="Models\Implementation.cs" />
-    <Compile Include="Models\Project.cs" />
-    <Compile Include="Models\Specification.cs" />
-    <Compile Include="Models\Step.cs" />
-    <Compile Include="Models\StepImplementation.cs" />
     <Compile Include="PkgCmdID.cs" />
     <Compile Include="Refactor\RenameCommandFilter.cs" />
     <Compile Include="References\FindReferencesCommandFilter.cs" />
@@ -286,15 +274,7 @@
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="GaugePackage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="SolutionsEventListener.cs" />
-    <Compile Include="TestRunner\GaugeRunner.cs" />
-    <Compile Include="TestRunner\GaugeTestRunSettings.cs" />
-    <Compile Include="TestRunner\GaugeTestRunSettingsService.cs" />
-    <Compile Include="TestRunner\TestContainer.cs" />
-    <Compile Include="TestRunner\TestContainerDiscoverer.cs" />
-    <Compile Include="TestRunner\TestDiscoverer.cs" />
-    <Compile Include="TestRunner\TestExecutor.cs" />
     <Compile Include="UI\Refactor.xaml.cs">
       <DependentUpon>Refactor.xaml</DependentUpon>
     </Compile>
@@ -320,6 +300,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="Gauge.VisualStudio.licenseheader" />
     <None Include="ItemTemplates\Gauge\Concept\concept.cpt" />
     <Resource Include="ItemTemplates\Gauge\Concept\logo.png">
@@ -375,6 +356,20 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Gauge.VisualStudio.Core\Gauge.VisualStudio.Core.csproj">
+      <Project>{24c4951f-15a5-4c76-9a20-2e456a21500e}</Project>
+      <Name>Gauge.VisualStudio.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Gauge.VisualStudio.Model\Gauge.VisualStudio.Model.csproj">
+      <Project>{6990376b-fd73-4a61-a26c-3c2fc9429164}</Project>
+      <Name>Gauge.VisualStudio.Model</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Gauge.VisualStudio.TestAdapter\Gauge.VisualStudio.TestAdapter.csproj">
+      <Project>{62f2f1da-2357-4f63-991a-5449b3f31e00}</Project>
+      <Name>Gauge.VisualStudio.TestAdapter</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <UseCodebase>true</UseCodebase>

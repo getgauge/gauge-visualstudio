@@ -18,7 +18,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
-using Gauge.VisualStudio.Models;
+using Gauge.VisualStudio.Model;
 using Microsoft.CSharp;
 using Color = System.Windows.Media.Color;
 
@@ -38,7 +38,7 @@ namespace Gauge.VisualStudio.UI
         {
             InitializeComponent();
             WindowStartupLocation=WindowStartupLocation.CenterScreen;
-            _classNames = Project.GetAllClasses().Select(element => element.Name).Take(10);
+            _classNames = Project.GetAllClasses(GaugePackage.ActiveProject).Select(element => element.Name).Take(10);
             ClassListBox.ItemsSource = _classNames;
         }
 

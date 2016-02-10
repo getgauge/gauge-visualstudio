@@ -65,6 +65,11 @@ namespace Gauge.VisualStudio
 
         public static DTE DTE { get; private set; }
 
+        public static Project ActiveProject
+        {
+            get { return DTE.ActiveDocument.ProjectItem.ContainingProject; }
+        }
+
         public void Dispose()
         {
             Dispose(true);

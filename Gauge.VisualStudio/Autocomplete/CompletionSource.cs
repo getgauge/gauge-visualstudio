@@ -15,7 +15,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using Gauge.VisualStudio.Models;
+using Gauge.VisualStudio.Model;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Operations;
@@ -40,15 +40,13 @@ namespace Gauge.VisualStudio.AutoComplete
 
         class GaugeCompletionSource : ICompletionSource
         {
-            private readonly GaugeCompletionSourceProvider _gaugeCompletionSourceProvider;
             private readonly ITextBuffer _buffer;
             private bool _disposed;
-            private readonly Concept _concept = new Concept();
-            private readonly Step _step = new Step();
+            private readonly Concept _concept = new Concept(GaugePackage.ActiveProject);
+            private readonly Step _step = new Step(GaugePackage.ActiveProject);
 
             public GaugeCompletionSource(GaugeCompletionSourceProvider gaugeCompletionSourceProvider, ITextBuffer buffer)
             {
-                _gaugeCompletionSourceProvider = gaugeCompletionSourceProvider;
                 _buffer = buffer;
             }
 

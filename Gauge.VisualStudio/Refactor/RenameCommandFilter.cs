@@ -16,6 +16,7 @@ using System;
 using Gauge.Messages;
 using Gauge.VisualStudio.Classification;
 using Gauge.VisualStudio.Helpers;
+using Gauge.VisualStudio.Model;
 using Gauge.VisualStudio.UI;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
@@ -59,7 +60,7 @@ namespace Gauge.VisualStudio.Refactor
                     if (!Parser.StepRegex.IsMatch(lineText))
                         return hresult;
 
-                    var originalText = Models.Step.GetStepText(currentLine);
+                    var originalText = Step.GetStepText(currentLine);
 
                     var refactorDialog = new RefactorDialog(originalText);
                     var showModal = refactorDialog.ShowModal();
@@ -85,7 +86,7 @@ namespace Gauge.VisualStudio.Refactor
                                 return VSConstants.S_FALSE;
 
                             ReloadChangedDocuments(response);
-                            Models.Project.RefreshImplementationsForActiveProject();
+                            Project.RefreshImplementationsForActiveProject(GaugePackage.DTE);
                         }
                         finally
                         {
@@ -109,7 +110,7 @@ namespace Gauge.VisualStudio.Refactor
                 .SetNewStep(newText)
                 .SetOldStep(originalText)
                 .Build();
-            var apiConnection = GaugeDaemonHelper.GetApiConnectionForActiveDocument();
+            var apiConnection = DaemonHelper.GetApiConnectionForActiveDocument();
             var apiMessage = APIMessage.CreateBuilder()
                 .SetPerformRefactoringRequest(performRefactoringRequest)
                 .SetMessageType(APIMessage.Types.APIMessageType.PerformRefactoringRequest)

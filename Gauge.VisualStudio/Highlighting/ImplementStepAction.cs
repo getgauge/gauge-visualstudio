@@ -21,13 +21,13 @@ using System.Windows.Media.Imaging;
 using EnvDTE;
 using Gauge.CSharp.Lib;
 using Gauge.VisualStudio.Classification;
-using Gauge.VisualStudio.Extensions;
+using Gauge.VisualStudio.Core.Extensions;
 using Gauge.VisualStudio.Loggers;
-using Gauge.VisualStudio.Models;
+using Gauge.VisualStudio.Model;
 using Gauge.VisualStudio.UI;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
-using Project = Gauge.VisualStudio.Models.Project;
+using Project = Gauge.VisualStudio.Model.Project;
 
 namespace Gauge.VisualStudio.Highlighting
 {
@@ -51,8 +51,8 @@ namespace Gauge.VisualStudio.Highlighting
             _snapshot = _trackingSpan.TextBuffer.CurrentSnapshot;
             _display = "Implement Step";
             Icon = new BitmapImage(new Uri("pack://application:,,,/Gauge.VisualStudio;component/assets/glyphs/step.png"));
-            _step = new Step();
             _project = project;
+            _step = new Step(GaugePackage.ActiveProject);
         }
 
         public void Invoke()
@@ -71,7 +71,7 @@ namespace Gauge.VisualStudio.Highlighting
             CodeClass targetClass;
             try
             {
-                targetClass = Project.FindOrCreateClass(selectedClass);
+                targetClass = Project.FindOrCreateClass(GaugePackage.ActiveProject, selectedClass);
             }
             catch (ArgumentException ex)
             {
@@ -96,11 +96,11 @@ namespace Gauge.VisualStudio.Highlighting
 
                 if (Step.HasTable(containingLine))
                 {
-                    implementationFunction.AddParameter(string.Format("table"), typeof (Table).Name);
+                    implementationFunction.AddParameter("table", typeof (Table).Name);
                 }
                 else
                 {
-                    var step = Step.Parse(containingLine);
+                    var step = _step.Parse(GaugePackage.ActiveProject, containingLine);
                     foreach (var parameter in step.Parameters)
                     {
                         implementationFunction.AddParameter(parameter, vsCMTypeRef.vsCMTypeRefString);
@@ -108,7 +108,7 @@ namespace Gauge.VisualStudio.Highlighting
                 }
 
                 var codeAttribute = implementationFunction.AddAttribute("Step",
-                    _step.GetParameterizedStepValue(containingLine).ToLiteral(), -1);
+                    _step.GetParameterizedStepValue(GaugePackage.ActiveProject, containingLine).ToLiteral(), -1);
 
                 if (codeAttribute == null)
                 {
