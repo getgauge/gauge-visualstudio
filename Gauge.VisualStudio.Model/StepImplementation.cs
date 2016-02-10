@@ -18,13 +18,18 @@ namespace Gauge.VisualStudio.Model
 {
     internal class StepImplementation : Implementation
     {
+        private CodeFunction _function;
+
         public StepImplementation(CodeFunction function, string stepText)
         {
-            Function = function;
+            _function = function;
             StepText = stepText;
         }
 
-        public CodeFunction Function { get; }
+        public CodeFunction Function
+        {
+            get { return _function; } ;
+        }
 
         public override void NavigateToImplementation(DTE dte)
         {
