@@ -16,6 +16,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Gauge.VisualStudio.Core.Loggers;
 using Gauge.VisualStudio.Model;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
@@ -44,6 +45,8 @@ namespace Gauge.VisualStudio.TestAdapter
 
             Parallel.ForEach(protoSpecs, spec =>
             {
+                OutputPaneLogger.Debug("Source: {0}", spec);
+
                 if (sources.All(s => string.CompareOrdinal(s, spec.FileName) != 0))
                     return;
 
