@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -20,9 +21,12 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using EnvDTE;
 using Gauge.CSharp.Core;
+using Gauge.Messages;
 using Gauge.VisualStudio.Core.Exceptions;
 using Gauge.VisualStudio.Core.Extensions;
 using Gauge.VisualStudio.Core.Loggers;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 using Process = System.Diagnostics.Process;
 using Thread = System.Threading.Thread;
 
@@ -125,6 +129,13 @@ namespace Gauge.VisualStudio.Core.Helpers
 
         private static GaugeApiConnection StartGaugeAsDaemon(Project gaugeProject)
         {
+            var waitDialog = (IVsThreadedWaitDialog)Package.GetGlobalService(typeof(SVsThreadedWaitDialog));
+            waitDialog.StartWaitDialog("Initializing Gauge Project",
+                string.Format("Initializing Gauge daemon for Project: {0}", gaugeProject.Name),
+                null,
+                0,
+                null,
+                null);
             var projectOutputPath = GetValidProjectOutputPath(gaugeProject);
 
             var openPort = GetOpenPort();
@@ -151,19 +162,78 @@ namespace Gauge.VisualStudio.Core.Helpers
                 StartInfo = gaugeStartInfo
             };
 
-            if (gaugeProcess.Start())
+            try
             {
-                ChildProcesses.Add(slugifiedName, gaugeProcess);
+                if (gaugeProcess.Start())
+                {
+                    ChildProcesses.Add(slugifiedName, gaugeProcess);
+                }
+                OutputPaneLogger.Debug("Opening Gauge Daemon with PID: {0}", gaugeProcess.Id);
+                var tcpClientWrapper = new TcpClientWrapper(openPort);
+                WaitForColdStart(tcpClientWrapper);
+                OutputPaneLogger.Debug("PID: {0} ready, waiting for messages..", gaugeProcess.Id);
+                return new GaugeApiConnection(tcpClientWrapper);
             }
+            catch
+            {
+                DisplayGaugeNotFoundMessage();
+                return null;
+            }
+            finally
+            {
+                var cancelled = 0;
+                waitDialog.EndWaitDialog(ref cancelled);
+            }
+        }
 
-            OutputPaneLogger.Debug("Opening Gauge Daemon with PID: {0}", gaugeProcess.Id);
-            var tcpClientWrapper = new TcpClientWrapper(openPort);
+        private static void DisplayGaugeNotFoundMessage()
+        {
+            const string message = "Unable to launch Gauge Daemon. Ensure that\n" +
+                                   "1. Gauge is installed.\n" +
+                                   "2. Gauge.exe is available in PATH\n\n" +
+                                   "If issue persists, please report to authors";
+            var uiShell = (IVsUIShell) Package.GetGlobalService(typeof (IVsUIShell));
+            var clsId = Guid.Empty;
+            var result = 0;
+            uiShell.ShowMessageBox(0, ref clsId,
+                "Gauge - Critical Error Occurred",
+                message,
+                string.Empty,
+                0,
+                OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST,
+                OLEMSGICON.OLEMSGICON_CRITICAL,
+                0, out result
+                );
+        }
+
+        private static void WaitForColdStart(ITcpClientWrapper tcpClientWrapper)
+        {
             while (!tcpClientWrapper.Connected)
             {
                 Thread.Sleep(100);
             }
-            OutputPaneLogger.Debug("PID: {0} ready, waiting for messages..", gaugeProcess.Id);
-            return new GaugeApiConnection(tcpClientWrapper);
+
+            var messageId = DateTime.Now.Ticks/TimeSpan.TicksPerMillisecond;
+            var specsRequest = GetAllSpecsRequest.DefaultInstance;
+            var apiMessage = APIMessage.CreateBuilder()
+                .SetMessageId(messageId)
+                .SetMessageType(APIMessage.Types.APIMessageType.GetAllSpecsRequest)
+                .SetAllSpecsRequest(specsRequest)
+                .Build();
+
+            var gaugeApiConnection = new GaugeApiConnection(tcpClientWrapper);
+            var i = 0;
+            while (i < 10)
+            {
+                var message = gaugeApiConnection.WriteAndReadApiMessage(apiMessage);
+                if (message.HasAllSpecsResponse && message.AllSpecsResponse.SpecsCount > 0)
+                {
+                    break;
+                }
+                Thread.Sleep(500);
+                i++;
+            }
         }
 
         private static string GetValidProjectOutputPath(Project gaugeProject)

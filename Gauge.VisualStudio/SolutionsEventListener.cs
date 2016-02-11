@@ -43,6 +43,7 @@ namespace Gauge.VisualStudio
             if (GaugeDaemonHelper.ContainsApiConnectionFor(slugifiedName))
                 return VSConstants.S_OK;
 
+
             GaugeDaemonHelper.RegisterGaugeProject(project);
 
             StatusBarLogger.Log("Gauge Project detected, build solution to keep test explorer updated.");
