@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.IO;
+using System.Text.RegularExpressions;
 using EnvDTE;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -21,6 +22,8 @@ namespace Gauge.VisualStudio.Core.Extensions
 {
     public static class ProjectExtensions
     {
+        private static readonly Regex ManifestExists = new Regex("\"Language\"\\s*:\\s*\"csharp\"", RegexOptions.Compiled | RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
         public static string SlugifiedName(this Project project)
         {
             return project == null ? "" : project.Name.Replace('.', '_');
@@ -31,10 +34,14 @@ namespace Gauge.VisualStudio.Core.Extensions
             try
             {
                 var directoryName = Path.GetDirectoryName(project.FileName);
-                var manifestExists = File.Exists(Path.Combine(directoryName, "manifest.json"));
-                var specsDirExists = Directory.Exists(Path.Combine(directoryName, "specs"));
+                var manifestPath = Path.Combine(directoryName, "manifest.json");
+                if (!File.Exists(manifestPath))
+                {
+                    return false;
+                }
 
-                return specsDirExists && manifestExists;
+                var manifest = File.ReadAllText(manifestPath);
+                return ManifestExists.IsMatch(manifest);
             }
             catch
             {
