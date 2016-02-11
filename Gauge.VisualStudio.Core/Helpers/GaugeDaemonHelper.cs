@@ -24,6 +24,7 @@ using Gauge.VisualStudio.Core.Exceptions;
 using Gauge.VisualStudio.Core.Extensions;
 using Gauge.VisualStudio.Core.Loggers;
 using Process = System.Diagnostics.Process;
+using Thread = System.Threading.Thread;
 
 namespace Gauge.VisualStudio.Core.Helpers
 {
@@ -156,8 +157,13 @@ namespace Gauge.VisualStudio.Core.Helpers
             }
 
             OutputPaneLogger.Debug("Opening Gauge Daemon with PID: {0}", gaugeProcess.Id);
-
-            return new GaugeApiConnection(new TcpClientWrapper(openPort));
+            var tcpClientWrapper = new TcpClientWrapper(openPort);
+            while (!tcpClientWrapper.Connected)
+            {
+                Thread.Sleep(100);
+            }
+            OutputPaneLogger.Debug("PID: {0} ready, waiting for messages..", gaugeProcess.Id);
+            return new GaugeApiConnection(tcpClientWrapper);
         }
 
         private static string GetValidProjectOutputPath(Project gaugeProject)
