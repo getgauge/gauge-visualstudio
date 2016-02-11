@@ -21,6 +21,7 @@
   <Assets>
     <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
     <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="Gauge.VisualStudio" Path="|Gauge.VisualStudio|" />
+    <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="Gauge.VisualStudio.TestAdapter" Path="|Gauge.VisualStudio.TestAdapter|" />
     <Asset Type="UnitTestExtension" d:Source="Project" d:ProjectName="%CurrentProject%.TestAdapter" Path="|Gauge.VisualStudio.TestAdapter|" />
     <Asset Type="Microsoft.VisualStudio.ItemTemplate" Path="Output\ItemTemplates" />
     <Asset Type="Microsoft.VisualStudio.ProjectTemplate" Path="Output\ProjectTemplates" />

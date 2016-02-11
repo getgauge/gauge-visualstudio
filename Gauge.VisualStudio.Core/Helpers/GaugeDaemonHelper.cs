@@ -107,7 +107,8 @@ namespace Gauge.VisualStudio.Core.Helpers
                 ApiPorts.Remove(slugifiedName);
             }
 
-            GaugeProjects.Remove(GaugeProjects.Find(project => string.CompareOrdinal(project.SlugifiedName(), slugifiedName) == 0));
+            GaugeProjects.Remove(
+                GaugeProjects.Find(project => string.CompareOrdinal(project.SlugifiedName(), slugifiedName) == 0));
         }
 
         public static bool ContainsApiConnectionFor(string slugifiedName)

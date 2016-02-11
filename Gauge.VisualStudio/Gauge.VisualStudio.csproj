@@ -361,14 +361,20 @@
     <ProjectReference Include="..\Gauge.VisualStudio.Core\Gauge.VisualStudio.Core.csproj">
       <Project>{24c4951f-15a5-4c76-9a20-2e456a21500e}</Project>
       <Name>Gauge.VisualStudio.Core</Name>
+      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3bSatelliteDllsProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
+      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
     </ProjectReference>
     <ProjectReference Include="..\Gauge.VisualStudio.Model\Gauge.VisualStudio.Model.csproj">
       <Project>{6990376b-fd73-4a61-a26c-3c2fc9429164}</Project>
       <Name>Gauge.VisualStudio.Model</Name>
+      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3bSatelliteDllsProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
+      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
     </ProjectReference>
     <ProjectReference Include="..\Gauge.VisualStudio.TestAdapter\Gauge.VisualStudio.TestAdapter.csproj">
       <Project>{62f2f1da-2357-4f63-991a-5449b3f31e00}</Project>
       <Name>Gauge.VisualStudio.TestAdapter</Name>
+      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3bSatelliteDllsProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
+      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
