@@ -27,13 +27,14 @@ namespace Gauge.VisualStudio.Highlighting
     internal class UnimplementedStepTagger : ITagger<UnimplementedStepTag>, IDisposable
     {
         private readonly ITextView _textView;
-        private static readonly Project _project = new Project(GaugePackage.DTE);
+        private readonly Project _project;
 
         public UnimplementedStepTagger(ITextView textView)
         {
             _textView = textView;
             _textView.LayoutChanged += OnLayoutChanged;
             _textView.Caret.PositionChanged += OnCaretMove;
+            _project = new Project(GaugePackage.DTE);
         }
 
         private void OnCaretMove(object sender, CaretPositionChangedEventArgs e)
