@@ -16,16 +16,16 @@ using System;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
-namespace Gauge.VisualStudio.Loggers
+namespace Gauge.VisualStudio.Core.Loggers
 {
-    internal class OutputPaneLogger
+    public class OutputPaneLogger
     {
-        internal static void WriteLine(string message, params object[] parameters)
+        public static void WriteLine(string message, params object[] parameters)
         {
             Write(string.Concat(message, "\n"), parameters);
         }
 
-        internal static void Write(string message, params object[] parameters)
+        public static void Write(string message, params object[] parameters)
         {
             var outWindow = Package.GetGlobalService(typeof(SVsOutputWindow)) as IVsOutputWindow;
 
@@ -40,6 +40,21 @@ namespace Gauge.VisualStudio.Loggers
             outWindow.GetPane(ref customGuid, out customPane);
 
             customPane.OutputString(string.Format(message, parameters));
+        }
+
+        public static void Error(string s, params object[] parameters)
+        {
+            WriteLine(string.Format("[Error] {0}", s), parameters);
+        }
+
+        public static void Debug(string s, params object[] parameters)
+        {
+            WriteLine(string.Format("[Debug] {0}", s), parameters);
+        }
+
+        public static void Info(string s, params object[] parameters)
+        {
+            WriteLine(string.Format("[Info] {0}", s), parameters);
         }
     }
 }

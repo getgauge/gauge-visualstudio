@@ -18,7 +18,6 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using EnvDTE;
 using EnvDTE80;
-using Gauge.VisualStudio.Loggers;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -50,7 +49,6 @@ namespace Gauge.VisualStudio
         {
             Debug.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", ToString()));
             base.Initialize();
-            ErrorListLogger.Initialize(this);
 
             DTE = (DTE) GetService(typeof (DTE));
 

@@ -252,7 +252,6 @@
     <Compile Include="GaugeEditorFactory.cs" />
     <Compile Include="GaugeLanguageInfo.cs" />
     <Compile Include="Helpers\DaemonHelper.cs" />
-    <Compile Include="Loggers\ErrorListLogger.cs" />
     <Compile Include="GaugeContentTypeDefinitions.cs" />
     <Compile Include="GaugeClassifierProvider.cs" />
     <Compile Include="GotoDefn\GotoDefnCommandFilter.cs" />
@@ -261,7 +260,6 @@
     <Compile Include="Highlighting\StepTaggerProvider.cs" />
     <Compile Include="Highlighting\UnimplementedStepTag.cs" />
     <Compile Include="Highlighting\UnimplementedStepTagger.cs" />
-    <Compile Include="Loggers\OutputPaneLogger.cs" />
     <Compile Include="Loggers\StatusBarLogger.cs" />
     <Compile Include="PkgCmdID.cs" />
     <Compile Include="Refactor\RenameCommandFilter.cs" />

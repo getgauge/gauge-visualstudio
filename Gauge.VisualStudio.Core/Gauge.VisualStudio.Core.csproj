@@ -120,6 +120,7 @@
     <Compile Include="Helpers\DTEHelper.cs" />
     <Compile Include="Helpers\GaugeDaemonHelper.cs" />
     <Compile Include="Helpers\NativeMethods.cs" />
+    <Compile Include="Loggers\OutputPaneLogger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

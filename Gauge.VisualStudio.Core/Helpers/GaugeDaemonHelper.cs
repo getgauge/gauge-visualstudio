@@ -22,6 +22,7 @@ using EnvDTE;
 using Gauge.CSharp.Core;
 using Gauge.VisualStudio.Core.Exceptions;
 using Gauge.VisualStudio.Core.Extensions;
+using Gauge.VisualStudio.Core.Loggers;
 using Process = System.Diagnostics.Process;
 
 namespace Gauge.VisualStudio.Core.Helpers
@@ -120,12 +121,13 @@ namespace Gauge.VisualStudio.Core.Helpers
         {
             return ApiPorts.Values.ToList();
         }
+
         private static GaugeApiConnection StartGaugeAsDaemon(Project gaugeProject)
         {
             var projectOutputPath = GetValidProjectOutputPath(gaugeProject);
 
             var openPort = GetOpenPort();
-//            OutputPaneLogger.WriteLine("[Debug] Opening Gauge Daemon for Project : {0},  at port: {1}", gaugeProject.Name, openPort);
+            OutputPaneLogger.Debug("Opening Gauge Daemon for Project : {0},  at port: {1}", gaugeProject.Name, openPort);
             var slugifiedName = gaugeProject.SlugifiedName();
 
             ApiPorts.Add(slugifiedName, openPort);
@@ -153,7 +155,7 @@ namespace Gauge.VisualStudio.Core.Helpers
                 ChildProcesses.Add(slugifiedName, gaugeProcess);
             }
 
-//            OutputPaneLogger.WriteLine("[Debug] Opening Gauge Daemon with PID: {0}", gaugeProcess.Id);
+            OutputPaneLogger.Debug("Opening Gauge Daemon with PID: {0}", gaugeProcess.Id);
 
             return new GaugeApiConnection(new TcpClientWrapper(openPort));
         }
@@ -164,24 +166,24 @@ namespace Gauge.VisualStudio.Core.Helpers
 
             if (string.IsNullOrEmpty(projectOutputPath))
             {
-//                OutputPaneLogger.WriteLine(
-//                    "[Error] Unable to retrieve Project Output path for Project : {0}. Not starting Gauge Daemon",
-//                    gaugeProject.Name);
+                OutputPaneLogger.Error(
+                    "Unable to retrieve Project Output path for Project : {0}. Not starting Gauge Daemon",
+                    gaugeProject.Name);
                 throw new GaugeApiInitializationException();
             }
 
             if (!Directory.Exists(projectOutputPath))
             {
-//                OutputPaneLogger.WriteLine("[Error] Project Output path '{0}' does not exists. Not starting Gauge Daemon",
-//                    projectOutputPath);
+                OutputPaneLogger.Error("Project Output path '{0}' does not exists. Not starting Gauge Daemon",
+                    projectOutputPath);
                 throw new GaugeApiInitializationException();
             }
 
             if (!Directory.EnumerateFiles(projectOutputPath, "*.dll").Any())
             {
-//                OutputPaneLogger.WriteLine(
-//                    "[Error] Project Output path '{0}' does not contain any binadies. Ensure that project is built. Not starting Gauge Daemon",
-//                    projectOutputPath);
+                OutputPaneLogger.Error(
+                    "Project Output path '{0}' does not contain any binaries. Ensure that project is built. Not starting Gauge Daemon",
+                    projectOutputPath);
                 throw new GaugeApiInitializationException();
             }
 
