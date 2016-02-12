@@ -86,7 +86,7 @@ namespace Gauge.VisualStudio.TestAdapter
             var specs = Specification.GetAllSpecsFromGauge();
             Parallel.ForEach(specs, s =>
             {
-                OutputPaneLogger.Debug("Adding Scenario TestContainer: {0}", s);
+                OutputPaneLogger.Debug("Adding TestContainer: {0}", s);
                 testContainers.Add(new TestContainer(this, s, DateTime.Now));
             });
             return testContainers;
