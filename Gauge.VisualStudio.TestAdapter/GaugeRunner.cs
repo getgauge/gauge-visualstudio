@@ -49,8 +49,6 @@ namespace Gauge.VisualStudio.TestAdapter
                     }
                 };
 
-                frameworkHandle.SendMessage(TestMessageLevel.Informational, string.Format("TestContext : {0}", testCase.LocalExtensionData));
-
                 p.StartInfo.EnvironmentVariables["gauge_custom_build_path"] = BuildOutputPath(projectRoot);
 
                 if (isBeingDebugged)

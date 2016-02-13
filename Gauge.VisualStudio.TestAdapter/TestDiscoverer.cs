@@ -39,9 +39,13 @@ namespace Gauge.VisualStudio.TestAdapter
 
         public static List<TestCase> GetSpecs(GaugeTestRunSettings testRunSettings, ITestCaseDiscoverySink discoverySink, IEnumerable<string> sources, IMessageLogger logger)
         {
+            OutputPaneLogger.Debug("Discover Scenarios started. Using API ports: {0}", testRunSettings.ApiPorts);
+
             var testCases = new ConcurrentBag<TestCase>();
 
             var protoSpecs = Specification.GetAllSpecs(testRunSettings.ApiPorts);
+
+            OutputPaneLogger.Debug("Discover Scenarios started. Using API ports: {0}", testRunSettings.ApiPorts);
 
             Parallel.ForEach(protoSpecs, spec =>
             {
