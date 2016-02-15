@@ -35,7 +35,7 @@ namespace Gauge.VisualStudio.Model
         private static List<Implementation> _implementations;
         private static DocumentEvents _documentEvents;
         private ProjectItemsEvents _projectItemsEvents;
-        private DTE _dte;
+        private readonly DTE _dte;
 
         public Project(DTE dte)
         {
@@ -144,6 +144,7 @@ namespace Gauge.VisualStudio.Model
             return GetAllClasses(project).FirstOrDefault(element => element.Name == className) as CodeClass ??
                    AddClass(className, project);
         }
+
         private static CodeClass AddClass(string className, EnvDTE.Project project)
         {
             var codeDomProvider = CodeDomProvider.CreateProvider("CSharp");
@@ -168,6 +169,7 @@ namespace Gauge.VisualStudio.Model
 
             var codeNamespace = new System.CodeDom.CodeNamespace(targetNamespace);
             codeNamespace.Imports.Add(new CodeNamespaceImport("System"));
+            codeNamespace.Imports.Add(new CodeNamespaceImport("Gauge.CSharp.Lib"));
             codeNamespace.Imports.Add(new CodeNamespaceImport("Gauge.CSharp.Lib.Attribute"));
 
             var codeTypeDeclaration = new CodeTypeDeclaration(targetClass) {IsClass = true, TypeAttributes = TypeAttributes.Public};
