@@ -14,6 +14,7 @@
 
 using System;
 using Gauge.VisualStudio.Classification;
+using Gauge.VisualStudio.Model;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Text.Editor;

@@ -17,7 +17,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.Text;
 
-namespace Gauge.VisualStudio.Classification
+namespace Gauge.VisualStudio.Model
 {
     public static class Parser
     {

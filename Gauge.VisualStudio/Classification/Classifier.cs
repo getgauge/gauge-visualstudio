@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections.Generic;
+using Gauge.VisualStudio.Model;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 
