@@ -1,4 +1,4 @@
-// Copyright [2014, 2015] [ThoughtWorks Inc.](www.thoughtworks.com)
+﻿// Copyright [2014, 2015] [ThoughtWorks Inc.](www.thoughtworks.com)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,16 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Gauge.CSharp.Core;
-using Gauge.VisualStudio.Core.Helpers;
-
-namespace Gauge.VisualStudio.Helpers
+namespace Gauge.VisualStudio.Model.Tests
 {
-    internal class DaemonHelper
+    public class Class1
     {
-        public static GaugeApiConnection GetApiConnectionForActiveDocument()
-        {
-            return GaugeDaemonHelper.GetApiConnectionFor(GaugePackage.ActiveProject);
-        }
     }
 }

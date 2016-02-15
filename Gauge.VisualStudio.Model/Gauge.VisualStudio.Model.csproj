@@ -164,6 +164,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Gauge.VisualStudio.licenseheader" />
     <None Include="model.snk" />
     <None Include="packages.config" />
   </ItemGroup>

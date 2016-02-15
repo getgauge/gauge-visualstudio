@@ -125,6 +125,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="core.snk" />
+    <None Include="Gauge.VisualStudio.licenseheader" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
