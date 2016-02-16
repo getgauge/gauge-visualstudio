@@ -103,12 +103,49 @@ namespace Gauge.VisualStudio.Model.Tests
                 new TestCaseData("* say !@ to all").Returns("* say !@ to all"), 
                 new TestCaseData("* Say \"{hi | bye / how  who ? <>=+-_)(*&^%$#@!~`}\" to \"[hello)\"").Returns("* Say \"{hi | bye / how  who ? <>=+-_)(*&^%$#@!~`}\" to \"[hello)\""), 
                 new TestCaseData("* Say ,./?';:\\|][=+-_)(*&^%$#@!~`").Returns("* Say ,./?';:\\|][=+-_)(*&^%$#@!~`"), 
+                new TestCaseData("* Step that takes a table <table:foo.csv>").Returns("* Step that takes a table <table:foo.csv>")
             };
 
             [Test, TestCaseSource("ScenarioHeadingTestCases")]
             public string ShouldGetStepName(string stepText)
             {
                 return Parser.StepRegex.Match(stepText).Value.Trim();
+            }
+
+            [Test]
+            public void ShouldGetTableFromStepText()
+            {
+                var tokens = Parser.ParseMarkdownParagraph("* Step that takes a table <table:foo.csv>");
+                var tableParameter = tokens.First(token => token.TokenType == Parser.TokenType.TableParameter).Value;
+
+                Assert.AreEqual("foo.csv", tableParameter);
+            }
+
+            [Test]
+            public void ShouldGetFileFromStepText()
+            {
+                var tokens = Parser.ParseMarkdownParagraph(@"* Step that takes a table <File:c:\blah\foo.txt>");
+                var tableParameter = tokens.First(token => token.TokenType == Parser.TokenType.FileParameter).Value;
+
+                Assert.AreEqual(@"c:\blah\foo.txt", tableParameter);
+            }
+
+            [Test]
+            public void ShouldGetStaticParameters()
+            {
+                var tokens = Parser.ParseMarkdownParagraph("* Say \"hello\" to \"world\"");
+                var staticParameters = tokens.Where(token => token.TokenType == Parser.TokenType.StaticParameter).Select(token => token.Value);
+
+                Assert.AreEqual(new []{"hello", "world"}, staticParameters);
+            }
+
+            [Test]
+            public void ShouldGetDynamicParameters()
+            {
+                var tokens = Parser.ParseMarkdownParagraph("* Say <something> to <someone>");
+                var dynamicParameters = tokens.Where(token => token.TokenType == Parser.TokenType.DynamicParameter).Select(token => token.Value);
+
+                Assert.AreEqual(new []{"something", "someone"}, dynamicParameters);
             }
         }
     }

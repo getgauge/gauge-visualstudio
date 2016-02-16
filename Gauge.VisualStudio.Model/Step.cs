@@ -74,6 +74,10 @@ namespace Gauge.VisualStudio.Model
 
         public static bool HasTable(ITextSnapshotLine line)
         {
+            var text = line.GetText();
+            var markdownParagraph = Parser.ParseMarkdownParagraph(text);
+            if(markdownParagraph.Any(token => token.TokenType == Parser.TokenType.TableParameter))
+                return true;
             var nextLineText = NextLineText(line);
             var tableRegex = new Regex(@"[ ]*\|[\w ]+\|", RegexOptions.Compiled);
             return tableRegex.IsMatch(nextLineText);

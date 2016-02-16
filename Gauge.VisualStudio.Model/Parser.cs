@@ -23,15 +23,25 @@ namespace Gauge.VisualStudio.Model
     {
         internal const char DummyChar = '~';
 
-        private static readonly Regex ScenarioHeadingRegex = new Regex(@"\#\#(?<heading>.+)[\n\r]+", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
-        private static readonly Regex ScenarioHeadingRegexAlt = new Regex(@"(?<heading>.+)[\n\r]+[\s]*-+", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
+        private static readonly Regex ScenarioHeadingRegex = new Regex(@"\#\#(?<heading>.+)[\n\r]+",
+            RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
 
-        private static readonly Regex SpecHeadingRegex = new Regex(@"\#(?<heading>.+)[\n\r]*", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
-        private static readonly Regex SpecHeadingRegexAlt = new Regex(@"(?<heading>.+)[\n\r][\s]*=+", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
+        private static readonly Regex ScenarioHeadingRegexAlt = new Regex(@"(?<heading>.+)[\n\r]+[\s]*-+",
+            RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
 
-        public static readonly Regex StepRegex = new Regex(@"[ ]*\*(([^{}""\n\r]*)(?<stat>"".*"")*(?<dyn><[^<>\n\r]>)*)*", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
+        private static readonly Regex SpecHeadingRegex = new Regex(@"\#(?<heading>.+)[\n\r]*",
+            RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
 
-        private static readonly Regex TagsRegex = new Regex(@"\s*tags\s*:\s*(?<tag>[\w\s]+)(,(?<tag>[\w\s]+))*", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
+        private static readonly Regex SpecHeadingRegexAlt = new Regex(@"(?<heading>.+)[\n\r][\s]*=+",
+            RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
+
+        public static readonly Regex StepRegex =
+            new Regex(
+                @"[ ]*\*(([^{}""\<\>\n\r]*)(?<stat>""(?<statValue>.*?)"")*(?<dyn>\<(?<dynValue>(?!(table|file)).*?)\>)*)*((?<table><table:(?<tableValue>[^>]*)>)|(?<file><file:(?<fileValue>[^>]*)))?",
+                RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace | RegexOptions.IgnoreCase);
+
+        private static readonly Regex TagsRegex = new Regex(@"\s*tags\s*:\s*(?<tag>[\w\s]+)(,(?<tag>[\w\s]+))*",
+            RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
 
         public static List<Token> ParseMarkdownParagraph(string text, int offset = 0)
         {
@@ -83,31 +93,38 @@ namespace Gauge.VisualStudio.Model
             Tag,
             TagValue,
             StaticParameter,
-            DynamicParameter
+            DynamicParameter,
+            TableParameter,
+            FileParameter
         }
 
         public struct Token
         {
-            public Token(TokenType type, Span span) { TokenType = type; Span = span; }
+            public Token(TokenType type, Span span, string value)
+            {
+                TokenType = type; 
+                Span = span;
+                Value = value;
+            }
 
             public TokenType TokenType;
             public Span Span;
+            public string Value;
         }
 
         private static IEnumerable<Token> ParseScenarios(string text)
         {
             // Multiple ifs? Somehow I feel this is more explicit than having complex regex.
-
             var matches = ScenarioHeadingRegex.Matches(text);
             foreach (Match match in matches)
             {
-                yield return new Token(TokenType.Scenario, new Span(match.Index, match.Length));
+                yield return new Token(TokenType.Scenario, new Span(match.Index, match.Length), match.Value);
             }
 
             matches = ScenarioHeadingRegexAlt.Matches(text);
             foreach (Match match in matches)
             {
-                yield return new Token(TokenType.Scenario, new Span(match.Index, match.Length));
+                yield return new Token(TokenType.Scenario, new Span(match.Index, match.Length), match.Value);
             }
         }
 
@@ -116,12 +133,12 @@ namespace Gauge.VisualStudio.Model
             var matches = SpecHeadingRegex.Matches(text);
             foreach (Match match in matches)
             {
-                yield return new Token(TokenType.Specification, new Span(match.Index, match.Length));
+                yield return new Token(TokenType.Specification, new Span(match.Index, match.Length), match.Value);
             }
             matches = SpecHeadingRegexAlt.Matches(text);
             foreach (Match match in matches)
             {
-                yield return new Token(TokenType.Specification, new Span(match.Index, match.Length));
+                yield return new Token(TokenType.Specification, new Span(match.Index, match.Length), match.Value);
             }
         }
 
@@ -130,14 +147,30 @@ namespace Gauge.VisualStudio.Model
             var matches = StepRegex.Matches(text);
             foreach (Match match in matches)
             {
-                yield return new Token(TokenType.Step, new Span(match.Index, match.Length));
-                foreach (Capture capture in match.Groups["stat"].Captures)
+                yield return new Token(TokenType.Step, new Span(match.Index, match.Length), match.Value);
+                for (var i = 0; i < match.Groups["stat"].Captures.Count; i++)
                 {
-                    yield return new Token(TokenType.StaticParameter, new Span(capture.Index, capture.Length));    
+                    var capture = match.Groups["stat"].Captures[i];
+                    var captureValue = match.Groups["statValue"].Captures[i].Value;
+                    yield return new Token(TokenType.StaticParameter, new Span(capture.Index, capture.Length), captureValue);
                 }
-                foreach (Capture capture in match.Groups["dyn"].Captures)
+                for (var i = 0; i < match.Groups["dyn"].Captures.Count; i++)
                 {
-                    yield return new Token(TokenType.DynamicParameter, new Span(capture.Index, capture.Length));    
+                    var capture = match.Groups["dyn"].Captures[i];
+                    var captureValue = match.Groups["dynValue"].Captures[i].Value;
+                    yield return new Token(TokenType.DynamicParameter, new Span(capture.Index, capture.Length), captureValue);
+                }
+                for (var i = 0; i < match.Groups["table"].Captures.Count; i++)
+                {
+                    var capture = match.Groups["table"].Captures[i];
+                    var captureValue = match.Groups["tableValue"].Captures[i].Value;
+                    yield return new Token(TokenType.TableParameter, new Span(capture.Index, capture.Length), captureValue);
+                }
+                for (var i = 0; i < match.Groups["file"].Captures.Count; i++)
+                {
+                    var capture = match.Groups["file"].Captures[i];
+                    var captureValue = match.Groups["fileValue"].Captures[i].Value;
+                    yield return new Token(TokenType.FileParameter, new Span(capture.Index, capture.Length), captureValue);
                 }
             }
         }
@@ -147,10 +180,10 @@ namespace Gauge.VisualStudio.Model
             var matches = TagsRegex.Matches(text);
             foreach (Match match in matches)
             {
-                yield return new Token(TokenType.Tag, new Span(match.Index, match.Length));
+                yield return new Token(TokenType.Tag, new Span(match.Index, match.Length), match.Value);
                 foreach (Capture capture in match.Groups["tag"].Captures)
                 {
-                    yield return new Token(TokenType.TagValue, new Span(capture.Index, capture.Length));                    
+                    yield return new Token(TokenType.TagValue, new Span(capture.Index, capture.Length), capture.Value);
                 }
             }
         }

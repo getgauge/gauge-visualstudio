@@ -37,7 +37,7 @@ namespace Gauge.VisualStudio.Model.Tests
         }
 
         [Test]
-        public void ShouldFindTableInStepWitSpecialTableParam()
+        public void ShouldFindTableInStepWithSpecialTableParam()
         {
             var snapshotLine = A.Fake<ITextSnapshotLine>();
             A.CallTo(() => snapshotLine.LineNumber).Returns(1);
