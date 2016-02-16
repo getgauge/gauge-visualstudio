@@ -68,12 +68,12 @@ namespace Gauge.VisualStudio.Model
         public static IEnumerable<string> GetScenarios(string text)
         {
             var matches = ScenarioHeadingRegex.Matches(text);
-            foreach (Capture capture in from Match match in matches from Capture capture in match.Groups["heading"].Captures select capture)
+            foreach (var capture in from Match match in matches from Capture capture in match.Groups["heading"].Captures select capture)
             {
                 yield return capture.Value.Trim();
             }
             matches = ScenarioHeadingRegexAlt.Matches(text);
-            foreach (Capture capture in from Match match in matches from Capture capture in match.Groups["heading"].Captures select capture)
+            foreach (var capture in from Match match in matches from Capture capture in match.Groups["heading"].Captures select capture)
             {
                 yield return capture.Value.Trim();
             }
@@ -148,29 +148,24 @@ namespace Gauge.VisualStudio.Model
             foreach (Match match in matches)
             {
                 yield return new Token(TokenType.Step, new Span(match.Index, match.Length), match.Value);
-                for (var i = 0; i < match.Groups["stat"].Captures.Count; i++)
+
+                var types = new Dictionary<string, TokenType>
                 {
-                    var capture = match.Groups["stat"].Captures[i];
-                    var captureValue = match.Groups["statValue"].Captures[i].Value;
-                    yield return new Token(TokenType.StaticParameter, new Span(capture.Index, capture.Length), captureValue);
-                }
-                for (var i = 0; i < match.Groups["dyn"].Captures.Count; i++)
+                    {"stat", TokenType.StaticParameter},
+                    {"dyn", TokenType.DynamicParameter},
+                    {"table", TokenType.TableParameter},
+                    {"file", TokenType.FileParameter}
+                };
+
+                foreach (var tokenType in types)
                 {
-                    var capture = match.Groups["dyn"].Captures[i];
-                    var captureValue = match.Groups["dynValue"].Captures[i].Value;
-                    yield return new Token(TokenType.DynamicParameter, new Span(capture.Index, capture.Length), captureValue);
-                }
-                for (var i = 0; i < match.Groups["table"].Captures.Count; i++)
-                {
-                    var capture = match.Groups["table"].Captures[i];
-                    var captureValue = match.Groups["tableValue"].Captures[i].Value;
-                    yield return new Token(TokenType.TableParameter, new Span(capture.Index, capture.Length), captureValue);
-                }
-                for (var i = 0; i < match.Groups["file"].Captures.Count; i++)
-                {
-                    var capture = match.Groups["file"].Captures[i];
-                    var captureValue = match.Groups["fileValue"].Captures[i].Value;
-                    yield return new Token(TokenType.FileParameter, new Span(capture.Index, capture.Length), captureValue);
+                    var tokenName = tokenType.Key;
+                    for (var i = 0; i < match.Groups[tokenName].Captures.Count; i++)
+                    {
+                        var capture = match.Groups[tokenName].Captures[i];
+                        var captureValue = match.Groups[string.Format("{0}Value", tokenName)].Captures[i].Value;
+                        yield return new Token(tokenType.Value, new Span(capture.Index, capture.Length), captureValue);
+                    }
                 }
             }
         }
