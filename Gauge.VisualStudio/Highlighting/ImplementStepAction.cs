@@ -20,7 +20,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using EnvDTE;
 using Gauge.CSharp.Lib;
-using Gauge.VisualStudio.Classification;
 using Gauge.VisualStudio.Core.Extensions;
 using Gauge.VisualStudio.Loggers;
 using Gauge.VisualStudio.Model;
@@ -85,12 +84,15 @@ namespace Gauge.VisualStudio.Highlighting
                 return;
             }
 
-            var functionCount = Project.GetFunctionsForClass(targetClass).Count();
+            var stepValue = _step.GetParameterizedStepValue(GaugePackage.ActiveProject, containingLine);
+            var functionName = stepValue.ToMethodIdentifier();
+            var functionCount = Project.GetFunctionsForClass(targetClass).Count(element => string.CompareOrdinal(element.Name, functionName)==0);
+            functionName = functionCount==0 ? functionName : functionName + functionCount;
             CodeFunction implementationFunction = null;
 
             try
             {
-                implementationFunction = targetClass.AddFunction(string.Format("GaugeImpl{0}", functionCount + 1),
+                implementationFunction = targetClass.AddFunction(functionName,
                     vsCMFunction.vsCMFunctionFunction, vsCMTypeRef.vsCMTypeRefVoid, -1,
                     vsCMAccess.vsCMAccessPublic);
 
@@ -107,8 +109,7 @@ namespace Gauge.VisualStudio.Highlighting
                     }
                 }
 
-                var codeAttribute = implementationFunction.AddAttribute("Step",
-                    _step.GetParameterizedStepValue(GaugePackage.ActiveProject, containingLine).ToLiteral(), -1);
+                var codeAttribute = implementationFunction.AddAttribute("Step", stepValue.ToLiteral(), -1);
 
                 if (codeAttribute == null)
                 {

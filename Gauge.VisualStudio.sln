@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauge.VisualStudio.Core", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauge.VisualStudio.Model.Tests", "Gauge.VisualStudio.Model.Tests\Gauge.VisualStudio.Model.Tests.csproj", "{11C8F0C3-1654-4B5C-BD87-7C7458485F4A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauge.VisualStudio.Core.Tests", "Gauge.VisualStudio.Core.Tests\Gauge.VisualStudio.Core.Tests.csproj", "{44A99A24-DE66-4FF1-8683-E001F5B7C55B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +45,10 @@ Global
 		{11C8F0C3-1654-4B5C-BD87-7C7458485F4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{11C8F0C3-1654-4B5C-BD87-7C7458485F4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{11C8F0C3-1654-4B5C-BD87-7C7458485F4A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44A99A24-DE66-4FF1-8683-E001F5B7C55B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44A99A24-DE66-4FF1-8683-E001F5B7C55B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44A99A24-DE66-4FF1-8683-E001F5B7C55B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44A99A24-DE66-4FF1-8683-E001F5B7C55B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
