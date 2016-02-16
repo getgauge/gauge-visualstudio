@@ -64,23 +64,32 @@ namespace Gauge.VisualStudio.Model
         public static string GetStepText(ITextSnapshotLine line)
         {
             var originalText = line.GetText();
-            var lineText = originalText.Replace('*', ' ').Trim();
+            var match = Parser.StepRegex.Match(originalText);
+            var stepText = match.Groups["stepText"].Value.Trim();
+            var suffix = string.Empty;
 
-            //if next line is a table then change the last word of the step to take in a special param
-            if (HasTable(line))
-                lineText = string.Format("{0} <table>", lineText);
-            return lineText;
+            if (match.Groups["table"].Success || HasInlineTable(line))
+            {
+                suffix = " <table>";
+            }
+            if (match.Groups["file"].Success)
+            {
+                suffix = " <file>";
+            }
+            return string.Concat(stepText, suffix);
         }
 
         public static bool HasTable(ITextSnapshotLine line)
         {
             var text = line.GetText();
-            var markdownParagraph = Parser.ParseMarkdownParagraph(text);
-            if(markdownParagraph.Any(token => token.TokenType == Parser.TokenType.TableParameter))
-                return true;
+            var hasReferenceTable = Parser.ParseMarkdownParagraph(text).Any(token => token.TokenType == Parser.TokenType.TableParameter);
+            return hasReferenceTable || HasInlineTable(line);
+        }
+
+        private static bool HasInlineTable(ITextSnapshotLine line)
+        {
             var nextLineText = NextLineText(line);
-            var tableRegex = new Regex(@"[ ]*\|[\w ]+\|", RegexOptions.Compiled);
-            return tableRegex.IsMatch(nextLineText);
+            return Parser.TableRegex.IsMatch(nextLineText);
         }
 
         private static IEnumerable<ProtoStepValue> GetAllStepsFromGauge(EnvDTE.Project project)

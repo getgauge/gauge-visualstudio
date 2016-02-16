@@ -125,6 +125,8 @@ namespace Gauge.VisualStudio.Classification
             { Parser.TokenType.TagValue, "gauge.tagvalue" },
             { Parser.TokenType.StaticParameter, "gauge.static_param" },
             { Parser.TokenType.DynamicParameter, "gauge.dynamic_param" },
+            { Parser.TokenType.TableParameter, "gauge.dynamic_param" },
+            { Parser.TokenType.FileParameter, "gauge.dynamic_param" },
         };
 
         IClassificationType GetClassificationTypeForMarkdownToken(Parser.TokenType tokenType)

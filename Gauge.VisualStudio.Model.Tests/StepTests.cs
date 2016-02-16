@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Collections.Generic;
 using FakeItEasy;
 using Microsoft.VisualStudio.Text;
 using NUnit.Framework;
@@ -21,30 +22,84 @@ namespace Gauge.VisualStudio.Model.Tests
     [TestFixture]
     public class StepTests
     {
-        [Test]
-        public void ShouldFindTableInStep()
+        private class InlineTableParamTests
         {
-            var textSnapshotLines = A.CollectionOfFake<ITextSnapshotLine>(2);
-            A.CallTo(() => textSnapshotLines[0].LineNumber).Returns(1);
-            A.CallTo(() => textSnapshotLines[1].LineNumber).Returns(2);
-            A.CallTo(() => textSnapshotLines[0].GetText()).Returns("* Step that takes a table");
-            A.CallTo(() => textSnapshotLines[1].GetText()).Returns("    |col1|col2|");
-            var textSnapshot = A.Fake<ITextSnapshot>();
-            A.CallTo(() => textSnapshot.GetLineFromLineNumber(2)).Returns(textSnapshotLines[1]);
-            A.CallTo(() => textSnapshotLines[0].Snapshot).Returns(textSnapshot);
+            private IList<ITextSnapshotLine> _textSnapshotLines;
+            private const string StepText = "Step that takes a table";
 
-            Assert.True(Step.HasTable(textSnapshotLines[0]));
+            [SetUp]
+            public void Setup()
+            {
+                _textSnapshotLines = A.CollectionOfFake<ITextSnapshotLine>(2);
+                A.CallTo(() => _textSnapshotLines[0].LineNumber).Returns(1);
+                A.CallTo(() => _textSnapshotLines[1].LineNumber).Returns(2);
+                A.CallTo(() => _textSnapshotLines[0].GetText()).Returns(string.Format("* {0}", StepText));
+                A.CallTo(() => _textSnapshotLines[1].GetText()).Returns("    |col1|col2|");
+                var textSnapshot = A.Fake<ITextSnapshot>();
+                A.CallTo(() => textSnapshot.GetLineFromLineNumber(2)).Returns(_textSnapshotLines[1]);
+                A.CallTo(() => _textSnapshotLines[0].Snapshot).Returns(textSnapshot);
+            }
+
+            [Test]
+            public void ShouldFindTableInStep()
+            {
+                Assert.True(Step.HasTable(_textSnapshotLines[0]));
+            }
+
+            [Test]
+            public void ShouldFetchStepTextForInlineTable()
+            {
+                var expected = string.Format("{0} <table>", StepText);
+                Assert.AreEqual(expected, Step.GetStepText(_textSnapshotLines[0]));
+            }
         }
 
-        [Test]
-        public void ShouldFindTableInStepWithSpecialTableParam()
+        private class TableParamTests
         {
-            var snapshotLine = A.Fake<ITextSnapshotLine>();
-            A.CallTo(() => snapshotLine.LineNumber).Returns(1);
-            A.CallTo(() => snapshotLine.GetText()).Returns("* Step that takes a table <table:foo.csv>");
+            private ITextSnapshotLine _snapshotLine;
+            private const string StepText = "Step that takes a table";
 
-            Assert.True(Step.HasTable(snapshotLine));
+            [SetUp]
+            public void Setup()
+            {
+                _snapshotLine = A.Fake<ITextSnapshotLine>();
+                A.CallTo(() => _snapshotLine.LineNumber).Returns(1);
+                A.CallTo(() => _snapshotLine.GetText()).Returns(string.Format("* {0} <table:foo.csv>", StepText));
+            }
+
+            [Test]
+            public void ShouldFindTableInStepWithTableParam()
+            {
+                Assert.True(Step.HasTable(_snapshotLine));
+            }
+
+            [Test]
+            public void ShouldFetchStepTextForTableParam()
+            {
+                var expected = string.Format("{0} <table>", StepText);
+                Assert.AreEqual(expected, Step.GetStepText(_snapshotLine));
+            }
         }
 
+        private class FileParamTests
+        {
+            private ITextSnapshotLine _snapshotLine;
+            private const string StepText = "Step that takes a table";
+
+            [SetUp]
+            public void Setup()
+            {
+                _snapshotLine = A.Fake<ITextSnapshotLine>();
+                A.CallTo(() => _snapshotLine.LineNumber).Returns(1);
+                A.CallTo(() => _snapshotLine.GetText()).Returns(string.Format("* {0} <file:foo.txt>", StepText));
+            }
+
+            [Test]
+            public void ShouldFetchStepTextForTableParam()
+            {
+                var expected = string.Format("{0} <file>", StepText);
+                Assert.AreEqual(expected, Step.GetStepText(_snapshotLine));
+            }
+        }
     }
 }

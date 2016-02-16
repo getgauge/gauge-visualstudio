@@ -14,7 +14,6 @@
 
 using System;
 using Gauge.Messages;
-using Gauge.VisualStudio.Classification;
 using Gauge.VisualStudio.Helpers;
 using Gauge.VisualStudio.Model;
 using Gauge.VisualStudio.UI;

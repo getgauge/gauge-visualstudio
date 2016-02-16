@@ -125,9 +125,27 @@ namespace Gauge.VisualStudio.Model.Tests
             public void ShouldGetFileFromStepText()
             {
                 var tokens = Parser.ParseMarkdownParagraph(@"* Step that takes a table <File:c:\blah\foo.txt>");
-                var tableParameter = tokens.First(token => token.TokenType == Parser.TokenType.FileParameter).Value;
+                var fileParameter = tokens.First(token => token.TokenType == Parser.TokenType.FileParameter).Value;
 
-                Assert.AreEqual(@"c:\blah\foo.txt", tableParameter);
+                Assert.AreEqual(@"c:\blah\foo.txt", fileParameter);
+            }
+
+            [Test]
+            public void ShouldMatchInlineTable()
+            {
+                const string tableValue = "    |col1|col2|\n    |value1|value2|";
+                var isMatch = Parser.TableRegex.IsMatch(tableValue);
+
+                Assert.IsTrue(isMatch);
+            }
+
+            [Test]
+            public void ShouldFetchFileSpecialParameters()
+            {
+                const string stepText = "* Step with a <dyn> and \"static\" as well as file paramerter <file:c:\\foo.txt>";
+                var match = Parser.StepRegex.Match(stepText);
+
+                Assert.AreEqual(" Step with a <dyn> and \"static\" as well as file paramerter ", match.Groups["stepText"].Value);
             }
 
             [Test]

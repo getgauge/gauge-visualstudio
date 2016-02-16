@@ -37,11 +37,13 @@ namespace Gauge.VisualStudio.Model
 
         public static readonly Regex StepRegex =
             new Regex(
-                @"[ ]*\*(([^{}""\<\>\n\r]*)(?<stat>""(?<statValue>.*?)"")*(?<dyn>\<(?<dynValue>(?!(table|file)).*?)\>)*)*((?<table><table:(?<tableValue>[^>]*)>)|(?<file><file:(?<fileValue>[^>]*)))?",
+                @"[ ]*\*(?<stepText>(([^{}""\<\>\n\r]*)(?<stat>""(?<statValue>.*?)"")*(?<dyn>\<(?<dynValue>(?!(table|file)).*?)\>)*)*)((?<table><table:(?<tableValue>[^>]*)>)|(?<file><file:(?<fileValue>[^>]*)>))?",
                 RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace | RegexOptions.IgnoreCase);
 
         private static readonly Regex TagsRegex = new Regex(@"\s*tags\s*:\s*(?<tag>[\w\s]+)(,(?<tag>[\w\s]+))*",
             RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
+
+        public static readonly Regex TableRegex = new Regex(@"[ ]*\|[\w ]+\|", RegexOptions.Compiled);
 
         public static List<Token> ParseMarkdownParagraph(string text, int offset = 0)
         {
