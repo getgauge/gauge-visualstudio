@@ -15,10 +15,12 @@
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
+using System.IO;
 using System.Linq;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using EnvDTE;
+using EnvDTE80;
 using Gauge.CSharp.Lib;
 using Gauge.VisualStudio.Core.Extensions;
 using Gauge.VisualStudio.Loggers;
@@ -67,6 +69,11 @@ namespace Gauge.VisualStudio.Highlighting
                 return;
             }
 
+            GenerateMethodStub(selectedClass, containingLine);
+        }
+
+        private void GenerateMethodStub(string selectedClass, ITextSnapshotLine containingLine)
+        {
             CodeClass targetClass;
             try
             {
@@ -78,7 +85,7 @@ namespace Gauge.VisualStudio.Highlighting
                 return;
             }
 
-            if (targetClass==null)
+            if (targetClass == null)
             {
                 //TODO: Display error to user?
                 return;
@@ -86,8 +93,10 @@ namespace Gauge.VisualStudio.Highlighting
 
             var stepValue = _step.GetParameterizedStepValue(GaugePackage.ActiveProject, containingLine);
             var functionName = stepValue.ToMethodIdentifier();
-            var functionCount = Project.GetFunctionsForClass(targetClass).Count(element => string.CompareOrdinal(element.Name, functionName)==0);
-            functionName = functionCount==0 ? functionName : functionName + functionCount;
+            var functionCount =
+                Project.GetFunctionsForClass(targetClass)
+                    .Count(element => string.CompareOrdinal(element.Name, functionName) == 0);
+            functionName = functionCount == 0 ? functionName : functionName + functionCount;
             CodeFunction implementationFunction = null;
 
             try
@@ -96,25 +105,31 @@ namespace Gauge.VisualStudio.Highlighting
                     vsCMFunction.vsCMFunctionFunction, vsCMTypeRef.vsCMTypeRefVoid, -1,
                     vsCMAccess.vsCMAccessPublic);
 
-                if (Step.HasTable(containingLine))
+                var step = _step.Parse(GaugePackage.ActiveProject, containingLine);
+                // hack: remove string parameter already added
+                // Gauge API does not return param type
+                var parameterList = step.Parameters;
+
+                if (Step.HasInlineTable(containingLine))
                 {
                     implementationFunction.AddParameter("table", typeof (Table).Name);
+                    parameterList.RemoveAt(parameterList.Count - 1);
                 }
-                else
+
+                foreach (var parameter in parameterList)
                 {
-                    var step = _step.Parse(GaugePackage.ActiveProject, containingLine);
-                    foreach (var parameter in step.Parameters)
+                    if (IsSpecialParameter(parameter))
                     {
-                        implementationFunction.AddParameter(parameter, vsCMTypeRef.vsCMTypeRefString);
+                        AddSpecialParam(implementationFunction, parameter);
+                    }
+                    else
+                    {
+                        var newName = GenerateNewParameterIdentifier(implementationFunction, parameter);
+                        implementationFunction.AddParameter(newName, vsCMTypeRef.vsCMTypeRefString);
                     }
                 }
 
-                var codeAttribute = implementationFunction.AddAttribute("Step", stepValue.ToLiteral(), -1);
-
-                if (codeAttribute == null)
-                {
-                    throw new ChangeRejectedException("Step Attribute not created");
-                }
+                AddStepAttribute(implementationFunction, stepValue);
 
                 targetClass.ProjectItem.Save();
                 Project.RefreshImplementations(targetClass.ProjectItem);
@@ -130,6 +145,53 @@ namespace Gauge.VisualStudio.Highlighting
             finally
             {
                 targetClass.ProjectItem.Save();
+            }
+        }
+
+        private static void AddSpecialParam(CodeFunction implementationFunction, string parameter)
+        {
+            object paramType = vsCMTypeRef.vsCMTypeRefString;
+            if (parameter.StartsWith("table:"))
+            {
+                paramType = typeof (Table).Name;
+            }
+            var paramValue = GetParamName(parameter.Split(':').Last());
+            var variableIdentifier = GenerateNewParameterIdentifier(implementationFunction, paramValue);
+            implementationFunction.AddParameter(variableIdentifier, paramType);
+        }
+
+        private static bool IsSpecialParameter(string parameter)
+        {
+            return parameter.StartsWith("file:") || parameter.StartsWith("table:");
+        }
+
+        private static string GenerateNewParameterIdentifier(CodeFunction implementationFunction, string parameter)
+        {
+            var i = implementationFunction.Parameters.Cast<CodeParameter2>()
+                    .Count(param => string.CompareOrdinal(param.Name, parameter) == 0);
+            var newName = i == 0 ? parameter : parameter + i;
+            return newName.ToVariableIdentifier();
+        }
+
+        private static void AddStepAttribute(CodeFunction implementationFunction, string stepValue)
+        {
+            var codeAttribute = implementationFunction.AddAttribute("Step", stepValue.ToLiteral(), -1);
+
+            if (codeAttribute == null)
+            {
+                throw new ChangeRejectedException("Step Attribute not created");
+            }
+        }
+
+        private static string GetParamName(string tableName)
+        {
+            try
+            {
+                return Path.GetFileNameWithoutExtension(tableName);
+            }
+            catch
+            {
+                return tableName;
             }
         }
 

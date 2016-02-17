@@ -15,7 +15,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using Gauge.Messages;
 using Gauge.VisualStudio.Core.Exceptions;
 using Gauge.VisualStudio.Core.Helpers;
@@ -66,27 +65,11 @@ namespace Gauge.VisualStudio.Model
             var originalText = line.GetText();
             var match = Parser.StepRegex.Match(originalText);
             var stepText = match.Groups["stepText"].Value.Trim();
-            var suffix = string.Empty;
 
-            if (match.Groups["table"].Success || HasInlineTable(line))
-            {
-                suffix = " <table>";
-            }
-            if (match.Groups["file"].Success)
-            {
-                suffix = " <file>";
-            }
-            return string.Concat(stepText, suffix);
+            return HasInlineTable(line) ? string.Concat(stepText, " <table>") : stepText;
         }
 
-        public static bool HasTable(ITextSnapshotLine line)
-        {
-            var text = line.GetText();
-            var hasReferenceTable = Parser.ParseMarkdownParagraph(text).Any(token => token.TokenType == Parser.TokenType.TableParameter);
-            return hasReferenceTable || HasInlineTable(line);
-        }
-
-        private static bool HasInlineTable(ITextSnapshotLine line)
+        public static bool HasInlineTable(ITextSnapshotLine line)
         {
             var nextLineText = NextLineText(line);
             return Parser.TableRegex.IsMatch(nextLineText);

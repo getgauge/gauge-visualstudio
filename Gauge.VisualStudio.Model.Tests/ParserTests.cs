@@ -122,6 +122,15 @@ namespace Gauge.VisualStudio.Model.Tests
             }
 
             [Test]
+            public void ShouldGetMultipleTablesFromStepText()
+            {
+                var tokens = Parser.ParseMarkdownParagraph("* Step that takes a table <table:foo.csv> and another table <table:bar.csv>");
+                var tableParameters = tokens.Where(token => token.TokenType == Parser.TokenType.TableParameter).Select(token => token.Value).ToList();
+
+                Assert.AreEqual(new [] {"foo.csv", "bar.csv"}, tableParameters);
+            }
+
+            [Test]
             public void ShouldGetFileFromStepText()
             {
                 var tokens = Parser.ParseMarkdownParagraph(@"* Step that takes a table <File:c:\blah\foo.txt>");
@@ -137,15 +146,6 @@ namespace Gauge.VisualStudio.Model.Tests
                 var isMatch = Parser.TableRegex.IsMatch(tableValue);
 
                 Assert.IsTrue(isMatch);
-            }
-
-            [Test]
-            public void ShouldFetchFileSpecialParameters()
-            {
-                const string stepText = "* Step with a <dyn> and \"static\" as well as file paramerter <file:c:\\foo.txt>";
-                var match = Parser.StepRegex.Match(stepText);
-
-                Assert.AreEqual(" Step with a <dyn> and \"static\" as well as file paramerter ", match.Groups["stepText"].Value);
             }
 
             [Test]
