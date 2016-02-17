@@ -40,7 +40,6 @@ namespace Gauge.VisualStudio.Model
         public Project(DTE dte)
         {
             _dte = dte;
-            _implementations = GetGaugeImplementations(_dte.ActiveDocument.ProjectItem.ContainingProject);
             if (_events2 != null) return;
 
             _events2 = _dte.Events as Events2;
@@ -64,7 +63,11 @@ namespace Gauge.VisualStudio.Model
 
         internal IEnumerable<Implementation> Implementations
         {
-            get { return _implementations; }
+            get
+            {
+                _implementations = _implementations ?? GetGaugeImplementations(_dte.ActiveDocument.ProjectItem.ContainingProject);
+                return _implementations;
+            }
         }
 
         public void RefreshImplementationsForActiveProject()
@@ -102,9 +105,7 @@ namespace Gauge.VisualStudio.Model
                     if (function == null) continue;
                     var allAttributes = GetCodeElementsFor(function.Attributes, vsCMElement.vsCMElementAttribute);
 
-                    var attribute =
-                        allAttributes.FirstOrDefault(a => a.Name == "Step") as
-                            CodeAttribute;
+                    var attribute = allAttributes.FirstOrDefault(a => a.Name == "Step") as CodeAttribute;
 
                     if (attribute == null) continue;
 
