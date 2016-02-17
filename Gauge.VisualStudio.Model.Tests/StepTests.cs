@@ -43,7 +43,8 @@ namespace Gauge.VisualStudio.Model.Tests
             [Test]
             public void ShouldFindTableInStep()
             {
-                Assert.True(Step.HasInlineTable(_textSnapshotLines[0]));
+                var step = new Step(A.Fake<EnvDTE.Project>()) {ContainingLine =  _textSnapshotLines[0]};
+                Assert.True(step.HasInlineTable);
             }
 
             [Test]

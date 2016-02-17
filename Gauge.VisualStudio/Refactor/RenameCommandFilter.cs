@@ -85,7 +85,7 @@ namespace Gauge.VisualStudio.Refactor
                                 return VSConstants.S_FALSE;
 
                             ReloadChangedDocuments(response);
-                            Project.RefreshImplementationsForActiveProject(GaugePackage.DTE);
+                            new Project(GaugePackage.DTE).RefreshImplementationsForActiveProject();
                         }
                         finally
                         {

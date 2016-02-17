@@ -32,7 +32,7 @@ namespace Gauge.VisualStudio.AutoComplete
 
             var concepts = concept.GetAllConcepts();
             var prefix = line.GetText().TrimStart('*').TrimStart(' ');
-            var steps = step.GetAll(GaugePackage.ActiveProject).Where(s => concepts.All(c => string.CompareOrdinal(c.StepValue, s) != 0));
+            var steps = step.GetAll().Where(s => concepts.All(c => string.CompareOrdinal(c.StepValue, s) != 0));
             var applicableCompletions = prefix.Length < 1 ? steps : steps.Where(s => s.StartsWith(prefix));
             var stepCompletions = applicableCompletions.Select(x => new Completion(x, x, "Step", stepImageSource, "Step"));
             _gaugeCompletions.AddRange(stepCompletions);

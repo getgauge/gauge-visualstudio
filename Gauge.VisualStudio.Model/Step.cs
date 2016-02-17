@@ -24,6 +24,12 @@ namespace Gauge.VisualStudio.Model
 {
     public class Step
     {
+        public ITextSnapshotLine ContainingLine { get; set; }
+
+        public string Text { get; set; }
+
+        public List<string> Parameters { get; set; }
+
         private readonly EnvDTE.Project _project;
 
         public Step(EnvDTE.Project project)
@@ -31,34 +37,33 @@ namespace Gauge.VisualStudio.Model
             _project = project;
         }
 
-        public IEnumerable<string> GetAll(EnvDTE.Project project)
+        public Step (EnvDTE.Project project, ITextSnapshotLine inputLine) : this(project)
         {
-            return GetAllStepsFromGauge(project).Select(x => x.ParameterizedStepValue);
+            ContainingLine = inputLine;
+            var stepValueFromInput = GetStepValueFromInput(_project, GetStepText(inputLine));
+
+            if (stepValueFromInput == null) 
+                return;
+
+            Text = stepValueFromInput.ParameterizedStepValue;
+            Parameters = stepValueFromInput.ParametersList.ToList();
         }
 
-        public string GetParameterizedStepValue(EnvDTE.Project project, ITextSnapshotLine input)
+        public bool HasInlineTable
         {
-            var stepValueFromInput = GetStepValueFromInput(project, GetStepText(input));
+            get { return CheckForInlineTable(ContainingLine); }
+        }
+
+        public IEnumerable<string> GetAll()
+        {
+            return GetAllStepsFromGauge(_project).Select(x => x.ParameterizedStepValue);
+        }
+
+        public string GetParameterizedStepValue(ITextSnapshotLine input)
+        {
+            var stepValueFromInput = GetStepValueFromInput(_project, GetStepText(input));
             return stepValueFromInput == null ? string.Empty : stepValueFromInput.ParameterizedStepValue;
         }
-
-        public Step Parse(EnvDTE.Project project, ITextSnapshotLine input)
-        {
-            var stepValueFromInput = GetStepValueFromInput(project, GetStepText(input));
-            
-
-            if (stepValueFromInput == null) return default(Step);
-
-            return new Step(_project)
-            {
-                Text = stepValueFromInput.ParameterizedStepValue,
-                Parameters = stepValueFromInput.ParametersList.ToList()
-            };
-        }
-
-        public string Text { get; set; }
-
-        public List<string> Parameters { get; set; }
 
         public static string GetStepText(ITextSnapshotLine line)
         {
@@ -66,11 +71,15 @@ namespace Gauge.VisualStudio.Model
             var match = Parser.StepRegex.Match(originalText);
             var stepText = match.Groups["stepText"].Value.Trim();
 
-            return HasInlineTable(line) ? string.Concat(stepText, " <table>") : stepText;
+            return CheckForInlineTable(line) ? string.Concat(stepText, " <table>") : stepText;
         }
 
-        public static bool HasInlineTable(ITextSnapshotLine line)
+        private static bool CheckForInlineTable(ITextSnapshotLine line)
         {
+            if (line==null)
+            {
+                return false;
+            }
             var nextLineText = NextLineText(line);
             return Parser.TableRegex.IsMatch(nextLineText);
         }

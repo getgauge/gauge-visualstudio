@@ -57,7 +57,7 @@ namespace Gauge.VisualStudio.Model
             _codeModelEvents.ElementDeleted += (parent, element) => RefreshImplementations(element.ProjectItem);
         }
 
-        public static void RefreshImplementations(ProjectItem projectItem)
+        public void RefreshImplementations(ProjectItem projectItem)
         {
             _implementations = GetGaugeImplementations(projectItem.ContainingProject);
         }
@@ -67,16 +67,16 @@ namespace Gauge.VisualStudio.Model
             get { return _implementations; }
         }
 
-        public static void RefreshImplementationsForActiveProject(DTE dte)
+        public void RefreshImplementationsForActiveProject()
         {
-            var activeDocument = dte.ActiveDocument;
+            var activeDocument = _dte.ActiveDocument;
             if (activeDocument!=null)
             {
                 _implementations = GetGaugeImplementations(activeDocument.ProjectItem.ContainingProject);
             }
         }
 
-        private static List<Implementation> GetGaugeImplementations(EnvDTE.Project containingProject)
+        private List<Implementation> GetGaugeImplementations(EnvDTE.Project containingProject)
         {
             var allClasses = GetAllClasses(containingProject);
 
@@ -88,7 +88,7 @@ namespace Gauge.VisualStudio.Model
             return gaugeImplementations;
         }
 
-        private static IEnumerable<StepImplementation> GetStepImplementations(IEnumerable<CodeElement> allClasses)
+        private IEnumerable<StepImplementation> GetStepImplementations(IEnumerable<CodeElement> allClasses)
         {
             var gaugeImplementations = new List<StepImplementation>();
             foreach (var codeElement in allClasses)
@@ -127,7 +127,7 @@ namespace Gauge.VisualStudio.Model
         }
 
 
-        public static IEnumerable<CodeElement> GetFunctionsForClass(CodeClass codeClass)
+        public IEnumerable<CodeElement> GetFunctionsForClass(CodeClass codeClass)
         {
             return GetCodeElementsFor(codeClass.Members, vsCMElement.vsCMElementFunction);
         }
@@ -139,7 +139,7 @@ namespace Gauge.VisualStudio.Model
                 : GetCodeElementsFor(containingProject.CodeModel.CodeElements, vsCMElement.vsCMElementClass);
         }
 
-        public static CodeClass FindOrCreateClass(EnvDTE.Project project, string className)
+        public CodeClass FindOrCreateClass(EnvDTE.Project project, string className)
         {
             return GetAllClasses(project).FirstOrDefault(element => element.Name == className) as CodeClass ??
                    AddClass(className, project);
