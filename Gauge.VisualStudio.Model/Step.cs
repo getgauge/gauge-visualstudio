@@ -22,7 +22,17 @@ using Microsoft.VisualStudio.Text;
 
 namespace Gauge.VisualStudio.Model
 {
-    public class Step
+    public interface IStep
+    {
+        ITextSnapshotLine ContainingLine { get; set; }
+        string Text { get; set; }
+        List<string> Parameters { get; set; }
+        bool HasInlineTable { get; }
+        IEnumerable<string> GetAll();
+        string GetParameterizedStepValue(ITextSnapshotLine input);
+    }
+
+    public class Step : IStep
     {
         public ITextSnapshotLine ContainingLine { get; set; }
 

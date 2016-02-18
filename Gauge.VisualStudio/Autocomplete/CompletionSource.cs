@@ -43,7 +43,6 @@ namespace Gauge.VisualStudio.AutoComplete
             private readonly ITextBuffer _buffer;
             private bool _disposed;
             private readonly Concept _concept = new Concept(GaugePackage.ActiveProject);
-            private readonly Step _step = new Step(GaugePackage.ActiveProject);
 
             public GaugeCompletionSource(GaugeCompletionSourceProvider gaugeCompletionSourceProvider, ITextBuffer buffer)
             {
@@ -58,7 +57,8 @@ namespace Gauge.VisualStudio.AutoComplete
                 var snapshot = _buffer.CurrentSnapshot;
                 var snapshotPoint = session.GetTriggerPoint(snapshot);
                 if (!snapshotPoint.HasValue) return;
-                completionSets.Add(new GaugeCompletionSet(snapshotPoint.Value, _step, _concept));
+                var step = new Step(GaugePackage.ActiveProject, snapshotPoint.Value.GetContainingLine());
+                completionSets.Add(new GaugeCompletionSet(snapshotPoint.Value, step, _concept));
             }
 
             public void Dispose()

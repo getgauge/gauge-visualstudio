@@ -27,7 +27,7 @@ namespace Gauge.VisualStudio.Highlighting
     internal class UnimplementedStepTagger : ITagger<UnimplementedStepTag>, IDisposable
     {
         private readonly ITextView _textView;
-        private readonly Project _project;
+        private readonly IProject _project;
 
         public UnimplementedStepTagger(ITextView textView)
         {

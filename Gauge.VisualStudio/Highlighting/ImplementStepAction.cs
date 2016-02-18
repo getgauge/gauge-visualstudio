@@ -33,11 +33,11 @@ namespace Gauge.VisualStudio.Highlighting
         private readonly string _display;
         private bool _enabled = true;
         private readonly ITrackingSpan _trackingSpan;
-        private readonly Step _step;
-        private readonly Project _project;
+        private readonly IStep _step;
+        private readonly IProject _project;
         private readonly StepImplementationGenerator _stepImplementationGenerator;
 
-        public ImplementStepAction(SnapshotSpan span, UnimplementedStepTagger unimplementedStepTagger, Project project)
+        public ImplementStepAction(SnapshotSpan span, UnimplementedStepTagger unimplementedStepTagger, IProject project)
         {
             _trackingSpan = span.Snapshot.CreateTrackingSpan(span, SpanTrackingMode.EdgeInclusive);
 
@@ -47,7 +47,8 @@ namespace Gauge.VisualStudio.Highlighting
             _display = "Implement Step";
             Icon = new BitmapImage(new Uri("pack://application:,,,/Gauge.VisualStudio;component/assets/glyphs/step.png"));
             _project = project;
-            _stepImplementationGenerator = new StepImplementationGenerator();
+            var step = new Step(GaugePackage.ActiveProject, span.Start.GetContainingLine());
+            _stepImplementationGenerator = new StepImplementationGenerator(GaugePackage.ActiveProject, project, step);
         }
 
         public void Invoke()

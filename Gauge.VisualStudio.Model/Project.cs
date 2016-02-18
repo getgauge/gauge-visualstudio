@@ -28,7 +28,16 @@ using CodeNamespace = EnvDTE.CodeNamespace;
 
 namespace Gauge.VisualStudio.Model
 {
-    public class Project
+    public interface IProject
+    {
+        void RefreshImplementations(ProjectItem projectItem);
+        void RefreshImplementationsForActiveProject();
+        Implementation GetStepImplementation(ITextSnapshotLine line);
+        IEnumerable<CodeElement> GetFunctionsForClass(CodeClass codeClass);
+        CodeClass FindOrCreateClass(EnvDTE.Project project, string className);
+    }
+
+    public class Project : IProject
     {
         private static Events2 _events2;
         private static CodeModelEvents _codeModelEvents;

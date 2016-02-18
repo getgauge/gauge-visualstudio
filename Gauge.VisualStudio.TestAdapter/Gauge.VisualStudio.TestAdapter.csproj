@@ -155,6 +155,7 @@
     <Compile Include="TestExecutor.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Gauge.VisualStudio.licenseheader" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

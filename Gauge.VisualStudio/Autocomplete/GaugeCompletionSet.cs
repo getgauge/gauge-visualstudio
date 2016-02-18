@@ -24,7 +24,7 @@ namespace Gauge.VisualStudio.AutoComplete
 {
     internal sealed class GaugeCompletionSet : CompletionSet
     {
-        public GaugeCompletionSet(SnapshotPoint triggerPoint, Step step, Concept concept)
+        public GaugeCompletionSet(SnapshotPoint triggerPoint, IStep step, Concept concept)
         {
             var line = triggerPoint.GetContainingLine();
 

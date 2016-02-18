@@ -23,23 +23,17 @@ using Gauge.VisualStudio.Core.Extensions;
 using Gauge.VisualStudio.Loggers;
 using Gauge.VisualStudio.Model;
 using Microsoft.VisualStudio.Text;
-using Project = Gauge.VisualStudio.Model.Project;
 
 namespace Gauge.VisualStudio.Highlighting
 {
     public class StepImplementationGenerator
     {
         private readonly EnvDTE.Project _vsProject;
-        private readonly Project _project;
+        private readonly IProject _project;
         private readonly EnvDTE.Project _vsproject;
-        private readonly Step _step;
+        private readonly IStep _step;
 
-        public StepImplementationGenerator()
-            : this(GaugePackage.ActiveProject, new Project(GaugePackage.DTE), new Step(GaugePackage.ActiveProject))
-        {
-        }
-
-        public StepImplementationGenerator(EnvDTE.Project vsProject, Project project, Step step)
+        public StepImplementationGenerator(EnvDTE.Project vsProject, IProject project, IStep step)
         {
             _vsProject = vsProject;
             _step = step;
@@ -75,14 +69,15 @@ namespace Gauge.VisualStudio.Highlighting
             {
                 implementationFunction = targetClass.AddFunction(functionName,
                     vsCMFunction.vsCMFunctionFunction, vsCMTypeRef.vsCMTypeRefVoid, -1,
-                    vsCMAccess.vsCMAccessPublic);
+                    vsCMAccess.vsCMAccessPublic, null);
 
                 var parameterList = _step.Parameters;
+                parameterList.Reverse();
 
                 if (_step.HasInlineTable)
                 {
                     implementationFunction.AddParameter("table", typeof (Table).Name);
-                    parameterList.RemoveAt(parameterList.Count - 1);
+                    parameterList.RemoveAt(0);
                 }
 
                 foreach (var parameter in parameterList)
