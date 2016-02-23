@@ -16,6 +16,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Gauge.Messages;
+using Gauge.VisualStudio.Core.Helpers;
 using Gauge.VisualStudio.Core.Loggers;
 using Gauge.VisualStudio.Model;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
@@ -29,6 +31,13 @@ namespace Gauge.VisualStudio.TestAdapter
     [DefaultExecutorUri(TestExecutor.ExecutorUriString)]
     public class TestDiscoverer : ITestDiscoverer
     {
+        public static readonly TestProperty GaugeCustomBuildPath = TestProperty.Register("TestCase.GaugeCustomBuildPath",
+            "Custom build path for Gauge project binaries.", typeof (string), typeof (TestCase));
+        public static readonly TestProperty GaugeProjectRoot = TestProperty.Register("TestCase.GaugeProjectRoot",
+            "GAUGE_PROJECT_ROOT value set in Gauge.", typeof (string), typeof (TestCase));
+        public static readonly TestProperty ScenarioIndex = TestProperty.Register("TestCase.ScenarioIndex",
+            "Index of Scenario in a given spec. Starts with 0.", typeof (int), typeof (TestCase));
+
         public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger logger,
             ITestCaseDiscoverySink discoverySink)
         {
@@ -39,56 +48,66 @@ namespace Gauge.VisualStudio.TestAdapter
 
         public static List<TestCase> GetSpecs(GaugeTestRunSettings testRunSettings, ITestCaseDiscoverySink discoverySink, IEnumerable<string> sources, IMessageLogger logger)
         {
-            OutputPaneLogger.Debug("Discover Scenarios started. Using API ports: {0}", testRunSettings.ApiPorts);
+            var gaugeProjectProperties = testRunSettings.ProjectsProperties;
+            OutputPaneLogger.Debug("Discover Scenarios started. Using API ports: {0}", gaugeProjectProperties);
 
             var testCases = new ConcurrentBag<TestCase>();
 
-            var protoSpecs = Specification.GetAllSpecs(testRunSettings.ApiPorts);
-
-            OutputPaneLogger.Debug("Discover Scenarios started. Using API ports: {0}", testRunSettings.ApiPorts);
-
-            Parallel.ForEach(protoSpecs, spec =>
+            Parallel.ForEach(gaugeProjectProperties, properties =>
             {
-                OutputPaneLogger.Debug("Source: {0}", spec);
+                var protoSpecs = Specification.GetAllSpecs(properties.ApiPort);
 
-                if (sources.All(s => string.CompareOrdinal(s, spec.FileName) != 0))
-                    return;
-
-                var scenarioIndex = 0;
-                var scenarios = spec.ItemsList.Where(item => item.HasScenario).Select(item => item.Scenario);
-
-                foreach (var scenario in scenarios)
+                Parallel.ForEach(protoSpecs, spec =>
                 {
-                    var testCase = new TestCase(string.Format("[{0}].[{1}]", spec.SpecHeading, scenario.ScenarioHeading),
-                        TestExecutor.ExecutorUri, spec.FileName)
+                    OutputPaneLogger.Debug("Source: {0}", spec);
+
+                    if (sources.All(s => string.CompareOrdinal(s, spec.FileName) != 0))
+                        return;
+
+                    var scenarioIndex = 0;
+                    var scenarios = spec.ItemsList.Where(item => item.HasScenario).Select(item => item.Scenario);
+
+                    foreach (var scenario in scenarios)
                     {
-                        CodeFilePath = spec.FileName,
-                        DisplayName = scenario.ScenarioHeading,
-                        // Ugly hack below - I don't know how else to pass the scenario index to GaugeRunner
-                        // LocalExtensionData returns a null despite setting it here
-                        LineNumber = scenarioIndex,
-                    };
+                        var testCase = CreateTestCase(logger, spec, scenario, properties, scenarioIndex);
+                        testCases.Add(testCase);
 
-                    logger.SendMessage(TestMessageLevel.Informational, string.Format("Discovered scenario: {0}", testCase.DisplayName));
+                        if (discoverySink != null)
+                        {
+                            discoverySink.SendTestCase(testCase);
+                        }
 
-                    testCase.Traits.Add("Spec", spec.SpecHeading);
-
-                    foreach (var tag in scenario.TagsList.Union(spec.TagsList))
-                    {
-                        testCase.Traits.Add("Tag", tag);
+                        scenarioIndex++;
                     }
-                    testCases.Add(testCase);
-
-                    if (discoverySink != null)
-                    {
-                        discoverySink.SendTestCase(testCase);
-                    }
-
-                    scenarioIndex++;
-                }
+                });
             });
-
             return testCases.ToList();
+        }
+
+        private static TestCase CreateTestCase(IMessageLogger logger, ProtoSpec spec, ProtoScenario scenario,
+            GaugeProjectProperties properties, int scenarioIndex)
+        {
+            var testCase = new TestCase(string.Format("[{0}].[{1}]", spec.SpecHeading, scenario.ScenarioHeading),
+                    TestExecutor.ExecutorUri, spec.FileName)
+                {
+                    CodeFilePath = spec.FileName,
+                    DisplayName = scenario.ScenarioHeading
+                };
+
+            testCase.SetPropertyValue(GaugeCustomBuildPath, properties.BuildOutputPath);
+            testCase.SetPropertyValue(GaugeProjectRoot, properties.ProjectRoot);
+            testCase.SetPropertyValue(ScenarioIndex, scenarioIndex);
+
+            logger.SendMessage(TestMessageLevel.Informational,
+                string.Format("Discovered scenario: {0}", testCase.DisplayName));
+
+            testCase.Traits.Add("Spec", spec.SpecHeading);
+
+            foreach (var tag in scenario.TagsList.Union(spec.TagsList))
+            {
+                testCase.Traits.Add("Tag", tag);
+            }
+            return testCase;
         }
     }
 }

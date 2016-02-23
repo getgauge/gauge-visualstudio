@@ -43,13 +43,10 @@ namespace Gauge.VisualStudio.Model
             }
         }
 
-        public static IEnumerable<ProtoSpec> GetAllSpecs(IEnumerable<int> apiPorts)
+        public static IEnumerable<ProtoSpec> GetAllSpecs(int apiPort)
         {
-            return apiPorts.SelectMany(i =>
-            {
-                var gaugeApiConnection = new GaugeApiConnection(new TcpClientWrapper(i));
-                return GetSpecsFromGauge(gaugeApiConnection);
-            }).Distinct();
+            var gaugeApiConnection = new GaugeApiConnection(new TcpClientWrapper(apiPort));
+            return GetSpecsFromGauge(gaugeApiConnection);
         }
 
         private static IEnumerable<ProtoSpec> GetSpecsFromGauge(GaugeApiConnection apiConnection)

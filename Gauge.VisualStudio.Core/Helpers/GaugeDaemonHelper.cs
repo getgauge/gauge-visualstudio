@@ -122,9 +122,15 @@ namespace Gauge.VisualStudio.Core.Helpers
             return ApiConnections.ContainsKey(slugifiedName);
         }
 
-        public static List<int> GetAllApiPorts()
+        public static List<GaugeProjectProperties> GetPropertiesForAllGaugeProjects()
         {
-            return ApiPorts.Values.ToList();
+            return GaugeProjects.Select( project =>
+                new GaugeProjectProperties
+                {
+                    ApiPort = ApiPorts[project.SlugifiedName()],
+                    BuildOutputPath = GetValidProjectOutputPath(project),
+                    ProjectRoot = GetProjectRoot(project)
+                }).ToList();
         }
 
         private static GaugeApiConnection StartGaugeAsDaemon(Project gaugeProject)
@@ -145,7 +151,7 @@ namespace Gauge.VisualStudio.Core.Helpers
             ApiPorts.Add(slugifiedName, openPort);
             var gaugeStartInfo = new ProcessStartInfo
             {
-                WorkingDirectory = Path.GetDirectoryName(gaugeProject.FullName),
+                WorkingDirectory = GetProjectRoot(gaugeProject),
                 UseShellExecute = false,
                 FileName = "gauge.exe",
                 CreateNoWindow = true,
@@ -184,6 +190,11 @@ namespace Gauge.VisualStudio.Core.Helpers
                 var cancelled = 0;
                 waitDialog.EndWaitDialog(ref cancelled);
             }
+        }
+
+        private static string GetProjectRoot(Project gaugeProject)
+        {
+            return Path.GetDirectoryName(gaugeProject.FullName);
         }
 
         private static void DisplayGaugeNotFoundMessage()

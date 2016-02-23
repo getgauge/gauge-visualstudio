@@ -29,14 +29,14 @@ namespace Gauge.VisualStudio.TestAdapter
 
         public GaugeTestRunSettings(string name) : base(name)
         {
-            ApiPorts = GaugeDaemonHelper.GetAllApiPorts();
+            ProjectsProperties = GaugeDaemonHelper.GetPropertiesForAllGaugeProjects();
         }
 
         public GaugeTestRunSettings() : this(SettingsName)
         {
         }
 
-        public List<int> ApiPorts { get; private set; }
+        public List<GaugeProjectProperties> ProjectsProperties { get; private set; }
 
         public override XmlElement ToXml()
         {

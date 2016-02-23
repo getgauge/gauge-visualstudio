@@ -12,13 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Gauge.VisualStudio.Core.Exceptions;
 using Gauge.VisualStudio.Core.Helpers;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using System;
-using System.IO;
 using Process = System.Diagnostics.Process;
 
 namespace Gauge.VisualStudio.TestAdapter
@@ -30,11 +28,11 @@ namespace Gauge.VisualStudio.TestAdapter
             var result = new TestResult(testCase);
             frameworkHandle.RecordStart(testCase);
             frameworkHandle.SendMessage(TestMessageLevel.Informational, string.Format("Executing Test: {0}", testCase));
-            var projectRoot = GetProjectRootPath(new FileInfo(testCase.Source).Directory);
+            var projectRoot = testCase.GetPropertyValue(TestDiscoverer.GaugeProjectRoot, string.Empty);
+            var scenarioIndex = testCase.GetPropertyValue(TestDiscoverer.ScenarioIndex, -1);
             try
             {
-                var arguments = string.Format(@"--simple-console {0}:{1}", GetTestCasePath(testCase, projectRoot),
-                    testCase.LineNumber);
+                var arguments = string.Format(@"--simple-console {0}:{1}", testCase.Source, scenarioIndex);
                 var p = new Process
                 {
                     StartInfo =
@@ -49,7 +47,12 @@ namespace Gauge.VisualStudio.TestAdapter
                     }
                 };
 
-                p.StartInfo.EnvironmentVariables["gauge_custom_build_path"] = BuildOutputPath(projectRoot);
+                var gaugeCustomBuildPath = testCase.GetPropertyValue(TestDiscoverer.GaugeCustomBuildPath, string.Empty);
+
+                if (!string.IsNullOrEmpty(gaugeCustomBuildPath))
+                {
+                    p.StartInfo.EnvironmentVariables["gauge_custom_build_path"] = gaugeCustomBuildPath;
+                }
 
                 if (isBeingDebugged)
                 {
@@ -88,38 +91,6 @@ namespace Gauge.VisualStudio.TestAdapter
             }
             frameworkHandle.RecordResult(result);
             frameworkHandle.RecordEnd(testCase, result.Outcome);
-        }
-
-        private static string BuildOutputPath(string projectRoot)
-        {
-            var dte = DTEHelper.GetCurrent();
-            var activeConfiguration = dte.Solution.SolutionBuild.ActiveConfiguration.Name;
-            var buildOutputPath = string.Format("{0}\\bin\\{1}", projectRoot, activeConfiguration);
-            return buildOutputPath;
-        }
-
-        private static string GetTestCasePath(TestCase testCase, string rootPath)
-        {
-            var sourceUri = new Uri(testCase.Source);
-            var rootUri = new Uri(Path.Combine(rootPath, "specs"));
-
-            return rootUri.MakeRelativeUri(sourceUri).ToString();
-        }
-
-        private static string GetProjectRootPath(DirectoryInfo directory)
-        {
-            while (true)
-            {
-                if (directory == null || directory.Parent == null)
-                {
-                    throw new ConventionViolationException("Folder structure does not follow Gauge Convention.");
-                }
-                if (directory.Name.ToLowerInvariant() == "specs")
-                {
-                    return directory.Parent.FullName;
-                }
-                directory = directory.Parent;
-            }
         }
     }
 }
