@@ -1,39 +1,50 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using FluentAssertions;
 using Gauge.CSharp.Lib;
 using Gauge.CSharp.Lib.Attribute;
 
 namespace _GaugeProjectTemplate
 {
-	public class StepImplementation
-	{
-        [Step("A context step which gets executed before every scenario")]
-        public void Context()
+    public class StepImplementation
+    {
+        private HashSet<char> _vowels;
+
+        [Step("Vowels in English language are <vowelString>.")]
+        public void SetLanguageVowels(string vowelString)
         {
-            Console.WriteLine("This is a sample context");
-        }
-
-        [Step("Say <what> to <who>")]
-        public void SaySomething(string what, string who)
-        {
-            Console.WriteLine("{0}, {1}!", what, who);
-        }
-
-        [Step("Step that takes a table <table>")]
-        public void ReadTable(Table table)
-        {
-            Func<string, string, string> aggregateFunc = (a, b) => string.Format("{0}|{1}", a, b);
-            var columnNames = table.GetColumnNames();
-
-            // print column headers
-            Console.WriteLine(columnNames.Aggregate(aggregateFunc));
-
-            //print row cells
-            foreach (var row in table.GetTableRows())
+            _vowels = new HashSet<char>();
+            foreach (var c in vowelString)
             {
-                // Get all row cells, and print them in a line
-                Console.WriteLine(columnNames.Select(s => row.GetCell(s)).Aggregate(aggregateFunc));
+                _vowels.Add(c);
             }
+        }
+
+        [Step("The word <word> has <expectedCount> vowels.")]
+        public void VerifyVowelsCountInWord(string word, int expectedCount)
+        {
+            var actualCount = CountVowels(word);
+            actualCount.Should().Be(expectedCount);
+        }
+
+        [Step("Almost all words have vowels <wordsTable>")]
+        public void VerifyVowelsCountInMultipleWords(Table wordsTable)
+        {
+            var rows = wordsTable.GetTableRows();
+            foreach (var row in rows)
+            {
+                var word = row.GetCell("Word");
+                var expectedCount = Convert.ToInt32(row.GetCell("Vowel Count"));
+                var actualCount = CountVowels(word);
+
+                actualCount.Should().Be(expectedCount);
+            }
+        }
+
+        private int CountVowels(String word)
+        {
+            return word.Count(c => _vowels.Contains(c));
         }
     }
 }

@@ -39,6 +39,14 @@
       <HintPath Condition="Exists('packages\Gauge.CSharp.Lib._GaugeLibVersion.0\lib\net45\Gauge.CSharp.Lib.dll')">packages\Gauge.CSharp.Lib._GaugeLibVersion.0\lib\net45\Gauge.CSharp.Lib.dll</HintPath>
       <HintPath Condition="Exists('..\packages\Gauge.CSharp.Lib._GaugeLibVersion.0\lib\net45\Gauge.CSharp.Lib.dll')">..\packages\Gauge.CSharp.Lib._GaugeLibVersion.0\lib\net45\Gauge.CSharp.Lib.dll</HintPath>
     </Reference>
+    <Reference Include="FluentAssertions">
+      <HintPath Condition="Exists('packages\FluentAssertions.3.5.0\lib\net45\FluentAssertions.dll')">packages\FluentAssertions.3.5.0\lib\net45\FluentAssertions.dll</HintPath>
+      <HintPath Condition="Exists('..\packages\FluentAssertions.3.5.0\lib\net45\FluentAssertions.dll')">..\packages\FluentAssertions.3.5.0\lib\net45\FluentAssertions.dll</HintPath>
+    </Reference>
+    <Reference Include="FluentAssertions.Core">
+      <HintPath Condition="Exists('packages\FluentAssertions.3.5.0\lib\net45\FluentAssertions.Core.dll')">packages\FluentAssertions.3.5.0\lib\net45\FluentAssertions.Core.dll</HintPath>
+      <HintPath Condition="Exists('..\packages\FluentAssertions.3.5.0\lib\net45\FluentAssertions.Core.dll')">..\packages\FluentAssertions.3.5.0\lib\net45\FluentAssertions.Core.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -55,7 +63,7 @@
     <None Include="Env\default\default.properties" />
     <None Include="manifest.json" />
     <None Include="packages.config" />
-    <None Include="Specs\hello_world.spec" />
+    <None Include="Specs\example.spec" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
