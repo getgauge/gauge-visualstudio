@@ -23,13 +23,13 @@ namespace Gauge.VisualStudio.Model
     {
         internal const char DummyChar = '~';
 
-        private static readonly Regex ScenarioHeadingRegex = new Regex(@"\#\#(?<heading>.+)[\n\r]+",
-            RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
+        private static readonly Regex ScenarioHeadingRegex = new Regex(@"^\s*\#\#(?<heading>.+)[\n\r]+",
+            RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace | RegexOptions.Multiline);
 
         private static readonly Regex ScenarioHeadingRegexAlt = new Regex(@"(?<heading>.+)[\n\r]+[\s]*-+",
             RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
 
-        private static readonly Regex SpecHeadingRegex = new Regex(@"\#(?<heading>.+)[\n\r]*",
+        private static readonly Regex SpecHeadingRegex = new Regex(@"^\s*\#(?<heading>.+)[\n\r]*",
             RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
 
         private static readonly Regex SpecHeadingRegexAlt = new Regex(@"(?<heading>.+)[\n\r][\s]*=+",
