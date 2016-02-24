@@ -124,13 +124,13 @@ namespace Gauge.VisualStudio.Core.Helpers
 
         public static List<GaugeProjectProperties> GetPropertiesForAllGaugeProjects()
         {
-            return GaugeProjects.Select( project =>
-                new GaugeProjectProperties
-                {
-                    ApiPort = ApiPorts[project.SlugifiedName()],
-                    BuildOutputPath = GetValidProjectOutputPath(project),
-                    ProjectRoot = GetProjectRoot(project)
-                }).ToList();
+            return GaugeProjects.Where(project => ApiPorts.ContainsKey(project.SlugifiedName()))
+                .Select( project => new GaugeProjectProperties
+                    {
+                        ApiPort = ApiPorts[project.SlugifiedName()],
+                        BuildOutputPath = GetValidProjectOutputPath(project),
+                        ProjectRoot = GetProjectRoot(project)
+                    }).ToList();
         }
 
         private static GaugeApiConnection StartGaugeAsDaemon(Project gaugeProject)
