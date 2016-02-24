@@ -40,8 +40,8 @@ namespace Gauge.VisualStudio.Model
                 @"[ ]*\*(?<stepText>(([^{}""\<\>\n\r]*)(?<stat>""(?<statValue>.*?)"")*(?<dyn>\<(?<dynValue>(?!(table|file)).*?)\>)*((?<table><table:(?<tableValue>[^>]*)>)|(?<file><file:(?<fileValue>[^>]*)>))?)*)",
                 RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace | RegexOptions.IgnoreCase);
 
-        private static readonly Regex TagsRegex = new Regex(@"\s*tags\s*:\s*(?<tag>[\w\s]+)(,(?<tag>[\w\s]+))*",
-            RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
+        private static readonly Regex TagsRegex = new Regex(@"tags\s*:\s*(?<tag>[^(,|\n)]*)(,(?<tag>[^(,|\n)]*))*",
+            RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace | RegexOptions.Multiline);
 
         public static readonly Regex TableRegex = new Regex(@"[ ]*\|[\w ]+\|", RegexOptions.Compiled);
 
@@ -177,10 +177,10 @@ namespace Gauge.VisualStudio.Model
             var matches = TagsRegex.Matches(text);
             foreach (Match match in matches)
             {
-                yield return new Token(TokenType.Tag, new Span(match.Index, match.Length), match.Value);
+                yield return new Token(TokenType.Tag, new Span(match.Index, match.Length), match.Value.Trim());
                 foreach (Capture capture in match.Groups["tag"].Captures)
                 {
-                    yield return new Token(TokenType.TagValue, new Span(capture.Index, capture.Length), capture.Value);
+                    yield return new Token(TokenType.TagValue, new Span(capture.Index, capture.Length), capture.Value.Trim());
                 }
             }
         }

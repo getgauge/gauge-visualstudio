@@ -169,5 +169,42 @@ namespace Gauge.VisualStudio.Model.Tests
                 Assert.AreEqual(new []{"something", "someone"}, dynamicParameters);
             }
         }
+
+        public class TagsTest
+        {
+            private static readonly TestCaseData[] tagValuesTestCases = new[]
+            {
+                new TestCaseData("tags: foo, bar").Returns(new[] { "foo", "bar" }),
+                new TestCaseData("tags: foo, bar bar , blah,   baz  ").Returns(new[] {"foo", "bar bar", "blah", "baz"}),
+                new TestCaseData("tags: a multiword tag, bar").Returns(new[] { "a multiword tag", "bar" }),
+                new TestCaseData("  tags: a multiword tag, bar").Returns(new[] { "a multiword tag", "bar" }),
+                new TestCaseData("  tags:    foo   ,    bar   ").Returns(new[] { "foo", "bar" }),
+                new TestCaseData("  tags: a multiword tag, bar\n this is random text").Returns(new[] { "a multiword tag", "bar" })
+            };
+
+            [Test, TestCaseSource("tagValuesTestCases")]
+            public IEnumerable<string> ShouldGetTagValues(string input)
+            {
+                var tokens = Parser.ParseMarkdownParagraph(input);
+                return tokens.Where(token => token.TokenType == Parser.TokenType.TagValue).Select(token => token.Value);
+            }
+
+            private static readonly TestCaseData[] tagTestCases = new[]
+            {
+                new TestCaseData("tags: foo, bar").Returns("tags: foo, bar"),
+                new TestCaseData("tags: foo, bar , blah,   baz  ").Returns("tags: foo, bar , blah,   baz"),
+                new TestCaseData("tags: a multiword tag, bar").Returns("tags: a multiword tag, bar"),
+                new TestCaseData("  tags: a multiword tag, bar").Returns("tags: a multiword tag, bar"),
+                new TestCaseData("  tags:    foo   ,    bar   ").Returns("tags:    foo   ,    bar"),
+                new TestCaseData("  tags: a multiword tag, bar\n this is random text").Returns("tags: a multiword tag, bar")
+            };
+
+            [Test, TestCaseSource("tagTestCases")]
+            public string ShouldGetTag(string input)
+            {
+                var tokens = Parser.ParseMarkdownParagraph(input);
+                return tokens.First(token => token.TokenType == Parser.TokenType.Tag).Value;
+            }
+        }
     }
 }
