@@ -136,54 +136,55 @@ namespace Gauge.VisualStudio.Core.Helpers
         private static GaugeApiConnection StartGaugeAsDaemon(Project gaugeProject)
         {
             var waitDialog = (IVsThreadedWaitDialog)Package.GetGlobalService(typeof(SVsThreadedWaitDialog));
-            waitDialog.StartWaitDialog("Initializing Gauge Project",
-                string.Format("Initializing Gauge daemon for Project: {0}", gaugeProject.Name),
-                null,
-                0,
-                null,
-                null);
-            var projectOutputPath = GetValidProjectOutputPath(gaugeProject);
-
-            var openPort = GetOpenPort();
-            OutputPaneLogger.Debug("Opening Gauge Daemon for Project : {0},  at port: {1}", gaugeProject.Name, openPort);
-            var slugifiedName = gaugeProject.SlugifiedName();
-
-            ApiPorts.Add(slugifiedName, openPort);
-            var gaugeStartInfo = new ProcessStartInfo
-            {
-                WorkingDirectory = GetProjectRoot(gaugeProject),
-                UseShellExecute = false,
-                FileName = "gauge.exe",
-                CreateNoWindow = true,
-                Arguments = "--daemonize",
-                RedirectStandardError = true,
-                RedirectStandardOutput = true
-            };
-
-            gaugeStartInfo.EnvironmentVariables["GAUGE_API_PORT"] = openPort.ToString(CultureInfo.InvariantCulture);
-            gaugeStartInfo.EnvironmentVariables["gauge_custom_build_path"] = projectOutputPath;
-
-            var gaugeProcess = new Process
-            {
-                StartInfo = gaugeStartInfo
-            };
-
             try
             {
-                if (gaugeProcess.Start())
+                waitDialog.StartWaitDialog("Initializing Gauge Project",
+                    string.Format("Initializing Gauge daemon for Project: {0}", gaugeProject.Name),
+                    null,
+                    0,
+                    null,
+                    null);
+                var projectOutputPath = GetValidProjectOutputPath(gaugeProject);
+
+                var openPort = GetOpenPort();
+                OutputPaneLogger.Debug("Opening Gauge Daemon for Project : {0},  at port: {1}", gaugeProject.Name,
+                    openPort);
+                var slugifiedName = gaugeProject.SlugifiedName();
+
+                ApiPorts.Add(slugifiedName, openPort);
+                var gaugeStartInfo = new ProcessStartInfo
                 {
-                    ChildProcesses.Add(slugifiedName, gaugeProcess);
+                    WorkingDirectory = GetProjectRoot(gaugeProject),
+                    UseShellExecute = false,
+                    FileName = "gauge.exe",
+                    CreateNoWindow = true,
+                    Arguments = "--daemonize",
+                    RedirectStandardError = true,
+                    RedirectStandardOutput = true
+                };
+
+                gaugeStartInfo.EnvironmentVariables["GAUGE_API_PORT"] = openPort.ToString(CultureInfo.InvariantCulture);
+                gaugeStartInfo.EnvironmentVariables["gauge_custom_build_path"] = projectOutputPath;
+
+                var gaugeProcess = new Process { StartInfo = gaugeStartInfo };
+
+                try
+                {
+                    if (gaugeProcess.Start())
+                    {
+                        ChildProcesses.Add(slugifiedName, gaugeProcess);
+                    }
+                    OutputPaneLogger.Debug("Opening Gauge Daemon with PID: {0}", gaugeProcess.Id);
+                    var tcpClientWrapper = new TcpClientWrapper(openPort);
+                    WaitForColdStart(tcpClientWrapper);
+                    OutputPaneLogger.Debug("PID: {0} ready, waiting for messages..", gaugeProcess.Id);
+                    return new GaugeApiConnection(tcpClientWrapper);
                 }
-                OutputPaneLogger.Debug("Opening Gauge Daemon with PID: {0}", gaugeProcess.Id);
-                var tcpClientWrapper = new TcpClientWrapper(openPort);
-                WaitForColdStart(tcpClientWrapper);
-                OutputPaneLogger.Debug("PID: {0} ready, waiting for messages..", gaugeProcess.Id);
-                return new GaugeApiConnection(tcpClientWrapper);
-            }
-            catch
-            {
-                DisplayGaugeNotFoundMessage();
-                return null;
+                catch
+                {
+                    DisplayGaugeNotFoundMessage();
+                    return null;
+                }
             }
             finally
             {
