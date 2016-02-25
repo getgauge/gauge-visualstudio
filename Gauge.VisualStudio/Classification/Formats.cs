@@ -90,6 +90,10 @@ namespace Gauge.VisualStudio.Classification
         [UserVisible(true)]
         sealed class GaugeTagFormat : ClassificationFormatDefinition
         {
+            public GaugeTagFormat()
+            {
+                IsBold= true;
+            }
         }
 
         [Export(typeof(EditorFormatDefinition))]
@@ -102,6 +106,7 @@ namespace Gauge.VisualStudio.Classification
             public GaugeTagValueFormat()
             {
                 IsBold = true;
+                IsItalic = true;
             }
         }
     }
