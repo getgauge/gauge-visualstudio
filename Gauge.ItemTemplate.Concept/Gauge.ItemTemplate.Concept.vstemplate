@@ -1,10 +1,10 @@
-<VSTemplate Version="3.0.0" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" Type="Item">
+﻿<VSTemplate Version="3.0.0" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" Type="Item">
   <TemplateData>
     <ProjectType>CSharp</ProjectType>
     <DefaultName>Concept</DefaultName>
     <Name>Concept</Name>
     <Description>A Gauge Concept file.</Description>
-    <Icon>logo.png</Icon>
+    <Icon>Gauge.png</Icon>
     <NumberOfParentCategoriesToRollUp>1</NumberOfParentCategoriesToRollUp>
     <TemplateID>e21665b3-93a8-4156-b7a6-b334e25c5aa5</TemplateID>
   </TemplateData>

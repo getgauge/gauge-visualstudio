@@ -279,12 +279,6 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="Gauge.VisualStudio.licenseheader" />
-    <None Include="ItemTemplates\Gauge\Concept\concept.cpt" />
-    <Resource Include="ItemTemplates\Gauge\Concept\logo.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Content Include="ItemTemplates\Gauge\Specification\Definitions\CSharp.vstemplate" />
-    <Content Include="ItemTemplates\Gauge\Concept\Definitions\CSharp.vstemplate" />
     <None Include="packages.config" />
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
@@ -296,10 +290,6 @@
   <ItemGroup>
     <Resource Include="assets\glyphs\concept.png" />
     <Resource Include="assets\glyphs\step.png" />
-    <None Include="ItemTemplates\Gauge\Specification\specification.spec" />
-    <Resource Include="ItemTemplates\Gauge\Specification\logo.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
     <Content Include="LICENSE.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
@@ -329,6 +319,20 @@
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Gauge.ItemTemplate.Concept\Gauge.ItemTemplate.Concept.csproj">
+      <Project>{1443A909-01A8-43F2-9B74-1307ADA135E0}</Project>
+      <Name>Gauge.ItemTemplate.Concept</Name>
+      <VSIXSubPath>ItemTemplates</VSIXSubPath>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
+    </ProjectReference>
+    <ProjectReference Include="..\Gauge.ItemTemplate.Spec\Gauge.ItemTemplate.Spec.csproj">
+      <Project>{A5552EDD-ECA1-4735-99C1-64F78FBA685D}</Project>
+      <Name>Gauge.ItemTemplate.Spec</Name>
+      <VSIXSubPath>ItemTemplates</VSIXSubPath>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
+    </ProjectReference>
     <ProjectReference Include="..\Gauge.VisualStudio.Core\Gauge.VisualStudio.Core.csproj">
       <Project>{24c4951f-15a5-4c76-9a20-2e456a21500e}</Project>
       <Name>Gauge.VisualStudio.Core</Name>
@@ -347,9 +351,9 @@
       <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3bSatelliteDllsProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
       <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
     </ProjectReference>
-    <ProjectReference Include="..\GaugeProjectTemplate\GaugeProjectTemplate.csproj">
+    <ProjectReference Include="..\GaugeProjectTemplate\Gauge.ProjectTemplate.csproj">
       <Project>{6F5A1231-12FA-4354-9B14-1CA9DF5F1322}</Project>
-      <Name>GaugeProjectTemplate</Name>
+      <Name>Gauge.ProjectTemplate</Name>
       <VSIXSubPath>ProjectTemplates</VSIXSubPath>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
