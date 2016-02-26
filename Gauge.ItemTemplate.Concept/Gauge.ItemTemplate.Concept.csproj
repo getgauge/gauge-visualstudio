@@ -80,7 +80,9 @@
     <None Include="concept.cpt" />
   </ItemGroup>
   <ItemGroup>
-    <VSTemplate Include="Gauge.ItemTemplate.Concept.vstemplate" />
+    <VSTemplate Include="Gauge.ItemTemplate.Concept.vstemplate">
+      <OutputSubPath>Test</OutputSubPath>
+    </VSTemplate>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5">
