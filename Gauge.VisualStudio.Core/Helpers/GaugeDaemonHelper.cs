@@ -180,8 +180,9 @@ namespace Gauge.VisualStudio.Core.Helpers
                     OutputPaneLogger.Debug("PID: {0} ready, waiting for messages..", gaugeProcess.Id);
                     return new GaugeApiConnection(tcpClientWrapper);
                 }
-                catch
+                catch (Exception ex)
                 {
+                    OutputPaneLogger.Error(string.Format("Failed to start Gauge Daemon: {0}", ex));
                     DisplayGaugeNotFoundMessage();
                     return null;
                 }
