@@ -5,8 +5,6 @@ VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauge.VisualStudio", "Gauge.VisualStudio\Gauge.VisualStudio.csproj", "{DC3355B9-8179-48A6-9A01-0E96F2FB842E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GaugeProjectTemplate", "GaugeProjectTemplate\GaugeProjectTemplate.csproj", "{C095C38E-A58F-4E66-8E57-F0A91CCA7974}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauge.VisualStudio.TestAdapter", "Gauge.VisualStudio.TestAdapter\Gauge.VisualStudio.TestAdapter.csproj", "{62F2F1DA-2357-4F63-991A-5449B3F31E00}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauge.VisualStudio.Model", "Gauge.VisualStudio.Model\Gauge.VisualStudio.Model.csproj", "{6990376B-FD73-4A61-A26C-3C2FC9429164}"
@@ -19,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauge.VisualStudio.Core.Tes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauge.VisualStudio.Tests", "Gauge.VisualStudio.Tests\Gauge.VisualStudio.Tests.csproj", "{754095AA-91B0-40E4-98AD-3FD8746DB95D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GaugeProjectTemplate", "GaugeProjectTemplate\GaugeProjectTemplate.csproj", "{6F5A1231-12FA-4354-9B14-1CA9DF5F1322}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,8 +29,6 @@ Global
 		{DC3355B9-8179-48A6-9A01-0E96F2FB842E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DC3355B9-8179-48A6-9A01-0E96F2FB842E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DC3355B9-8179-48A6-9A01-0E96F2FB842E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C095C38E-A58F-4E66-8E57-F0A91CCA7974}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C095C38E-A58F-4E66-8E57-F0A91CCA7974}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{62F2F1DA-2357-4F63-991A-5449B3F31E00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{62F2F1DA-2357-4F63-991A-5449B3F31E00}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{62F2F1DA-2357-4F63-991A-5449B3F31E00}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -55,6 +53,10 @@ Global
 		{754095AA-91B0-40E4-98AD-3FD8746DB95D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{754095AA-91B0-40E4-98AD-3FD8746DB95D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{754095AA-91B0-40E4-98AD-3FD8746DB95D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F5A1231-12FA-4354-9B14-1CA9DF5F1322}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F5A1231-12FA-4354-9B14-1CA9DF5F1322}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F5A1231-12FA-4354-9B14-1CA9DF5F1322}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F5A1231-12FA-4354-9B14-1CA9DF5F1322}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

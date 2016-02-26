@@ -1,20 +1,36 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
+    <MinimumVisualStudioVersion>12.0</MinimumVisualStudioVersion>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>12.0</OldToolsVersion>
+    <UpgradeBackupLocation />
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectTypeGuids>{82b43b9b-a64c-4715-b499-d71e9ca2bd60};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <ProjectGuid>{6F5A1231-12FA-4354-9B14-1CA9DF5F1322}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>_GaugeProjectTemplate</RootNamespace>
-    <AssemblyName>_GaugeProjectTemplate</AssemblyName>
-    <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <RootNamespace>GaugeProjectTemplate</RootNamespace>
+    <AssemblyName>GaugeProjectTemplate</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
-    <ProjectGuid>{C095C38E-A58F-4E66-8E57-F0A91CCA7974}</ProjectGuid>
+    <GeneratePkgDefFile>false</GeneratePkgDefFile>
+    <IncludeAssemblyInVSIXContainer>false</IncludeAssemblyInVSIXContainer>
+    <IncludeDebugSymbolsInVSIXContainer>false</IncludeDebugSymbolsInVSIXContainer>
+    <IncludeDebugSymbolsInLocalVSIXDeployment>false</IncludeDebugSymbolsInLocalVSIXDeployment>
+    <CreateVsixContainer>false</CreateVsixContainer>
+    <DeployExtension>false</DeployExtension>
+    <DeployVSTemplates>false</DeployVSTemplates>
+    <CopyVsixManifestToOutput>false</CopyVsixManifestToOutput>
+    <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
+    <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -34,43 +50,35 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Gauge.CSharp.Lib, Version=_GaugeLibVersion, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath Condition="Exists('packages\Gauge.CSharp.Lib._GaugeLibVersion.0\lib\net45\Gauge.CSharp.Lib.dll')">packages\Gauge.CSharp.Lib._GaugeLibVersion.0\lib\net45\Gauge.CSharp.Lib.dll</HintPath>
-      <HintPath Condition="Exists('..\packages\Gauge.CSharp.Lib._GaugeLibVersion.0\lib\net45\Gauge.CSharp.Lib.dll')">..\packages\Gauge.CSharp.Lib._GaugeLibVersion.0\lib\net45\Gauge.CSharp.Lib.dll</HintPath>
-    </Reference>
-    <Reference Include="FluentAssertions">
-      <HintPath Condition="Exists('packages\FluentAssertions.3.5.0\lib\net45\FluentAssertions.dll')">packages\FluentAssertions.3.5.0\lib\net45\FluentAssertions.dll</HintPath>
-      <HintPath Condition="Exists('..\packages\FluentAssertions.3.5.0\lib\net45\FluentAssertions.dll')">..\packages\FluentAssertions.3.5.0\lib\net45\FluentAssertions.dll</HintPath>
-    </Reference>
-    <Reference Include="FluentAssertions.Core">
-      <HintPath Condition="Exists('packages\FluentAssertions.3.5.0\lib\net45\FluentAssertions.Core.dll')">packages\FluentAssertions.3.5.0\lib\net45\FluentAssertions.Core.dll</HintPath>
-      <HintPath Condition="Exists('..\packages\FluentAssertions.3.5.0\lib\net45\FluentAssertions.Core.dll')">..\packages\FluentAssertions.3.5.0\lib\net45\FluentAssertions.Core.dll</HintPath>
+    <Reference Include="Microsoft.VisualStudio.CoreUtility">
+      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="StepImplementation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="AssemblyInfo.cs" />
+    <None Include="ProjectTemplate.csproj" />
+    <None Include="GaugeProjectTemplate.ico" />
+    <None Include="StepImplementation.cs" />
     <None Include="Env\default\default.properties" />
     <None Include="manifest.json" />
     <None Include="packages.config" />
     <None Include="Specs\example.spec" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="_Definitions\_project.vstemplate.xml" />
-    <Content Include="_preprocess.xml" />
+    <VSTemplate Include="GaugeProjectTemplate.vstemplate">
+      <OutputSubPath>Test</OutputSubPath>
+    </VSTemplate>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
+  <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>

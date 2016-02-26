@@ -153,10 +153,6 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
-    <Reference Include="TemplateBuilder, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\TemplateBuilder.1.1.4.6-beta\lib\TemplateBuilder.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="UIAutomationTypes" />
     <Reference Include="VSLangProj, Version=7.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <SpecificVersion>False</SpecificVersion>
@@ -290,7 +286,6 @@
     <Content Include="ItemTemplates\Gauge\Specification\Definitions\CSharp.vstemplate" />
     <Content Include="ItemTemplates\Gauge\Concept\Definitions\CSharp.vstemplate" />
     <None Include="packages.config" />
-    <None Include="Properties\template-builder.props" />
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
@@ -315,11 +310,6 @@
     </Content>
     <Resource Include="Resources\Images.png" />
     <Content Include="Resources\Package.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <TemplateReference Include="GaugeProjectTemplate.csproj">
-      <PathToProject>../GaugeProjectTemplate/GaugeProjectTemplate.csproj</PathToProject>
-    </TemplateReference>
   </ItemGroup>
   <ItemGroup>
     <Page Include="UI\Refactor.xaml">
@@ -356,6 +346,13 @@
       <Name>Gauge.VisualStudio.TestAdapter</Name>
       <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3bSatelliteDllsProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
       <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
+    </ProjectReference>
+    <ProjectReference Include="..\GaugeProjectTemplate\GaugeProjectTemplate.csproj">
+      <Project>{6F5A1231-12FA-4354-9B14-1CA9DF5F1322}</Project>
+      <Name>GaugeProjectTemplate</Name>
+      <VSIXSubPath>ProjectTemplates</VSIXSubPath>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -24,6 +24,6 @@
     <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="Gauge.VisualStudio.TestAdapter" Path="|Gauge.VisualStudio.TestAdapter|" />
     <Asset Type="UnitTestExtension" d:Source="Project" d:ProjectName="%CurrentProject%.TestAdapter" Path="|Gauge.VisualStudio.TestAdapter|" />
     <Asset Type="Microsoft.VisualStudio.ItemTemplate" Path="Output\ItemTemplates" />
-    <Asset Type="Microsoft.VisualStudio.ProjectTemplate" Path="Output\ProjectTemplates" />
+    <Asset Type="Microsoft.VisualStudio.ProjectTemplate" Path="ProjectTemplates" d:Source="Project" d:ProjectName="GaugeProjectTemplate" d:TargetPath="|GaugeProjectTemplate;TemplateProjectOutputGroup|" d:VsixSubPath="ProjectTemplates" />
   </Assets>
 </PackageManifest>
