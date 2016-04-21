@@ -24,7 +24,8 @@
     <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="Gauge.VisualStudio.TestAdapter" Path="|Gauge.VisualStudio.TestAdapter|" />
     <Asset Type="UnitTestExtension" d:Source="Project" d:ProjectName="%CurrentProject%.TestAdapter" Path="|Gauge.VisualStudio.TestAdapter|" />
     <Asset Type="Microsoft.VisualStudio.ItemTemplate" Path="ItemTemplates" d:Source="Project" d:ProjectName="Gauge.ItemTemplate.Spec" d:TargetPath="|Gauge.ItemTemplate.Spec;TemplateProjectOutputGroup|" d:VsixSubPath="ItemTemplates" />
-    <Asset Type="Microsoft.VisualStudio.ProjectTemplate" Path="ProjectTemplates" d:Source="Project" d:TargetPath="|Gauge.ProjectTemplate;TemplateProjectOutputGroup|" d:VsixSubPath="ProjectTemplates" d:ProjectName="Gauge.ProjectTemplate" />
     <Asset Type="Microsoft.VisualStudio.ItemTemplate" d:Source="Project" d:ProjectName="Gauge.ItemTemplate.Concept" d:TargetPath="|Gauge.ItemTemplate.Concept;TemplateProjectOutputGroup|" Path="ItemTemplates" d:VsixSubPath="ItemTemplates" />
+    <Asset Type="Microsoft.VisualStudio.ProjectTemplate" Path="ProjectTemplates" d:Source="Project" d:TargetPath="|Gauge.ProjectTemplates.Basic;TemplateProjectOutputGroup|" d:VsixSubPath="ProjectTemplates" d:ProjectName="Gauge.ProjectTemplates.Basic" />
+    <Asset Type="Microsoft.VisualStudio.ProjectTemplate" Path="ProjectTemplates" d:Source="Project" d:TargetPath="|Gauge.ProjectTemplates.Webdriver;TemplateProjectOutputGroup|" d:VsixSubPath="ProjectTemplates" d:ProjectName="Gauge.ProjectTemplates.Webdriver" />
   </Assets>
 </PackageManifest>

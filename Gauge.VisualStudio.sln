@@ -17,11 +17,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauge.VisualStudio.Core.Tes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauge.VisualStudio.Tests", "Gauge.VisualStudio.Tests\Gauge.VisualStudio.Tests.csproj", "{754095AA-91B0-40E4-98AD-3FD8746DB95D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauge.ProjectTemplate", "GaugeProjectTemplate\Gauge.ProjectTemplate.csproj", "{6F5A1231-12FA-4354-9B14-1CA9DF5F1322}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauge.ItemTemplate.Spec", "Gauge.ItemTemplate.Spec\Gauge.ItemTemplate.Spec.csproj", "{A5552EDD-ECA1-4735-99C1-64F78FBA685D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauge.ItemTemplate.Concept", "Gauge.ItemTemplate.Concept\Gauge.ItemTemplate.Concept.csproj", "{1443A909-01A8-43F2-9B74-1307ADA135E0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauge.ProjectTemplates.Webdriver", "Gauge.ProjectTemplates.Webdriver\Gauge.ProjectTemplates.Webdriver.csproj", "{ADCFFA82-039F-48AF-90BA-550A05064454}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauge.ProjectTemplates.Basic", "Gauge.ProjectTemplates.Basic\Gauge.ProjectTemplates.Basic.csproj", "{6F5A1231-12FA-4354-9B14-1CA9DF5F1322}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,10 +59,6 @@ Global
 		{754095AA-91B0-40E4-98AD-3FD8746DB95D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{754095AA-91B0-40E4-98AD-3FD8746DB95D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{754095AA-91B0-40E4-98AD-3FD8746DB95D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6F5A1231-12FA-4354-9B14-1CA9DF5F1322}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6F5A1231-12FA-4354-9B14-1CA9DF5F1322}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6F5A1231-12FA-4354-9B14-1CA9DF5F1322}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6F5A1231-12FA-4354-9B14-1CA9DF5F1322}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A5552EDD-ECA1-4735-99C1-64F78FBA685D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A5552EDD-ECA1-4735-99C1-64F78FBA685D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A5552EDD-ECA1-4735-99C1-64F78FBA685D}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -69,6 +67,14 @@ Global
 		{1443A909-01A8-43F2-9B74-1307ADA135E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1443A909-01A8-43F2-9B74-1307ADA135E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1443A909-01A8-43F2-9B74-1307ADA135E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ADCFFA82-039F-48AF-90BA-550A05064454}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ADCFFA82-039F-48AF-90BA-550A05064454}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ADCFFA82-039F-48AF-90BA-550A05064454}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ADCFFA82-039F-48AF-90BA-550A05064454}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F5A1231-12FA-4354-9B14-1CA9DF5F1322}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F5A1231-12FA-4354-9B14-1CA9DF5F1322}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F5A1231-12FA-4354-9B14-1CA9DF5F1322}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F5A1231-12FA-4354-9B14-1CA9DF5F1322}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

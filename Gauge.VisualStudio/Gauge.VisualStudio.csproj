@@ -333,6 +333,20 @@
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
     </ProjectReference>
+    <ProjectReference Include="..\Gauge.ProjectTemplates.Basic\Gauge.ProjectTemplates.Basic.csproj">
+      <Project>{6F5A1231-12FA-4354-9B14-1CA9DF5F1322}</Project>
+      <Name>Gauge.ProjectTemplates.Basic</Name>
+      <VSIXSubPath>ProjectTemplates</VSIXSubPath>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
+    </ProjectReference>
+    <ProjectReference Include="..\Gauge.ProjectTemplates.Webdriver\Gauge.ProjectTemplates.Webdriver.csproj">
+      <Project>{ADCFFA82-039F-48AF-90BA-550A05064454}</Project>
+      <Name>Gauge.ProjectTemplates.Webdriver</Name>
+      <VSIXSubPath>ProjectTemplates</VSIXSubPath>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
+    </ProjectReference>
     <ProjectReference Include="..\Gauge.VisualStudio.Core\Gauge.VisualStudio.Core.csproj">
       <Project>{24c4951f-15a5-4c76-9a20-2e456a21500e}</Project>
       <Name>Gauge.VisualStudio.Core</Name>
@@ -350,13 +364,6 @@
       <Name>Gauge.VisualStudio.TestAdapter</Name>
       <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3bSatelliteDllsProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
       <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
-    </ProjectReference>
-    <ProjectReference Include="..\GaugeProjectTemplate\Gauge.ProjectTemplate.csproj">
-      <Project>{6F5A1231-12FA-4354-9B14-1CA9DF5F1322}</Project>
-      <Name>Gauge.ProjectTemplate</Name>
-      <VSIXSubPath>ProjectTemplates</VSIXSubPath>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
