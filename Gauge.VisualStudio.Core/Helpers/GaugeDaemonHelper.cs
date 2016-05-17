@@ -182,7 +182,7 @@ namespace Gauge.VisualStudio.Core.Helpers
                 }
                 catch (Exception ex)
                 {
-                    OutputPaneLogger.Error(string.Format("Failed to start Gauge Daemon: {0}", ex));
+                    OutputPaneLogger.Error("Failed to start Gauge Daemon: {0}", ex);
                     DisplayGaugeNotFoundMessage();
                     return null;
                 }
@@ -239,10 +239,17 @@ namespace Gauge.VisualStudio.Core.Helpers
             var i = 0;
             while (i < 10)
             {
-                var message = gaugeApiConnection.WriteAndReadApiMessage(apiMessage);
-                if (message.HasAllSpecsResponse && message.AllSpecsResponse.SpecsCount > 0)
+                try
                 {
-                    break;
+                    var message = gaugeApiConnection.WriteAndReadApiMessage(apiMessage);
+                    if (message.HasAllSpecsResponse && message.AllSpecsResponse.SpecsCount > 0)
+                    {
+                        break;
+                    }
+                }
+                catch
+                {
+                    //do nothing, count as a retry attempt
                 }
                 Thread.Sleep(500);
                 i++;
