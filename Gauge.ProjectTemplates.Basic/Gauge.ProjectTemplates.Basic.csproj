@@ -68,7 +68,7 @@
     <None Include="StepImplementation.cs" />
     <None Include="Env\default\default.properties" />
     <None Include="manifest.json" />
-    <None Include="packages.config" />
+    <None Include="packages.config.template" />
     <None Include="Specs\example.spec" />
   </ItemGroup>
   <ItemGroup>

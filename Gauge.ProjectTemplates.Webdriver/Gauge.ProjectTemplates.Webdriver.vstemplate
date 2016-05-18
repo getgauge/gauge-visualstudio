@@ -19,7 +19,7 @@
     </CustomParameters>
     <Project File="ProjectTemplate.csproj" ReplaceParameters="true">
       <ProjectItem ReplaceParameters="true" TargetFileName="Properties\AssemblyInfo.cs">AssemblyInfo.cs</ProjectItem>
-      <ProjectItem ReplaceParameters="true">packages.config</ProjectItem>
+      <ProjectItem ReplaceParameters="true" TargetFileName="packages.config">packages.config.template</ProjectItem>
       <ProjectItem>manifest.json</ProjectItem>
       <ProjectItem ReplaceParameters="true">StepImplementation.cs</ProjectItem>
       <ProjectItem ReplaceParameters="true">DriverFactory.cs</ProjectItem>

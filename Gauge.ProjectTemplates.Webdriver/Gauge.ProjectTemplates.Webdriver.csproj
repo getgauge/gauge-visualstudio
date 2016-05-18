@@ -81,7 +81,7 @@
     <None Include="AssemblyInfo.cs" />
     <None Include="env\default\default.properties" />
     <None Include="manifest.json" />
-    <None Include="packages.config" />
+    <None Include="packages.config.template" />
     <None Include="specs\example.spec" />
     <None Include="StepImplementation.cs" />
     <None Include="ProjectTemplate.csproj" />

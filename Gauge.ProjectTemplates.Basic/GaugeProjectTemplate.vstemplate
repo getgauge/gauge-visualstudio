@@ -28,7 +28,7 @@
         </Folder>
       </Folder>
       <ProjectItem TargetFileName="manifest.json">manifest.json</ProjectItem>
-      <ProjectItem ReplaceParameters="true" TargetFileName="packages.config">packages.config</ProjectItem>
+      <ProjectItem ReplaceParameters="true" TargetFileName="packages.config">packages.config.template</ProjectItem>
       <Folder Name="specs" TargetFolderName="specs">
         <ProjectItem TargetFileName="example.spec">example.spec</ProjectItem>
       </Folder>
