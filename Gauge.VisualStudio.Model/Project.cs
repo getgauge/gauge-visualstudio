@@ -23,6 +23,7 @@ using System.Reflection;
 using EnvDTE;
 using EnvDTE80;
 using Microsoft.VisualStudio.Text;
+using VSLangProj;
 using CodeAttributeArgument = EnvDTE80.CodeAttributeArgument;
 using CodeNamespace = EnvDTE.CodeNamespace;
 
@@ -39,10 +40,10 @@ namespace Gauge.VisualStudio.Model
 
     public class Project : IProject
     {
-        private static Events2 _events2;
-        private static CodeModelEvents _codeModelEvents;
-        private static List<Implementation> _implementations;
-        private static DocumentEvents _documentEvents;
+        private Events2 _events2;
+        private CodeModelEvents _codeModelEvents;
+        private List<Implementation> _implementations;
+        private DocumentEvents _documentEvents;
         private ProjectItemsEvents _projectItemsEvents;
         private readonly DTE _dte;
 
@@ -144,9 +145,15 @@ namespace Gauge.VisualStudio.Model
 
         public static IEnumerable<CodeElement> GetAllClasses(EnvDTE.Project containingProject)
         {
-            return containingProject.CodeModel == null
-                ? Enumerable.Empty<CodeElement>()
-                : GetCodeElementsFor(containingProject.CodeModel.CodeElements, vsCMElement.vsCMElementClass);
+            if (containingProject.CodeModel == null)
+                return Enumerable.Empty<CodeElement>();
+
+            var vsProject = containingProject.Object as VSProject;
+            if (vsProject == null)
+                return Enumerable.Empty<CodeElement>();
+
+            var codeElements = vsProject.References.Cast<Reference>().Where(reference => reference.SourceProject != null).SelectMany(reference => GetAllClasses(reference.SourceProject));
+            return GetCodeElementsFor(containingProject.CodeModel.CodeElements, vsCMElement.vsCMElementClass).Concat(codeElements);
         }
 
         public CodeClass FindOrCreateClass(EnvDTE.Project project, string className)
