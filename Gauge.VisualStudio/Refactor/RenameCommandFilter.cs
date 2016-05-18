@@ -53,7 +53,7 @@ namespace Gauge.VisualStudio.Refactor
             switch ((VSConstants.VSStd2KCmdID)nCmdID)
             {
                 case VSConstants.VSStd2KCmdID.RENAME:
-
+                    GaugePackage.DTE.ExecuteCommand("File.SaveAll");
                     var caretBufferPosition = _view.Caret.Position.BufferPosition;
                     var currentLine = caretBufferPosition.GetContainingLine();
                     var lineText = currentLine.GetText();
