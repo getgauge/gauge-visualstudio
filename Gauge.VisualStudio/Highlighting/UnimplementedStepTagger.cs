@@ -15,6 +15,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Gauge.VisualStudio.Core.Extensions;
 using Gauge.VisualStudio.Model;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
@@ -39,7 +40,7 @@ namespace Gauge.VisualStudio.Highlighting
 
         private void OnCaretMove(object sender, CaretPositionChangedEventArgs e)
         {
-            if (TagsChanged == null) return;
+            if (TagsChanged == null || GaugePackage.DTE.ActiveDocument == null || !GaugePackage.DTE.ActiveDocument.IsGaugeSpecFile()) return;
             var line = _textView.GetTextViewLineContainingBufferPosition(e.NewPosition.BufferPosition);
             TagsChanged(this, new SnapshotSpanEventArgs(line.Extent));
         }
