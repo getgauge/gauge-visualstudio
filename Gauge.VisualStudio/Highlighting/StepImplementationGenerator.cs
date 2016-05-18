@@ -30,7 +30,6 @@ namespace Gauge.VisualStudio.Highlighting
     {
         private readonly EnvDTE.Project _vsProject;
         private readonly IProject _project;
-        private readonly EnvDTE.Project _vsproject;
         private readonly IStep _step;
 
         public StepImplementationGenerator(EnvDTE.Project vsProject, IProject project, IStep step)

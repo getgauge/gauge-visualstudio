@@ -235,7 +235,6 @@
     <Compile Include="FormatMenuCommand.cs" />
     <Compile Include="GaugeEditorFactory.cs" />
     <Compile Include="GaugeLanguageInfo.cs" />
-    <Compile Include="Helpers\DaemonHelper.cs" />
     <Compile Include="GaugeContentTypeDefinitions.cs" />
     <Compile Include="GaugeClassifierProvider.cs" />
     <Compile Include="GotoDefn\GotoDefnCommandFilter.cs" />

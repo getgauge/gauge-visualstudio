@@ -66,7 +66,7 @@ namespace Gauge.VisualStudio.TestAdapter
 
         private void UpdateTestContainersIfGaugeSpecFile(Document doc)
         {
-            if (doc.IsGaugeSpecFile())
+            if (doc.IsGaugeSpecFile() && doc.ProjectItem.ContainingProject.IsGaugeProject())
                 RaiseTestContainersUpdated();
         }
 

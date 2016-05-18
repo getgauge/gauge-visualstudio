@@ -22,6 +22,7 @@ using System.Linq;
 using System.Reflection;
 using EnvDTE;
 using EnvDTE80;
+using Gauge.VisualStudio.Core.Extensions;
 using Microsoft.VisualStudio.Text;
 using VSLangProj;
 using CodeAttributeArgument = EnvDTE80.CodeAttributeArgument;
@@ -40,7 +41,7 @@ namespace Gauge.VisualStudio.Model
 
     public class Project : IProject
     {
-        private Events2 _events2;
+        private readonly Events2 _events2;
         private CodeModelEvents _codeModelEvents;
         private List<Implementation> _implementations;
         private DocumentEvents _documentEvents;
@@ -68,14 +69,20 @@ namespace Gauge.VisualStudio.Model
 
         public void RefreshImplementations(ProjectItem projectItem)
         {
-            _implementations = GetGaugeImplementations(projectItem.ContainingProject);
+            if (projectItem.ContainingProject.IsGaugeProject())
+            {
+                _implementations = GetGaugeImplementations(projectItem.ContainingProject);
+            }
         }
 
-        internal IEnumerable<Implementation> Implementations
+        private IEnumerable<Implementation> Implementations
         {
             get
             {
-                _implementations = _implementations ?? GetGaugeImplementations(_dte.ActiveDocument.ProjectItem.ContainingProject);
+                if (_dte.ActiveDocument!=null)
+                {
+                    _implementations = _implementations ?? GetGaugeImplementations(_dte.ActiveDocument.ProjectItem.ContainingProject);
+                }
                 return _implementations;
             }
         }
@@ -131,10 +138,22 @@ namespace Gauge.VisualStudio.Model
 
         public Implementation GetStepImplementation(ITextSnapshotLine line)
         {
+            if (Implementations==null)
+            {
+                return null;
+            }
             var lineText = Step.GetStepText(line);
-            var project = _dte.ActiveDocument.ProjectItem.ContainingProject;
-
-            return Implementations.FirstOrDefault(implementation => implementation.ContainsImplememntationFor(project, lineText));
+            ITextDocument textDoc;
+            line.Snapshot.TextBuffer.Properties.TryGetProperty(typeof(ITextDocument), out textDoc);
+            try
+            {
+                var project = _dte.Documents.Cast<Document>().First(d => string.CompareOrdinal(d.FullName, textDoc.FilePath) == 0).ProjectItem.ContainingProject;
+                return Implementations.FirstOrDefault(implementation => implementation.ContainsImplememntationFor(project, lineText));
+            }
+            catch (InvalidOperationException)
+            {
+                return null;
+            }
         }
 
 
