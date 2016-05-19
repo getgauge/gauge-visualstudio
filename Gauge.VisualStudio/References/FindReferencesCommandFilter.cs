@@ -16,6 +16,7 @@ using System;
 using EnvDTE;
 using EnvDTE80;
 using Gauge.VisualStudio.Model;
+using Gauge.VisualStudio.Model.Extensions;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell;
@@ -39,7 +40,7 @@ namespace Gauge.VisualStudio.References
                     var caretBufferPosition = TextView.Caret.Position.BufferPosition;
                     var originalText = caretBufferPosition.GetContainingLine().GetText();
 
-                    var findRegex = Step.GetFindRegex(GaugePackage.ActiveProject, originalText);
+                    var findRegex = Step.GetFindRegex(caretBufferPosition.Snapshot.GetProject(GaugePackage.DTE), originalText);
 
                     var _dte = ServiceProvider.GlobalProvider.GetService(typeof(DTE)) as DTE2;
                     var find = (Find2)_dte.Find;

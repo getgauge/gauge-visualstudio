@@ -17,6 +17,7 @@ using Gauge.CSharp.Core;
 using Gauge.Messages;
 using Gauge.VisualStudio.Core.Helpers;
 using Gauge.VisualStudio.Model;
+using Gauge.VisualStudio.Model.Extensions;
 using Gauge.VisualStudio.UI;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
@@ -80,7 +81,8 @@ namespace Gauge.VisualStudio.Refactor
                         undoContext.Open("GaugeRefactoring");
                         try
                         {
-                            var response = RefactorUsingGaugeDaemon(newText, originalText);
+                            var project = _view.TextBuffer.CurrentSnapshot.GetProject(GaugePackage.DTE);
+                            var response = RefactorUsingGaugeDaemon(newText, originalText, project);
 
                             if (!response.PerformRefactoringResponse.Success)
                                 return VSConstants.S_FALSE;
@@ -103,14 +105,14 @@ namespace Gauge.VisualStudio.Refactor
             return hresult;
         }
 
-        private static APIMessage RefactorUsingGaugeDaemon(string newText, string originalText)
+        private static APIMessage RefactorUsingGaugeDaemon(string newText, string originalText, EnvDTE.Project project)
         {
             var performRefactoringRequest = PerformRefactoringRequest
                 .CreateBuilder()
                 .SetNewStep(newText)
                 .SetOldStep(originalText)
                 .Build();
-            var apiConnection = GaugeDaemonHelper.GetApiConnectionFor(GaugePackage.ActiveProject);
+            var apiConnection = GaugeDaemonHelper.GetApiConnectionFor(project);
             var apiMessage = APIMessage.CreateBuilder()
                 .SetPerformRefactoringRequest(performRefactoringRequest)
                 .SetMessageType(APIMessage.Types.APIMessageType.PerformRefactoringRequest)

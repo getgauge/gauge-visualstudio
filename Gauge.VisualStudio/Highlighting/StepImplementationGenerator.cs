@@ -22,6 +22,7 @@ using Gauge.CSharp.Lib;
 using Gauge.VisualStudio.Core.Extensions;
 using Gauge.VisualStudio.Loggers;
 using Gauge.VisualStudio.Model;
+using Gauge.VisualStudio.Model.Extensions;
 using Microsoft.VisualStudio.Text;
 
 namespace Gauge.VisualStudio.Highlighting

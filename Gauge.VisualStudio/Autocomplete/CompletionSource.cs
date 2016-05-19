@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using Gauge.VisualStudio.Model;
+using Gauge.VisualStudio.Model.Extensions;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Operations;
@@ -32,6 +33,7 @@ namespace Gauge.VisualStudio.AutoComplete
         {
             [Import]
             internal ITextStructureNavigatorSelectorService NavigatorService { get; set; }
+
             public ICompletionSource TryCreateCompletionSource(ITextBuffer textBuffer)
             {
                 return new GaugeCompletionSource(this, textBuffer);
@@ -42,10 +44,11 @@ namespace Gauge.VisualStudio.AutoComplete
         {
             private readonly ITextBuffer _buffer;
             private bool _disposed;
-            private readonly Concept _concept = new Concept(GaugePackage.ActiveProject);
+            private readonly Concept _concept;
 
             public GaugeCompletionSource(GaugeCompletionSourceProvider gaugeCompletionSourceProvider, ITextBuffer buffer)
             {
+                _concept = new Concept(buffer.CurrentSnapshot.GetProject(GaugePackage.DTE));
                 _buffer = buffer;
             }
 
@@ -57,7 +60,7 @@ namespace Gauge.VisualStudio.AutoComplete
                 var snapshot = _buffer.CurrentSnapshot;
                 var snapshotPoint = session.GetTriggerPoint(snapshot);
                 if (!snapshotPoint.HasValue) return;
-                var step = new Step(GaugePackage.ActiveProject, snapshotPoint.Value.GetContainingLine());
+                var step = new Step(snapshot.GetProject(GaugePackage.DTE), snapshotPoint.Value.GetContainingLine());
                 completionSets.Add(new GaugeCompletionSet(snapshotPoint.Value, step, _concept));
             }
 

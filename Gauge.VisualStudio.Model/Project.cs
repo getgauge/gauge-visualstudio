@@ -23,6 +23,7 @@ using System.Reflection;
 using EnvDTE;
 using EnvDTE80;
 using Gauge.VisualStudio.Core.Extensions;
+using Gauge.VisualStudio.Model.Extensions;
 using Microsoft.VisualStudio.Text;
 using VSLangProj;
 using CodeAttributeArgument = EnvDTE80.CodeAttributeArgument;
@@ -142,13 +143,10 @@ namespace Gauge.VisualStudio.Model
             {
                 return null;
             }
-            var lineText = Step.GetStepText(line);
-            ITextDocument textDoc;
-            line.Snapshot.TextBuffer.Properties.TryGetProperty(typeof(ITextDocument), out textDoc);
             try
             {
-                var project = _dte.Documents.Cast<Document>().First(d => string.CompareOrdinal(d.FullName, textDoc.FilePath) == 0).ProjectItem.ContainingProject;
-                return Implementations.FirstOrDefault(implementation => implementation.ContainsImplememntationFor(project, lineText));
+                var project = line.Snapshot.GetProject(_dte);
+                return project == null ? null : Implementations.FirstOrDefault(implementation => implementation.ContainsImplememntationFor(project, Step.GetStepText(line)));
             }
             catch (InvalidOperationException)
             {

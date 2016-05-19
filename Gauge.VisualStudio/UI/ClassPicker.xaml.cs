@@ -34,11 +34,11 @@ namespace Gauge.VisualStudio.UI
 
         public string SelectedClass { get; private set; }
 
-        public ClassPicker()
+        public ClassPicker(EnvDTE.Project project)
         {
             InitializeComponent();
             WindowStartupLocation=WindowStartupLocation.CenterScreen;
-            _classNames = Project.GetAllClasses(GaugePackage.ActiveProject).Select(element => element.Name).Take(10);
+            _classNames = Project.GetAllClasses(project).Select(element => element.Name).Take(10);
             ClassListBox.ItemsSource = _classNames;
         }
 

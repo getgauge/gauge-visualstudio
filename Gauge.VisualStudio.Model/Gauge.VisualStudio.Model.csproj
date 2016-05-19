@@ -156,6 +156,8 @@
   <ItemGroup>
     <Compile Include="Concept.cs" />
     <Compile Include="ConceptImplementation.cs" />
+    <Compile Include="Extensions\ProjectItemExtensions.cs" />
+    <Compile Include="Extensions\TextSnapshotExtensions.cs" />
     <Compile Include="Implementation.cs" />
     <Compile Include="Parser.cs" />
     <Compile Include="Project.cs" />

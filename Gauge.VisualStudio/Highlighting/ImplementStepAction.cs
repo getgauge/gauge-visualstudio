@@ -18,6 +18,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using EnvDTE;
 using Gauge.VisualStudio.Model;
+using Gauge.VisualStudio.Model.Extensions;
 using Gauge.VisualStudio.UI;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
@@ -47,13 +48,14 @@ namespace Gauge.VisualStudio.Highlighting
             _display = "Implement Step";
             Icon = new BitmapImage(new Uri("pack://application:,,,/Gauge.VisualStudio;component/assets/glyphs/step.png"));
             _project = project;
-            var step = new Step(GaugePackage.ActiveProject, span.Start.GetContainingLine());
-            _stepImplementationGenerator = new StepImplementationGenerator(GaugePackage.ActiveProject, project, step);
+            var dteProject = span.Snapshot.GetProject(GaugePackage.DTE);
+            var step = new Step(dteProject, span.Start.GetContainingLine());
+            _stepImplementationGenerator = new StepImplementationGenerator(dteProject, project, step);
         }
 
         public void Invoke()
         {
-            var classPicker = new ClassPicker();
+            var classPicker = new ClassPicker(_snapshot.GetProject(GaugePackage.DTE));
             var selectedClass = string.Empty;
             classPicker.ShowModal();
             selectedClass = classPicker.SelectedClass;
