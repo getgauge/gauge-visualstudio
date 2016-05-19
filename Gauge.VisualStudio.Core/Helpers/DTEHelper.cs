@@ -29,18 +29,14 @@ namespace Gauge.VisualStudio.Core.Helpers
 {
     public static class DTEHelper
     {
-        private static readonly string[] testRunners = {"vstest.executionengine.x86", "te.processhost.managed"};
+        private static readonly string[] TestRunners = {"vstest.executionengine.x86", "te.processhost.managed"};
         public static DTE GetCurrent()
         {
             var testRunnerProcess = Process.GetCurrentProcess();
-            if (!testRunners.Contains(testRunnerProcess.ProcessName.ToLower()))
+            if (!TestRunners.Contains(testRunnerProcess.ProcessName.ToLower()))
                 throw new Exception("Test Runner Process not expected: " + testRunnerProcess.ProcessName.ToLower());
 
-            var progId = $"!VisualStudio.DTE.12.0:{GetVisualStudioProcessId(testRunnerProcess.Id)}";
-
-#if DEBUG
-            progId = $"!VisualStudio.DTE.14.0:{GetVisualStudioProcessId(testRunnerProcess.Id)}";
-#endif
+            var progId = $"!VisualStudio.DTE.14.0:{GetVisualStudioProcessId(testRunnerProcess.Id)}";
 
             object runningObject = null;
 
