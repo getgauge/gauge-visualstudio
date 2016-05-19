@@ -18,7 +18,7 @@ namespace Gauge.VisualStudio.Model
 {
     internal class StepImplementation : Implementation
     {
-        private CodeFunction _function;
+        private readonly CodeFunction _function;
 
         public StepImplementation(CodeFunction function, string stepText)
         {

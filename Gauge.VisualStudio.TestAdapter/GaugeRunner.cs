@@ -32,7 +32,7 @@ namespace Gauge.VisualStudio.TestAdapter
             var scenarioIndex = testCase.GetPropertyValue(TestDiscoverer.ScenarioIndex, -1);
             try
             {
-                var arguments = string.Format(@"--simple-console {0}:{1}", testCase.Source, scenarioIndex);
+                var arguments = string.Format(@"--simple-console ""{0}:{1}""", testCase.Source, scenarioIndex);
                 var p = new Process
                 {
                     StartInfo =
