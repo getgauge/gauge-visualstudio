@@ -60,6 +60,8 @@ namespace Gauge.VisualStudio.Highlighting
                 return false;
             }
 
+            EnsureGaugeImport(targetClass);
+
             var functionName = _step.Text.ToMethodIdentifier();
             var functionCount = _project.GetFunctionsForClass(targetClass)
                     .Count(element => string.CompareOrdinal(element.Name, functionName) == 0);
@@ -108,6 +110,18 @@ namespace Gauge.VisualStudio.Highlighting
             return true;
         }
 
+        private static void EnsureGaugeImport(CodeClass targetClass)
+        {
+            var usings = new[] {"Gauge.CSharp.Lib", "Gauge.CSharp.Lib.Attribute"};
+
+            foreach (var usingStatement in usings)
+            {
+                if (!targetClass.ProjectItem.GetUsingStatements().Contains(usingStatement))
+                {
+                    targetClass.ProjectItem.AddUsingStatement(usingStatement);
+                }
+            }
+        }
 
         private static void AddSpecialParam(CodeFunction implementationFunction, string parameter)
         {
