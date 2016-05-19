@@ -171,7 +171,9 @@ namespace Gauge.VisualStudio.Model
             if (vsProject == null)
                 return Enumerable.Empty<CodeElement>();
 
-            var codeElements = vsProject.References.Cast<Reference>().Where(reference => reference.SourceProject != null).SelectMany(reference => GetAllClasses(reference.SourceProject));
+            var codeElements = vsProject.References.Cast<Reference>()
+                    .Where(reference => reference.SourceProject != null && reference.SourceProject.IsGaugeProject())
+                    .SelectMany(reference => GetAllClasses(reference.SourceProject));
             return GetCodeElementsFor(containingProject.CodeModel.CodeElements, vsCMElement.vsCMElementClass).Concat(codeElements);
         }
 
