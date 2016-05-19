@@ -13,11 +13,15 @@
 // limitations under the License.
 
 using System;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Management;
 using System.Runtime.InteropServices;
 using EnvDTE;
 using Microsoft.VisualStudio.OLE.Interop;
+using Microsoft.VisualStudio.PlatformUI;
+using Microsoft.VisualStudio.Shell;
 using Process = System.Diagnostics.Process;
 using Thread = System.Threading.Thread;
 
@@ -25,13 +29,14 @@ namespace Gauge.VisualStudio.Core.Helpers
 {
     public static class DTEHelper
     {
+        private static readonly string[] TestRunners = {"vstest.executionengine.x86", "te.processhost.managed"};
         public static DTE GetCurrent()
         {
             var testRunnerProcess = Process.GetCurrentProcess();
-            if (!"vstest.executionengine.x86".Equals(testRunnerProcess.ProcessName, StringComparison.OrdinalIgnoreCase))
-                return null;
+            if (!TestRunners.Contains(testRunnerProcess.ProcessName.ToLower()))
+                throw new Exception("Test Runner Process not expected: " + testRunnerProcess.ProcessName.ToLower());
 
-            var progId = string.Format("!{0}.DTE.{1}:{2}", "VisualStudio", "12.0", GetVisualStudioProcessId(testRunnerProcess.Id));
+            var progId = $"!VisualStudio.DTE.14.0:{GetVisualStudioProcessId(testRunnerProcess.Id)}";
 
             object runningObject = null;
 
