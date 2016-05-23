@@ -52,6 +52,13 @@ Implement an unimplemented step - generates a method template, with a `Step` att
 Open the Test Explorer : `Menu` -> `Test` -> `Windows` -> `Test Explorer`
 All the scenarios in the project should be listed. Run one or more of these tests.
 
+## Development Environment Setup
+
+- Use [BoxStarter](http://boxstarter.org/) to setup Windows box. 
+  - Install Windows
+  - Hit http://bit.ly/20pMrXY from Internet Explorer/Edge.
+  - Install Visual Studio and Resharper separately (You could consider installing from an ISO).
+
 ## License
 
 Gauge.VisualStudio is released under [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)
