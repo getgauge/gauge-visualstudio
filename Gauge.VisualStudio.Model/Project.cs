@@ -160,7 +160,7 @@ namespace Gauge.VisualStudio.Model
             return GetCodeElementsFor(codeClass.Members, vsCMElement.vsCMElementFunction);
         }
 
-        public static IEnumerable<CodeElement> GetAllClasses(EnvDTE.Project containingProject)
+        public static IEnumerable<CodeElement> GetAllClasses(EnvDTE.Project containingProject, bool includeReferencedProjects = true)
         {
             if (containingProject.CodeModel == null)
                 return Enumerable.Empty<CodeElement>();
@@ -169,15 +169,18 @@ namespace Gauge.VisualStudio.Model
             if (vsProject == null)
                 return Enumerable.Empty<CodeElement>();
 
+            if (!includeReferencedProjects)
+                return GetCodeElementsFor(containingProject.CodeModel.CodeElements, vsCMElement.vsCMElementClass);
+
             var codeElements = vsProject.References.Cast<Reference>()
-                    .Where(reference => reference.SourceProject != null && reference.SourceProject.IsGaugeProject())
-                    .SelectMany(reference => GetAllClasses(reference.SourceProject));
+                .Where(reference => reference.SourceProject != null)
+                .SelectMany(reference => GetAllClasses(reference.SourceProject));
             return GetCodeElementsFor(containingProject.CodeModel.CodeElements, vsCMElement.vsCMElementClass).Concat(codeElements);
         }
 
         public CodeClass FindOrCreateClass(EnvDTE.Project project, string className)
         {
-            return GetAllClasses(project).FirstOrDefault(element => element.Name == className) as CodeClass ??
+            return GetAllClasses(project, false).FirstOrDefault(element => element.Name == className) as CodeClass ??
                    AddClass(className, project);
         }
 
