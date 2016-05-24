@@ -36,7 +36,7 @@ namespace Gauge.VisualStudio.Core.Helpers
             if (!TestRunners.Contains(testRunnerProcess.ProcessName.ToLower()))
                 throw new Exception("Test Runner Process not expected: " + testRunnerProcess.ProcessName.ToLower());
 
-            var progId = $"!VisualStudio.DTE.14.0:{GetVisualStudioProcessId(testRunnerProcess.Id)}";
+            var progId = string.Format("!VisualStudio.DTE.14.0:{0}", GetVisualStudioProcessId(testRunnerProcess.Id));
 
             object runningObject = null;
 

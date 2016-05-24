@@ -19,4 +19,5 @@ if($env:MSBUILD_VERBOSITY)
   $verbosity = $env:MSBUILD_VERBOSITY
 }
 
-&$msbuild $sln /m /nologo "/p:configuration=release;OutDir=$($outputPath);VisualStudioVersion=14.0" /t:rebuild /verbosity:$($verbosity)
+&$msbuild $sln /m /nologo "/p:configuration=release;OutDir=$($outputPath)\VS2015;VisualStudioVersion=14.0" /t:rebuild /verbosity:$($verbosity)
+&$msbuild $sln /m /nologo "/p:configuration=release-2013;OutDir=$($outputPath)\VS2013;VisualStudioVersion=14.0" /t:rebuild /verbosity:$($verbosity)
