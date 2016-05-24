@@ -113,10 +113,11 @@ namespace Gauge.VisualStudio.Highlighting
         private static void EnsureGaugeImport(CodeClass targetClass)
         {
             var usings = new[] {"Gauge.CSharp.Lib", "Gauge.CSharp.Lib.Attribute"};
+            var targetClassUsingStatements = targetClass.ProjectItem.GetUsingStatements().ToList();
 
             foreach (var usingStatement in usings)
             {
-                if (!targetClass.ProjectItem.GetUsingStatements().Contains(usingStatement))
+                if (!targetClassUsingStatements.Any(s => s.Contains(usingStatement)))
                 {
                     targetClass.ProjectItem.AddUsingStatement(usingStatement);
                 }
