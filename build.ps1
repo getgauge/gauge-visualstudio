@@ -9,7 +9,7 @@ $nuget=".\.nuget\nuget.exe"
 $sln = "Gauge.VisualStudio.sln"
 
 Write-Host -ForegroundColor Yellow "Restoring Nuget Packages..."
-&$nuget restore
+&$nuget restore $sln
 Write-Host -ForegroundColor Yellow "Done."
 
 $verbosity = "minimal"
