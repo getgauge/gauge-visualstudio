@@ -45,7 +45,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="StringExtensionTests.cs" />
+    <Compile Include="Extensions\StringExtensionTests.cs" />
+    <Compile Include="Helpers\DTEHelperTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

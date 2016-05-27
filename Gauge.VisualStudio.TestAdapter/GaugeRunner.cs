@@ -58,6 +58,7 @@ namespace Gauge.VisualStudio.TestAdapter
                 {
                     //Gauge CSharp runner will wait for a debugger to be attached, when it finds this env variable set.
                     p.StartInfo.EnvironmentVariables["DEBUGGING"] = "true";
+                    frameworkHandle.SendMessage(TestMessageLevel.Informational, string.Format("Debugging 'gauge.exe {0}'", arguments));
                 }
 
                 p.Start();
@@ -65,6 +66,7 @@ namespace Gauge.VisualStudio.TestAdapter
                 if (isBeingDebugged)
                 {
                     DTEHelper.AttachToProcess(p.Id);
+                    frameworkHandle.SendMessage(TestMessageLevel.Informational, string.Format("Attaching to ProcessID {0}", p.Id));
                 }
                 var output = p.StandardOutput.ReadToEnd();
                 var error = p.StandardError.ReadToEnd();

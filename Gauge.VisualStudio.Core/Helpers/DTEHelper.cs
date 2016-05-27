@@ -16,6 +16,7 @@ using System;
 using System.Linq;
 using System.Management;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using EnvDTE;
 using Microsoft.VisualStudio.OLE.Interop;
 using Process = System.Diagnostics.Process;
@@ -25,13 +26,13 @@ namespace Gauge.VisualStudio.Core.Helpers
 {
     public static class DTEHelper
     {
+        private static readonly string[] TestRunners = { "vstest.executionengine.x86", "te.processhost.managed" };
         public static DTE GetCurrent()
         {
             var testRunnerProcess = Process.GetCurrentProcess();
-            if (!"vstest.executionengine.x86".Equals(testRunnerProcess.ProcessName, StringComparison.OrdinalIgnoreCase))
-                return null;
 
-            var progId = string.Format("!{0}.DTE.{1}:{2}", "VisualStudio", "12.0", GetVisualStudioProcessId(testRunnerProcess.Id));
+            if (!TestRunners.Contains(testRunnerProcess.ProcessName.ToLower()))
+                throw new Exception("Test Runner Process not expected: " + testRunnerProcess.ProcessName.ToLower());
 
             object runningObject = null;
 
@@ -51,13 +52,13 @@ namespace Gauge.VisualStudio.Core.Helpers
                 {
                     var runningObjectMoniker = moniker[0];
 
-                    string name = null;
+                    string parentProcessName = null;
 
                     try
                     {
                         if (runningObjectMoniker != null)
                         {
-                            runningObjectMoniker.GetDisplayName(bindCtx, null, out name);
+                            runningObjectMoniker.GetDisplayName(bindCtx, null, out parentProcessName);
                         }
                     }
                     catch (UnauthorizedAccessException)
@@ -65,7 +66,9 @@ namespace Gauge.VisualStudio.Core.Helpers
                         // do nothing.
                     }
 
-                    if (string.IsNullOrEmpty(name) || !string.Equals(name, progId, StringComparison.Ordinal)) continue;
+                    var isVSProcess = IsVisualStudioProcessName(parentProcessName, GetVisualStudioProcessId(testRunnerProcess.Id));
+
+                    if (!isVSProcess) continue;
 
                     rot.GetObject(runningObjectMoniker, out runningObject);
                     break;
@@ -90,6 +93,15 @@ namespace Gauge.VisualStudio.Core.Helpers
             }
 
             return (DTE)runningObject;
+        }
+
+        public static bool IsVisualStudioProcessName(string name, int visualStudioProcessId)
+        {
+            if (string.IsNullOrEmpty(name))
+                return false;
+
+            var vsProcessNameRegex = new Regex(@"^(!VisualStudio.DTE.)(\d\d?.\d):\d+$", RegexOptions.Compiled);
+            return vsProcessNameRegex.IsMatch(name);
         }
 
         internal static int GetRunnerProcessId(int parentProcessId)

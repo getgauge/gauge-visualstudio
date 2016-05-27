@@ -15,7 +15,7 @@
 using Gauge.VisualStudio.Core.Extensions;
 using NUnit.Framework;
 
-namespace Gauge.VisualStudio.Core.Tests
+namespace Gauge.VisualStudio.Core.Tests.Extensions
 {
     [TestFixture]
     public class StringExtensionTests
