@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System;
+using Gauge.VisualStudio.Core;
 using Gauge.VisualStudio.Core.Extensions;
-using Gauge.VisualStudio.Core.Helpers;
 using Gauge.VisualStudio.Loggers;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
@@ -40,11 +40,11 @@ namespace Gauge.VisualStudio
                 return VSConstants.S_OK;
 
             var slugifiedName = project.SlugifiedName();
-            if (GaugeDaemonHelper.ContainsApiConnectionFor(slugifiedName))
+            if (GaugeService.ContainsApiConnectionFor(slugifiedName))
                 return VSConstants.S_OK;
 
 
-            GaugeDaemonHelper.RegisterGaugeProject(project);
+            GaugeService.RegisterGaugeProject(project);
 
             StatusBarLogger.Log("Gauge Project detected, build solution to keep test explorer updated.");
             return VSConstants.S_OK;
@@ -60,7 +60,7 @@ namespace Gauge.VisualStudio
             var project = pHierarchy.ToProject();
             var slugifiedName = project.SlugifiedName();
 
-            GaugeDaemonHelper.KillChildProcess(slugifiedName);
+            GaugeService.KillChildProcess(slugifiedName);
 
             return VSConstants.S_OK;
         }

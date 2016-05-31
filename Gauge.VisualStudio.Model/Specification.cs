@@ -16,8 +16,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Gauge.CSharp.Core;
 using Gauge.Messages;
+using Gauge.VisualStudio.Core;
 using Gauge.VisualStudio.Core.Exceptions;
-using Gauge.VisualStudio.Core.Helpers;
 
 namespace Gauge.VisualStudio.Model
 {
@@ -28,7 +28,7 @@ namespace Gauge.VisualStudio.Model
             var specifications = new List<ProtoSpec>();
             try
             {
-                foreach (var apiConnection in GaugeDaemonHelper.GetAllApiConnections())
+                foreach (var apiConnection in GaugeService.GetAllApiConnections())
                 {
                     specifications.AddRange(GetSpecsFromGauge(apiConnection));
                 }
@@ -57,14 +57,9 @@ namespace Gauge.VisualStudio.Model
                 .SetAllSpecsRequest(specsRequest)
                 .Build();
 
-//            OutputPaneLogger.Info("Request API for Specifications");
             var bytes = apiConnection.WriteAndReadApiMessage(apiMessage);
 
             var specs = bytes.AllSpecsResponse.SpecsList;
-//            var specsList = specs.Count > 0 ? 
-//                specs.Select(spec => spec.SpecHeading).Aggregate((a, b) => string.Format("{0}, {1}", a, b))
-//                : "No specifications retrieved";
-//            OutputPaneLogger.Info("Specifications: [{0}]", specsList);
             return specs;
         }
     }

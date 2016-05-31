@@ -16,8 +16,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Gauge.Messages;
+using Gauge.VisualStudio.Core;
 using Gauge.VisualStudio.Core.Exceptions;
-using Gauge.VisualStudio.Core.Helpers;
 
 namespace Gauge.VisualStudio.Model
 {
@@ -42,7 +42,7 @@ namespace Gauge.VisualStudio.Model
             }
             try
             {
-                var gaugeApiConnection = GaugeDaemonHelper.GetApiConnectionFor(_project);
+                var gaugeApiConnection = GaugeService.GetApiConnectionFor(_project);
                 var conceptsRequest = GetAllConceptsRequest.DefaultInstance;
                 var apiMessage = APIMessage.CreateBuilder()
                     .SetMessageId(GenerateMessageId())

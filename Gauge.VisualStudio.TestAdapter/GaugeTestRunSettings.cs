@@ -16,6 +16,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
+using Gauge.VisualStudio.Core;
 using Gauge.VisualStudio.Core.Helpers;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
@@ -29,7 +30,7 @@ namespace Gauge.VisualStudio.TestAdapter
 
         public GaugeTestRunSettings(string name) : base(name)
         {
-            ProjectsProperties = GaugeDaemonHelper.GetPropertiesForAllGaugeProjects();
+            ProjectsProperties = GaugeService.GetPropertiesForAllGaugeProjects();
         }
 
         public GaugeTestRunSettings() : this(SettingsName)
