@@ -14,27 +14,29 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
+using System.Runtime.Serialization.Json;
 using EnvDTE;
 using Gauge.CSharp.Core;
 using Gauge.Messages;
 using Gauge.VisualStudio.Core.Exceptions;
 using Gauge.VisualStudio.Core.Extensions;
+using Gauge.VisualStudio.Core.Helpers;
 using Gauge.VisualStudio.Core.Loggers;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Process = System.Diagnostics.Process;
 using Thread = System.Threading.Thread;
 
-namespace Gauge.VisualStudio.Core.Helpers
+namespace Gauge.VisualStudio.Core
 {
-    public class GaugeDaemonHelper
+    public class GaugeService
     {
-        private static readonly Dictionary<string, GaugeApiConnection> ApiConnections = new Dictionary<string, GaugeApiConnection>();
+        private static readonly Dictionary<string, GaugeApiConnection> ApiConnections =
+            new Dictionary<string, GaugeApiConnection>();
 
         private static readonly Dictionary<string, Process> ChildProcesses = new Dictionary<string, Process>();
 
@@ -133,6 +135,27 @@ namespace Gauge.VisualStudio.Core.Helpers
                     }).ToList();
         }
 
+        public static GaugeVersionInfo GetInstalledGaugeVersion(IGaugeProcess gaugeProcess = null)
+        {
+            if (gaugeProcess == null)
+            {
+                gaugeProcess = GaugeProcess.ForVersion();
+            }
+
+            gaugeProcess.Start();
+
+            var error = gaugeProcess.StandardError.ReadToEnd();
+
+            gaugeProcess.WaitForExit();
+
+            if (gaugeProcess.ExitCode != 0)
+            {
+                throw new GaugeVersionNotFoundException(error);
+            }
+            var serializer = new DataContractJsonSerializer(typeof (GaugeVersionInfo));
+            return (GaugeVersionInfo) serializer.ReadObject(gaugeProcess.StandardOutput.BaseStream);
+        }
+
         private static GaugeApiConnection StartGaugeAsDaemon(Project gaugeProject)
         {
             var slugifiedName = gaugeProject.SlugifiedName();
@@ -163,28 +186,19 @@ namespace Gauge.VisualStudio.Core.Helpers
                     portInfo.ApiPort, portInfo.ApiV2Port);
 
                 PortsInfo.Add(slugifiedName, portInfo);
-                var gaugeStartInfo = new ProcessStartInfo
+                var environmentVariables = new Dictionary<string, string>
                 {
-                    WorkingDirectory = GetProjectRoot(gaugeProject),
-                    UseShellExecute = false,
-                    FileName = "gauge.exe",
-                    CreateNoWindow = true,
-                    Arguments = "--daemonize",
-                    RedirectStandardError = true,
-                    RedirectStandardOutput = true
+                    {"GAUGE_API_PORT", portInfo.ApiPort.ToString(CultureInfo.InvariantCulture)},
+                    {"GAUGE_API_V2_PORT", portInfo.ApiV2Port.ToString(CultureInfo.InvariantCulture)}, 
+                    {"gauge_custom_build_path", projectOutputPath}
                 };
-
-                gaugeStartInfo.EnvironmentVariables["GAUGE_API_PORT"] = portInfo.ApiPort.ToString(CultureInfo.InvariantCulture);
-                gaugeStartInfo.EnvironmentVariables["GAUGE_API_V2_PORT"] = portInfo.ApiV2Port.ToString(CultureInfo.InvariantCulture);
-                gaugeStartInfo.EnvironmentVariables["gauge_custom_build_path"] = projectOutputPath;
-
-                var gaugeProcess = new Process { StartInfo = gaugeStartInfo };
+                var gaugeProcess = GaugeProcess.ForDaemon(GetProjectRoot(gaugeProject), environmentVariables);
 
                 try
                 {
                     if (gaugeProcess.Start())
                     {
-                        ChildProcesses.Add(slugifiedName, gaugeProcess);
+                        ChildProcesses.Add(slugifiedName, gaugeProcess.BaseProcess);
                     }
                     OutputPaneLogger.Debug("Opening Gauge Daemon with PID: {0}", gaugeProcess.Id);
                     var tcpClientWrapper = new TcpClientWrapper(portInfo.ApiPort);
