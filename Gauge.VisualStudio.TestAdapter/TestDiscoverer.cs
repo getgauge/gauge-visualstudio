@@ -38,8 +38,8 @@ namespace Gauge.VisualStudio.TestAdapter
         public static readonly TestProperty GaugeProjectRoot = TestProperty.Register("TestCase.GaugeProjectRoot",
             "GAUGE_PROJECT_ROOT value set in Gauge.", typeof (string), typeof (TestCase));
 
-        public static readonly TestProperty ScenarioIndex = TestProperty.Register("TestCase.ScenarioIndex",
-            "Index of Scenario in a given spec. Starts with 0.", typeof (int), typeof (TestCase));
+        public static readonly TestProperty ScenarioIdentifier = TestProperty.Register("TestCase.ScenarioIdentifier",
+            "Scenario identifier in a given spec.", typeof (int), typeof (TestCase));
 
         public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger logger,
             ITestCaseDiscoverySink discoverySink)
@@ -104,9 +104,12 @@ namespace Gauge.VisualStudio.TestAdapter
             var testCase = new TestCase(testCaseName, TestExecutor.ExecutorUri, spec.FileName)
                 {CodeFilePath = spec.FileName, DisplayName = scenario.ScenarioHeading};
 
+            var scenarioIdentifier = GetScenarioIdentifier(scenarioIndex, scenario);
+            testCase.LineNumber = scenarioIdentifier;
+
+            testCase.SetPropertyValue(ScenarioIdentifier, scenarioIdentifier);
             testCase.SetPropertyValue(GaugeCustomBuildPath, properties.BuildOutputPath);
             testCase.SetPropertyValue(GaugeProjectRoot, properties.ProjectRoot);
-            testCase.SetPropertyValue(ScenarioIndex, scenarioIndex);
 
             logger.SendMessage(TestMessageLevel.Informational, string.Format("Discovered scenario: {0}", testCase.DisplayName));
 
@@ -117,6 +120,11 @@ namespace Gauge.VisualStudio.TestAdapter
                 testCase.Traits.Add("Tag", tag);
             }
             return testCase;
+        }
+
+        private static int GetScenarioIdentifier(int scenarioIndex, ProtoScenario scenario)
+        {
+            return (int) (scenario.HasSpan ? scenario.Span.Start : scenarioIndex);
         }
     }
 }

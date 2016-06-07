@@ -29,10 +29,10 @@ namespace Gauge.VisualStudio.TestAdapter
             frameworkHandle.RecordStart(testCase);
             frameworkHandle.SendMessage(TestMessageLevel.Informational, string.Format("Executing Test: {0}", testCase));
             var projectRoot = testCase.GetPropertyValue(TestDiscoverer.GaugeProjectRoot, string.Empty);
-            var scenarioIndex = testCase.GetPropertyValue(TestDiscoverer.ScenarioIndex, -1);
+            var scenarioIdentifier = testCase.GetPropertyValue(TestDiscoverer.ScenarioIdentifier, -1);
             try
             {
-                var arguments = string.Format(@"--simple-console ""{0}:{1}""", testCase.Source, scenarioIndex);
+                var arguments = string.Format(@"--simple-console ""{0}:{1}""", testCase.Source, scenarioIdentifier);
                 var p = new Process
                 {
                     StartInfo =
