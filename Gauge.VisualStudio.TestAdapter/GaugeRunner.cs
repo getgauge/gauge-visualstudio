@@ -33,6 +33,7 @@ namespace Gauge.VisualStudio.TestAdapter
             try
             {
                 var arguments = string.Format(@"--simple-console ""{0}:{1}""", testCase.Source, scenarioIdentifier);
+                frameworkHandle.SendMessage(TestMessageLevel.Informational, string.Format("Invoking : gauge.exe {0} [Working Dir: {1}]", arguments, projectRoot));
                 var p = new Process
                 {
                     StartInfo =

@@ -124,7 +124,7 @@ namespace Gauge.VisualStudio.TestAdapter
 
         private static int GetScenarioIdentifier(int scenarioIndex, ProtoScenario scenario)
         {
-            return (int) (scenario.HasSpan ? scenario.Span.Start : scenarioIndex);
+            return scenario.HasSpan ? (int) scenario.Span.Start : scenarioIndex;
         }
     }
 }
