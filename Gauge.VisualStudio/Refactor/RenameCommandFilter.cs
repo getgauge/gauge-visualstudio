@@ -13,8 +13,9 @@
 // limitations under the License.
 
 using System;
+using Gauge.CSharp.Core;
 using Gauge.Messages;
-using Gauge.VisualStudio.Core;
+using Gauge.VisualStudio.Core.Helpers;
 using Gauge.VisualStudio.Model;
 using Gauge.VisualStudio.Model.Extensions;
 using Gauge.VisualStudio.UI;
@@ -111,7 +112,7 @@ namespace Gauge.VisualStudio.Refactor
                 .SetNewStep(newText)
                 .SetOldStep(originalText)
                 .Build();
-            var apiConnection = GaugeService.GetApiConnectionFor(project);
+            var apiConnection = GaugeDaemonHelper.GetApiConnectionFor(project);
             var apiMessage = APIMessage.CreateBuilder()
                 .SetPerformRefactoringRequest(performRefactoringRequest)
                 .SetMessageType(APIMessage.Types.APIMessageType.PerformRefactoringRequest)

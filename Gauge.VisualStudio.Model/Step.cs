@@ -16,8 +16,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Gauge.Messages;
-using Gauge.VisualStudio.Core;
 using Gauge.VisualStudio.Core.Exceptions;
+using Gauge.VisualStudio.Core.Helpers;
 using Microsoft.VisualStudio.Text;
 
 namespace Gauge.VisualStudio.Model
@@ -98,7 +98,7 @@ namespace Gauge.VisualStudio.Model
         {
             try
             {
-                var gaugeApiConnection = GaugeService.GetApiConnectionFor(project);
+                var gaugeApiConnection = GaugeDaemonHelper.GetApiConnectionFor(project);
                 var stepsRequest = GetAllStepsRequest.DefaultInstance;
                 var apiMessage = APIMessage.CreateBuilder()
                     .SetMessageId(GenerateMessageId())
@@ -154,7 +154,7 @@ namespace Gauge.VisualStudio.Model
         {
             try
             {
-                var gaugeApiConnection = GaugeService.GetApiConnectionFor(project);
+                var gaugeApiConnection = GaugeDaemonHelper.GetApiConnectionFor(project);
                 var stepsRequest = GetStepValueRequest.CreateBuilder().SetStepText(input).Build();
                 var apiMessage = APIMessage.CreateBuilder()
                     .SetMessageId(GenerateMessageId())
