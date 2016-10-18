@@ -50,17 +50,17 @@ namespace Gauge.VisualStudio.Model
 
         private static IEnumerable<ProtoSpec> GetSpecsFromGauge(GaugeApiConnection apiConnection)
         {
-            var specsRequest = GetAllSpecsRequest.DefaultInstance;
+            var specsRequest = SpecsRequest.DefaultInstance;
             var apiMessage = APIMessage.CreateBuilder()
                 .SetMessageId(Step.GenerateMessageId())
-                .SetMessageType(APIMessage.Types.APIMessageType.GetAllSpecsRequest)
-                .SetAllSpecsRequest(specsRequest)
+                .SetMessageType(APIMessage.Types.APIMessageType.SpecsRequest)
+                .SetSpecsRequest(specsRequest)
                 .Build();
 
 //            OutputPaneLogger.Info("Request API for Specifications");
             var bytes = apiConnection.WriteAndReadApiMessage(apiMessage);
 
-            var specs = bytes.AllSpecsResponse.SpecsList;
+            var specs = bytes.SpecsResponse.DetailsList.Where(detail => detail.HasSpec).Select(detail => detail.Spec);
 //            var specsList = specs.Count > 0 ? 
 //                specs.Select(spec => spec.SpecHeading).Aggregate((a, b) => string.Format("{0}, {1}", a, b))
 //                : "No specifications retrieved";

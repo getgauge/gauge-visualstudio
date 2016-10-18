@@ -228,11 +228,11 @@ namespace Gauge.VisualStudio.Core.Helpers
             }
 
             var messageId = DateTime.Now.Ticks/TimeSpan.TicksPerMillisecond;
-            var specsRequest = GetAllSpecsRequest.DefaultInstance;
+            var specsRequest = SpecsRequest.DefaultInstance;
             var apiMessage = APIMessage.CreateBuilder()
                 .SetMessageId(messageId)
-                .SetMessageType(APIMessage.Types.APIMessageType.GetAllSpecsRequest)
-                .SetAllSpecsRequest(specsRequest)
+                .SetMessageType(APIMessage.Types.APIMessageType.SpecsRequest)
+                .SetSpecsRequest(specsRequest)
                 .Build();
 
             var gaugeApiConnection = new GaugeApiConnection(tcpClientWrapper);
@@ -242,7 +242,7 @@ namespace Gauge.VisualStudio.Core.Helpers
                 try
                 {
                     var message = gaugeApiConnection.WriteAndReadApiMessage(apiMessage);
-                    if (message.HasAllSpecsResponse && message.AllSpecsResponse.SpecsCount > 0)
+                    if (message.HasSpecsResponse && message.SpecsResponse.DetailsCount > 0)
                     {
                         break;
                     }
