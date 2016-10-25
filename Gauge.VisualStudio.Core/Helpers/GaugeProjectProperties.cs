@@ -20,6 +20,8 @@ namespace Gauge.VisualStudio.Core.Helpers
     public class GaugeProjectProperties
     {
         public int ApiPort { get; set; }
+
+        public int ApiV2Port { get; set; }
         
         public string BuildOutputPath { get; set; }
         

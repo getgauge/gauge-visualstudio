@@ -38,7 +38,7 @@ namespace Gauge.VisualStudio.Core.Helpers
 
         private static readonly Dictionary<string, Process> ChildProcesses = new Dictionary<string, Process>();
 
-        private static readonly Dictionary<string, int> ApiPorts = new Dictionary<string, int>();
+        private static readonly Dictionary<string, PortInfo> PortsInfo = new Dictionary<string, PortInfo>();
 
         private static readonly List<Project> GaugeProjects = new List<Project>();
 
@@ -108,9 +108,9 @@ namespace Gauge.VisualStudio.Core.Helpers
                 {
                 }
             }
-            if (ApiPorts.ContainsKey(slugifiedName))
+            if (PortsInfo.ContainsKey(slugifiedName))
             {
-                ApiPorts.Remove(slugifiedName);
+                PortsInfo.Remove(slugifiedName);
             }
 
             GaugeProjects.Remove(
@@ -124,10 +124,11 @@ namespace Gauge.VisualStudio.Core.Helpers
 
         public static List<GaugeProjectProperties> GetPropertiesForAllGaugeProjects()
         {
-            return GaugeProjects.Where(project => ApiPorts.ContainsKey(project.SlugifiedName()))
+            return GaugeProjects.Where(project => PortsInfo.ContainsKey(project.SlugifiedName()))
                 .Select( project => new GaugeProjectProperties
                     {
-                        ApiPort = ApiPorts[project.SlugifiedName()],
+                        ApiPort = PortsInfo[project.SlugifiedName()].ApiPort,
+                        ApiV2Port = PortsInfo[project.SlugifiedName()].ApiV2Port,
                         BuildOutputPath = GetValidProjectOutputPath(project),
                         ProjectRoot = GetProjectRoot(project)
                     }).ToList();
@@ -146,12 +147,12 @@ namespace Gauge.VisualStudio.Core.Helpers
                     null);
                 var projectOutputPath = GetValidProjectOutputPath(gaugeProject);
 
-                var openPort = GetOpenPort();
-                OutputPaneLogger.Debug("Opening Gauge Daemon for Project : {0},  at port: {1}", gaugeProject.Name,
-                    openPort);
+                var portInfo = new PortInfo(GetOpenPort(), GetOpenPort());
+                OutputPaneLogger.Debug("Opening Gauge Daemon for Project : {0},  at ports: {1}, {2}", gaugeProject.Name,
+                    portInfo.ApiPort, portInfo.ApiV2Port);
                 var slugifiedName = gaugeProject.SlugifiedName();
 
-                ApiPorts.Add(slugifiedName, openPort);
+                PortsInfo.Add(slugifiedName, portInfo);
                 var gaugeStartInfo = new ProcessStartInfo
                 {
                     WorkingDirectory = GetProjectRoot(gaugeProject),
@@ -163,7 +164,8 @@ namespace Gauge.VisualStudio.Core.Helpers
                     RedirectStandardOutput = true
                 };
 
-                gaugeStartInfo.EnvironmentVariables["GAUGE_API_PORT"] = openPort.ToString(CultureInfo.InvariantCulture);
+                gaugeStartInfo.EnvironmentVariables["GAUGE_API_PORT"] = portInfo.ApiPort.ToString(CultureInfo.InvariantCulture);
+                gaugeStartInfo.EnvironmentVariables["GAUGE_API_V2_PORT"] = portInfo.ApiV2Port.ToString(CultureInfo.InvariantCulture);
                 gaugeStartInfo.EnvironmentVariables["gauge_custom_build_path"] = projectOutputPath;
 
                 var gaugeProcess = new Process { StartInfo = gaugeStartInfo };
@@ -175,7 +177,7 @@ namespace Gauge.VisualStudio.Core.Helpers
                         ChildProcesses.Add(slugifiedName, gaugeProcess);
                     }
                     OutputPaneLogger.Debug("Opening Gauge Daemon with PID: {0}", gaugeProcess.Id);
-                    var tcpClientWrapper = new TcpClientWrapper(openPort);
+                    var tcpClientWrapper = new TcpClientWrapper(portInfo.ApiPort);
                     WaitForColdStart(tcpClientWrapper);
                     OutputPaneLogger.Debug("PID: {0} ready, waiting for messages..", gaugeProcess.Id);
                     return new GaugeApiConnection(tcpClientWrapper);
@@ -285,5 +287,18 @@ namespace Gauge.VisualStudio.Core.Helpers
 
             return projectOutputPath;
         }
+    }
+
+    internal class PortInfo
+    {
+        public PortInfo(int apiPort, int apiV2Port)
+        {
+            ApiPort = apiPort;
+            ApiV2Port = apiV2Port;
+        }
+
+        public int ApiPort { get;private set; }
+
+        public int ApiV2Port { get;private set; }
     }
 }

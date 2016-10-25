@@ -29,11 +29,21 @@ namespace Gauge.VisualStudio.TestAdapter
 
         public void RunTests(IEnumerable<TestCase> tests, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
+            var testSuites = new Dictionary<int, List<TestCase>>();
             _cancelled = false;
             foreach (var testCase in tests)
             {
                 if (_cancelled) break;
-                _gaugeRunner.Run(testCase, runContext.IsBeingDebugged, frameworkHandle);
+                var port = testCase.GetPropertyValue(TestDiscoverer.GaugeApiV2Port, -1);
+                if (!testSuites.ContainsKey(port))
+                {
+                    testSuites.Add(port, new List<TestCase>());
+                }
+                testSuites[port].Add(testCase);
+            }
+            foreach (var suite in testSuites)
+            {
+                _gaugeRunner.Run(suite.Value, suite.Key, runContext.IsBeingDebugged, frameworkHandle);
             }
         }
 
