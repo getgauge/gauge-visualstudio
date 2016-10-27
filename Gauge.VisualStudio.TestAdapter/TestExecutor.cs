@@ -14,6 +14,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
@@ -41,10 +43,8 @@ namespace Gauge.VisualStudio.TestAdapter
                 }
                 testSuites[port].Add(testCase);
             }
-            foreach (var suite in testSuites)
-            {
-                _gaugeRunner.Run(suite.Value, suite.Key, runContext.IsBeingDebugged, frameworkHandle);
-            }
+            var tasks = testSuites.Select(suite => _gaugeRunner.Run(suite.Value, suite.Key, runContext.IsBeingDebugged, frameworkHandle));
+            Task.WaitAll(tasks.ToArray());
         }
 
         public void RunTests(IEnumerable<string> sources, IRunContext runContext, IFrameworkHandle frameworkHandle)

@@ -65,10 +65,8 @@ namespace Gauge.VisualStudio.Core.Helpers
             return apiConnection;
         }
 
-        private static int GetOpenPort()
+        private static int GetOpenPort(int scanStart, int scanEnd)
         {
-            const int scanStart = 1000;
-            const int scanEnd = 2000;
             var properties = IPGlobalProperties.GetIPGlobalProperties();
             var tcpEndPoints = properties.GetActiveTcpListeners();
 
@@ -147,7 +145,7 @@ namespace Gauge.VisualStudio.Core.Helpers
                     null);
                 var projectOutputPath = GetValidProjectOutputPath(gaugeProject);
 
-                var portInfo = new PortInfo(GetOpenPort(), GetOpenPort());
+                var portInfo = new PortInfo(GetOpenPort(1000, 2000), GetOpenPort(2000, 3000));
                 OutputPaneLogger.Debug("Opening Gauge Daemon for Project : {0},  at ports: {1}, {2}", gaugeProject.Name,
                     portInfo.ApiPort, portInfo.ApiV2Port);
                 var slugifiedName = gaugeProject.SlugifiedName();

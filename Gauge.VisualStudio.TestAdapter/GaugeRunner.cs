@@ -17,6 +17,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Gauge.Messages;
 using Grpc.Core;
 
@@ -27,8 +28,9 @@ namespace Gauge.VisualStudio.TestAdapter
         // TODO:
         // - Add debug support via execution API
         // - Read STDOUT / STDERR from response
-        public async void Run(List<TestCase> testCases, int port, bool isBeingDebugged, IFrameworkHandle frameworkHandle)
+        public async Task Run(List<TestCase> testCases, int port, bool isBeingDebugged, IFrameworkHandle frameworkHandle)
         {
+            GrpcEnvironment.Initialize();
             var channel = new Channel("localhost", port);
             var executionClient = new Execution.ExecutionClient(channel);
 
@@ -59,14 +61,7 @@ namespace Gauge.VisualStudio.TestAdapter
                         {
                             var testCase = scenarios[executionResponse.ID];
                             var result = new TestResult(testCase);
-                            if (!executionResponse.Result.HasStatus)
-                            {
-                                result.Outcome=TestOutcome.None;
-                            }
-                            else
-                            {
-                                result.Outcome = GetVSResult(executionResponse.Result.Status);
-                            }
+                            result.Outcome = executionResponse.Result.HasStatus ? GetVSResult(executionResponse.Result.Status) : TestOutcome.None ;
                             frameworkHandle.RecordResult(result);
                             frameworkHandle.RecordEnd(testCase, result.Outcome);
                             break;
