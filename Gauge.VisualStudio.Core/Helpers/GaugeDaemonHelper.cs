@@ -128,12 +128,25 @@ namespace Gauge.VisualStudio.Core.Helpers
                         ApiPort = PortsInfo[project.SlugifiedName()].ApiPort,
                         ApiV2Port = PortsInfo[project.SlugifiedName()].ApiV2Port,
                         BuildOutputPath = GetValidProjectOutputPath(project),
-                        ProjectRoot = GetProjectRoot(project)
+                        ProjectRoot = GetProjectRoot(project),
+                        DaemonProcessId = ChildProcesses[project.SlugifiedName()].Id
                     }).ToList();
         }
 
         private static GaugeApiConnection StartGaugeAsDaemon(Project gaugeProject)
         {
+            var slugifiedName = gaugeProject.SlugifiedName();
+            if (ChildProcesses.ContainsKey(slugifiedName))
+            {
+                if (ChildProcesses[slugifiedName].HasExited)
+                {
+                    KillChildProcess(slugifiedName);
+                }
+                else
+                {
+                    return ApiConnections[slugifiedName];
+                }
+            }
             var waitDialog = (IVsThreadedWaitDialog)Package.GetGlobalService(typeof(SVsThreadedWaitDialog));
             try
             {
@@ -148,7 +161,6 @@ namespace Gauge.VisualStudio.Core.Helpers
                 var portInfo = new PortInfo(GetOpenPort(1000, 2000), GetOpenPort(2000, 3000));
                 OutputPaneLogger.Debug("Opening Gauge Daemon for Project : {0},  at ports: {1}, {2}", gaugeProject.Name,
                     portInfo.ApiPort, portInfo.ApiV2Port);
-                var slugifiedName = gaugeProject.SlugifiedName();
 
                 PortsInfo.Add(slugifiedName, portInfo);
                 var gaugeStartInfo = new ProcessStartInfo

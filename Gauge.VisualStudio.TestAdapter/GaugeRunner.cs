@@ -12,13 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Gauge.Messages;
+using Gauge.VisualStudio.Core.Helpers;
 using Grpc.Core;
 
 namespace Gauge.VisualStudio.TestAdapter
@@ -28,23 +31,46 @@ namespace Gauge.VisualStudio.TestAdapter
         // TODO:
         // - Add debug support via execution API
         // - Read STDOUT / STDERR from response
-        public async Task Run(List<TestCase> testCases, int port, bool isBeingDebugged, IFrameworkHandle frameworkHandle)
+
+        public async Task Debug(List<TestCase> testCases, int port, IFrameworkHandle frameworkHandle)
+        {
+            await Run(testCases, port, frameworkHandle, true);
+        }
+
+        public async Task Run(List<TestCase> testCases, int port, IFrameworkHandle frameworkHandle,
+            bool isBeingDebugged = false)
         {
             GrpcEnvironment.Initialize();
             var channel = new Channel("localhost", port);
             var executionClient = new Execution.ExecutionClient(channel);
 
-            var executionRequestBuilder = ExecutionRequest.CreateBuilder();
+            var executionRequestBuilder = ExecutionRequest.CreateBuilder().SetDebug(isBeingDebugged);
 
             var scenarios = testCases.ToDictionary(
                 test => string.Format("{0}:{1}", test.CodeFilePath, test.LineNumber), test => test);
 
             executionRequestBuilder.AddRangeSpecs(scenarios.Keys);
+
             using (var call = executionClient.execute(executionRequestBuilder.Build()))
             {
+                var processId = testCases.First().GetPropertyValue(TestDiscoverer.DaemonProcessId, -1);
+                if (isBeingDebugged)
+                {
+                    try
+                    {
+                        DTEHelper.AttachToProcess(processId);
+                    }
+                    catch (Exception e)
+                    {
+                        frameworkHandle.SendMessage(TestMessageLevel.Error,
+                            string.Format("Unable to attach debugger. Details:\n{0}", e));
+                    }
+                }
                 while (await call.ResponseStream.MoveNext())
                 {
                     var executionResponse = call.ResponseStream.Current;
+                    frameworkHandle.SendMessage(TestMessageLevel.Informational,
+                        string.Format("Gauge Execution API response: {0}", executionResponse.Type));
 
                     if (!executionResponse.HasType) continue;
                     switch (executionResponse.Type)
@@ -60,13 +86,21 @@ namespace Gauge.VisualStudio.TestAdapter
                         case ExecutionResponse.Types.Type.ScenarioEnd:
                         {
                             var testCase = scenarios[executionResponse.ID];
-                            var result = new TestResult(testCase);
-                            result.Outcome = executionResponse.Result.HasStatus ? GetVSResult(executionResponse.Result.Status) : TestOutcome.None ;
+                            var result = new TestResult(testCase)
+                            {
+                                Outcome = executionResponse.Result.HasStatus
+                                    ? GetVSResult(executionResponse.Result.Status)
+                                    : TestOutcome.None
+                            };
                             frameworkHandle.RecordResult(result);
                             frameworkHandle.RecordEnd(testCase, result.Outcome);
                             break;
                         }
                     }
+                }
+                if (isBeingDebugged)
+                {
+                    DTEHelper.DetachAllProcess();
                 }
             }
         }

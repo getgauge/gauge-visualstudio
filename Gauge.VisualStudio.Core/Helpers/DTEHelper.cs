@@ -129,15 +129,13 @@ namespace Gauge.VisualStudio.Core.Helpers
             foreach (EnvDTE.Process process in dte.Debugger.LocalProcesses)
             {
                 if (process.ProcessID != runnerProcessId) continue;
-                try
-                {
-                    process.Attach();
-                }
-                catch
-                {
-                    //do nothing
-                }
+                process.Attach();
             }
+        }
+
+        public static void DetachAllProcess()
+        {
+            GetCurrent().Debugger.DetachAll();
         }
 
         private static int GetVisualStudioProcessId(int testRunnerProcessId)

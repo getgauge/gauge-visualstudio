@@ -23,6 +23,8 @@ namespace Gauge.VisualStudio.Core.Helpers
 
         public int ApiV2Port { get; set; }
         
+        public int DaemonProcessId { get; set; }
+
         public string BuildOutputPath { get; set; }
         
         public string ProjectRoot { get; set; }

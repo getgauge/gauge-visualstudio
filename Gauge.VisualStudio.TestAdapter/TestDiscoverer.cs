@@ -44,6 +44,9 @@ namespace Gauge.VisualStudio.TestAdapter
         public static readonly TestProperty ScenarioIdentifier = TestProperty.Register("TestCase.ScenarioIdentifier",
             "Scenario identifier in a given spec.", typeof (int), typeof (TestCase));
 
+        public static readonly TestProperty DaemonProcessId = TestProperty.Register("TestCase.DaemonProcessId",
+            "PID of the corresponding daemon process.", typeof (int), typeof (TestCase));
+
         public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger logger,
             ITestCaseDiscoverySink discoverySink)
         {
@@ -114,6 +117,7 @@ namespace Gauge.VisualStudio.TestAdapter
             testCase.SetPropertyValue(GaugeCustomBuildPath, properties.BuildOutputPath);
             testCase.SetPropertyValue(GaugeProjectRoot, properties.ProjectRoot);
             testCase.SetPropertyValue(GaugeApiV2Port, properties.ApiV2Port);
+            testCase.SetPropertyValue(DaemonProcessId, properties.DaemonProcessId);
 
             logger.SendMessage(TestMessageLevel.Informational, string.Format("Discovered scenario: {0}", testCase.DisplayName));
 
