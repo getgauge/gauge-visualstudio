@@ -69,8 +69,6 @@ namespace Gauge.VisualStudio.TestAdapter
                 while (await call.ResponseStream.MoveNext())
                 {
                     var executionResponse = call.ResponseStream.Current;
-                    frameworkHandle.SendMessage(TestMessageLevel.Informational,
-                        string.Format("Gauge Execution API response: {0}", executionResponse.Type));
 
                     if (!executionResponse.HasType) continue;
                     switch (executionResponse.Type)
