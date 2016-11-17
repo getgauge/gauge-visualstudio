@@ -17,7 +17,6 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Gauge.Messages;
@@ -40,66 +39,155 @@ namespace Gauge.VisualStudio.TestAdapter
         public async Task Run(List<TestCase> testCases, int port, IFrameworkHandle frameworkHandle,
             bool isBeingDebugged = false)
         {
-            GrpcEnvironment.Initialize();
-            var channel = new Channel("localhost", port);
-            var executionClient = new Execution.ExecutionClient(channel);
-
-            var executionRequestBuilder = ExecutionRequest.CreateBuilder().SetDebug(isBeingDebugged);
-
-            var scenarios = testCases.ToDictionary(
-                test => string.Format("{0}:{1}", test.CodeFilePath, test.LineNumber), test => test);
-
-            executionRequestBuilder.AddRangeSpecs(scenarios.Keys);
-
-            using (var call = executionClient.execute(executionRequestBuilder.Build()))
+            try
             {
-                var processId = testCases.First().GetPropertyValue(TestDiscoverer.DaemonProcessId, -1);
-                if (isBeingDebugged)
+                foreach (var testCase in testCases)
                 {
-                    try
-                    {
-                        DTEHelper.AttachToProcess(processId);
-                    }
-                    catch (Exception e)
-                    {
-                        frameworkHandle.SendMessage(TestMessageLevel.Error,
-                            string.Format("Unable to attach debugger. Details:\n{0}", e));
-                    }
+                    frameworkHandle.SendMessage(TestMessageLevel.Informational, string.Format("{0} {1}",testCase.DisplayName, testCase.GetPropertyValue(TestDiscoverer.TestCaseType,string.Empty)));
                 }
-                while (await call.ResponseStream.MoveNext())
-                {
-                    var executionResponse = call.ResponseStream.Current;
+                GrpcEnvironment.Initialize();
+                var channel = new Channel("localhost", port);
+                var executionClient = new Execution.ExecutionClient(channel);
 
-                    if (!executionResponse.HasType) continue;
-                    switch (executionResponse.Type)
+                var executionRequestBuilder = ExecutionRequest.CreateBuilder().SetDebug(isBeingDebugged);
+
+                var beforeSuiteHook = testCases.First(test => test.DisplayName == "BeforeSuite" &&
+                                                              string.CompareOrdinal(
+                                                                  test.GetPropertyValue(TestDiscoverer.TestCaseType,
+                                                                      string.Empty), "hook") == 0);
+                var afterSuiteHook = testCases.First(test => test.DisplayName == "AfterSuite" &&
+                                                             string.CompareOrdinal(
+                                                                 test.GetPropertyValue(TestDiscoverer.TestCaseType,
+                                                                     string.Empty), "hook") == 0);
+                var beforeSpecHooks = testCases.Where(test => test.DisplayName == "BeforeSpec" &&
+                                                              string.CompareOrdinal(
+                                                                  test.GetPropertyValue(TestDiscoverer.TestCaseType,
+                                                                      string.Empty), "hook") == 0)
+                    .ToDictionary(test => test.CodeFilePath, test => test);
+                var afterSpecHooks = testCases.Where(test => test.DisplayName == "AfterSpec" &&
+                                                             string.CompareOrdinal(
+                                                                 test.GetPropertyValue(TestDiscoverer.TestCaseType,
+                                                                     string.Empty), "hook") == 0)
+                    .ToDictionary(test => test.CodeFilePath, test => test);
+                var scenariosMap = testCases.Where(
+                    test =>
+                        string.CompareOrdinal(test.GetPropertyValue(TestDiscoverer.TestCaseType, string.Empty),
+                            "scenario") == 0)
+                    .ToDictionary(test => string.Format("{0}:{1}", test.CodeFilePath, test.LineNumber), test => test);
+
+                executionRequestBuilder.AddRangeSpecs(scenariosMap.Keys);
+
+                using (var call = executionClient.execute(executionRequestBuilder.Build()))
+                {
+                    var processId = testCases.First().GetPropertyValue(TestDiscoverer.DaemonProcessId, -1);
+                    if (isBeingDebugged)
                     {
-                        case ExecutionResponse.Types.Type.ScenarioStart:
+                        try
                         {
-                            var testCase = scenarios[executionResponse.ID];
-                            frameworkHandle.RecordStart(testCase);
-                            frameworkHandle.SendMessage(TestMessageLevel.Informational,
-                                string.Format("Executing Test: {0}", testCase));
-                            break;
+                            DTEHelper.AttachToProcess(processId);
                         }
-                        case ExecutionResponse.Types.Type.ScenarioEnd:
+                        catch (Exception e)
                         {
-                            var testCase = scenarios[executionResponse.ID];
-                            var result = new TestResult(testCase)
-                            {
-                                Outcome = executionResponse.Result.HasStatus
-                                    ? GetVSResult(executionResponse.Result.Status)
-                                    : TestOutcome.None
-                            };
-                            frameworkHandle.RecordResult(result);
-                            frameworkHandle.RecordEnd(testCase, result.Outcome);
-                            break;
+                            frameworkHandle.SendMessage(TestMessageLevel.Error,
+                                string.Format("Unable to attach debugger. Details:\n{0}", e));
                         }
                     }
+                    while (await call.ResponseStream.MoveNext())
+                    {
+                        var executionResponse = call.ResponseStream.Current;
+
+                        frameworkHandle.SendMessage(TestMessageLevel.Informational,
+                            string.Format("Received: {0}", executionResponse.Type));
+                        if (!executionResponse.HasType)
+                        {
+                            continue;
+                        }
+                        switch (executionResponse.Type)
+                        {
+                            case ExecutionResponse.Types.Type.SuiteStart:
+                            {
+                                var testResult = new TestResult(beforeSuiteHook)
+                                {
+                                    Outcome = executionResponse.Result.HasStatus
+                                        ? GetVSResult(executionResponse.Result.Status)
+                                        : TestOutcome.None
+                                };
+                                frameworkHandle.RecordResult(testResult);
+                                frameworkHandle.RecordEnd(beforeSuiteHook, testResult.Outcome);
+                                break;
+                            }
+                            case ExecutionResponse.Types.Type.SuiteEnd:
+                            {
+                                var testResult = new TestResult(afterSuiteHook)
+                                {
+                                    Outcome = executionResponse.Result.HasStatus
+                                        ? GetVSResult(executionResponse.Result.Status)
+                                        : TestOutcome.None
+                                };
+                                frameworkHandle.RecordResult(testResult);
+                                frameworkHandle.RecordEnd(afterSuiteHook, testResult.Outcome);
+                                break;
+                            }
+                            case ExecutionResponse.Types.Type.SpecStart:
+                            {
+                                var spec = executionResponse.ID.Split(':')[0];
+                                var testCase = beforeSpecHooks[spec];
+                                var testResult = new TestResult(testCase)
+                                {
+                                    Outcome = executionResponse.Result.HasStatus
+                                        ? GetVSResult(executionResponse.Result.Status)
+                                        : TestOutcome.None
+                                };
+                                frameworkHandle.RecordResult(testResult);
+                                frameworkHandle.RecordEnd(testCase, testResult.Outcome);
+                                break;
+                            }
+                            case ExecutionResponse.Types.Type.ScenarioStart:
+                            {
+                                var testCase = scenariosMap[executionResponse.ID];
+                                frameworkHandle.RecordStart(testCase);
+                                frameworkHandle.SendMessage(TestMessageLevel.Informational,
+                                    string.Format("Executing Test: {0}", testCase));
+                                break;
+                            }
+                            case ExecutionResponse.Types.Type.ScenarioEnd:
+                            {
+                                var testCase = scenariosMap[executionResponse.ID];
+                                var result = new TestResult(testCase)
+                                {
+                                    Outcome = executionResponse.Result.HasStatus
+                                        ? GetVSResult(executionResponse.Result.Status)
+                                        : TestOutcome.None
+                                };
+                                frameworkHandle.RecordResult(result);
+                                frameworkHandle.RecordEnd(testCase, result.Outcome);
+                                break;
+                            }
+                            case ExecutionResponse.Types.Type.SpecEnd:
+                            {
+                                var spec = executionResponse.ID.Split(':')[0];
+                                var testCase = afterSpecHooks[spec];
+                                var testResult = new TestResult(testCase)
+                                {
+                                    Outcome = executionResponse.Result.HasStatus
+                                        ? GetVSResult(executionResponse.Result.Status)
+                                        : TestOutcome.None
+                                };
+                                frameworkHandle.RecordResult(testResult);
+                                frameworkHandle.RecordEnd(testCase, testResult.Outcome);
+                                break;
+                            }
+                        }
+                    }
+                    if (isBeingDebugged)
+                    {
+                        DTEHelper.DetachAllProcess();
+                    }
                 }
-                if (isBeingDebugged)
-                {
-                    DTEHelper.DetachAllProcess();
-                }
+            }
+            catch (Exception ex)
+            {
+                frameworkHandle.SendMessage(TestMessageLevel.Error, ex.ToString());
             }
         }
 

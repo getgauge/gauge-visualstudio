@@ -14,7 +14,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
@@ -28,13 +27,15 @@ namespace Gauge.VisualStudio.TestAdapter
         public const string ExecutorUriString = "executor://gaugespecexecutor/v1";
         public static readonly Uri ExecutorUri = new Uri(ExecutorUriString);
         private bool _cancelled;
-        readonly GaugeRunner _gaugeRunner = new GaugeRunner();
+        private readonly GaugeRunner _gaugeRunner = new GaugeRunner();
 
         public void RunTests(IEnumerable<TestCase> tests, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
             var testSuites = new Dictionary<int, List<TestCase>>();
             _cancelled = false;
-            foreach (var testCase in tests)
+            var testCases = tests as IList<TestCase> ?? tests.ToList();
+            var suiteAndScenarioHooks = TestDiscoverer.GetSuiteAndScenarioHooks(testCases.Select(t => Tuple.Create(t.DisplayName, t.Source)));
+            foreach (var testCase in testCases.Concat(suiteAndScenarioHooks))
             {
                 if (_cancelled) break;
                 var port = testCase.GetPropertyValue(TestDiscoverer.GaugeApiV2Port, -1);

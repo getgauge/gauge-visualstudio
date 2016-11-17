@@ -47,6 +47,9 @@ namespace Gauge.VisualStudio.TestAdapter
         public static readonly TestProperty DaemonProcessId = TestProperty.Register("TestCase.DaemonProcessId",
             "PID of the corresponding daemon process.", typeof (int), typeof (TestCase));
 
+        public static readonly TestProperty TestCaseType = TestProperty.Register("TestCase.Type",
+            "Type of the testcase object. Can be [hook, scenario].", typeof (string), typeof (TestCase));
+
         public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger logger,
             ITestCaseDiscoverySink discoverySink)
         {
@@ -64,9 +67,15 @@ namespace Gauge.VisualStudio.TestAdapter
             logger.SendMessage(TestMessageLevel.Informational, string.Format("Discover Scenarios started. Using : {0}", props));
 
             var testCases = new ConcurrentBag<TestCase>();
-
+            var testSources = sources.Where(s => string.CompareOrdinal(s, "Suite") != 0);
             try
             {
+                var beforeSuiteHook = GetBeforeSuiteHook();
+                testCases.Add(beforeSuiteHook);
+                if (discoverySink != null)
+                {
+                    discoverySink.SendTestCase(beforeSuiteHook);
+                }
                 Parallel.ForEach(gaugeProjectProperties, properties =>
                 {
                     var protoSpecs = Specification.GetAllSpecs(properties.ApiPort);
@@ -74,9 +83,15 @@ namespace Gauge.VisualStudio.TestAdapter
                     Parallel.ForEach(protoSpecs, spec =>
                     {
 
-                        if (sources.All(s => string.CompareOrdinal(s, spec.FileName) != 0))
+                        if (testSources.All(s => string.CompareOrdinal(s, spec.FileName) != 0))
                             return;
 
+                        var beforeSpecHook = GetBeforeSpecHook(spec.SpecHeading, spec.FileName);
+                        testCases.Add(beforeSpecHook);
+                        if (discoverySink != null)
+                        {
+                            discoverySink.SendTestCase(beforeSpecHook);
+                        }
                         logger.SendMessage(TestMessageLevel.Informational, string.Format("Adding test cases from : {0}", spec.FileName));
                         var scenarioIndex = 0;
                         var scenarios = spec.ItemsList.Where(item => item.HasScenario).Select(item => item.Scenario);
@@ -93,8 +108,20 @@ namespace Gauge.VisualStudio.TestAdapter
 
                             scenarioIndex++;
                         }
+                        var afterSpecHook = GetAfterSpecHook(spec.SpecHeading, spec.FileName);
+                        testCases.Add(afterSpecHook);
+                        if (discoverySink != null)
+                        {
+                            discoverySink.SendTestCase(afterSpecHook);
+                        }
                     });
                 });
+                var afterSuiteHook = GetAfterSuiteHook();
+                testCases.Add(afterSuiteHook);
+                if (discoverySink != null)
+                {
+                    discoverySink.SendTestCase(afterSuiteHook);
+                }
             }
             catch (Exception e)
             {
@@ -103,10 +130,55 @@ namespace Gauge.VisualStudio.TestAdapter
             return testCases.ToList();
         }
 
+        public static IEnumerable<TestCase> GetSuiteAndScenarioHooks(IEnumerable<Tuple<string, string>> specs)
+        {
+            yield return GetBeforeSuiteHook();
+            foreach (var spec in specs)
+            {
+                yield return GetBeforeSpecHook(spec.Item1, spec.Item2);
+                yield return GetAfterSpecHook(spec.Item1, spec.Item2);
+            }
+            yield return GetAfterSuiteHook();
+        }
+
+        private static TestCase GetAfterSuiteHook()
+        {
+            var afterSuiteHook = new TestCase("Suite.After", TestExecutor.ExecutorUri, "Suite") {DisplayName = "AfterSuite"};
+            afterSuiteHook.Traits.Add("ExecutionHook", "AfterSuite");
+            afterSuiteHook.SetPropertyValue(TestCaseType, "hook");
+            return afterSuiteHook;
+        }
+
+        private static TestCase GetAfterSpecHook(string specHeading, string codeFilePath)
+        {
+            var afterSpecHook = new TestCase(string.Format("{0}.{1}", specHeading, "After"), TestExecutor.ExecutorUri, codeFilePath)
+                {DisplayName = "AfterSpec", CodeFilePath = codeFilePath};
+            afterSpecHook.Traits.Add("ExecutionHook", "AfterSpec");
+            afterSpecHook.SetPropertyValue(TestCaseType, "hook");
+            return afterSpecHook;
+        }
+
+        private static TestCase GetBeforeSpecHook(string specHeading, string codeFilePath)
+        {
+            var beforeSpecHook = new TestCase(string.Format("{0}.{1}", specHeading, "Before"), TestExecutor.ExecutorUri, codeFilePath)
+                {DisplayName = "BeforeSpec", CodeFilePath = codeFilePath};
+            beforeSpecHook.Traits.Add("ExecutionHook", "BeforeSpec");
+            beforeSpecHook.SetPropertyValue(TestCaseType, "hook");
+            return beforeSpecHook;
+        }
+
+        private static TestCase GetBeforeSuiteHook()
+        {
+            var beforeSuiteHook = new TestCase("Suite.Before", TestExecutor.ExecutorUri, "Suite") {DisplayName = "BeforeSuite"};
+            beforeSuiteHook.Traits.Add("ExecutionHook", "BeforeSuite");
+            beforeSuiteHook.SetPropertyValue(TestCaseType, "hook");
+            return beforeSuiteHook;
+        }
+
         private static TestCase CreateTestCase(IMessageLogger logger, ProtoSpec spec, ProtoScenario scenario,
             GaugeProjectProperties properties, int scenarioIndex)
         {
-            var testCaseName = string.Format("[{0}].[{1}]", spec.SpecHeading, scenario.ScenarioHeading);
+            var testCaseName = string.Format("{0}.{1}", spec.SpecHeading, scenario.ScenarioHeading);
             var testCase = new TestCase(testCaseName, TestExecutor.ExecutorUri, spec.FileName)
                 {CodeFilePath = spec.FileName, DisplayName = scenario.ScenarioHeading};
 
@@ -118,6 +190,7 @@ namespace Gauge.VisualStudio.TestAdapter
             testCase.SetPropertyValue(GaugeProjectRoot, properties.ProjectRoot);
             testCase.SetPropertyValue(GaugeApiV2Port, properties.ApiV2Port);
             testCase.SetPropertyValue(DaemonProcessId, properties.DaemonProcessId);
+            testCase.SetPropertyValue(TestCaseType, "scenario");
 
             logger.SendMessage(TestMessageLevel.Informational, string.Format("Discovered scenario: {0}", testCase.DisplayName));
 
