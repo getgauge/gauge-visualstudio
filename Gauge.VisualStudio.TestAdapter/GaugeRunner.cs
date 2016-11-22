@@ -28,7 +28,6 @@ namespace Gauge.VisualStudio.TestAdapter
     public class GaugeRunner
     {
         // TODO:
-        // - Add debug support via execution API
         // - Read STDOUT / STDERR from response
 
         public async Task Debug(List<TestCase> testCases, int port, IFrameworkHandle frameworkHandle)
@@ -41,8 +40,13 @@ namespace Gauge.VisualStudio.TestAdapter
         {
             try
             {
+                var specsMap = new Dictionary<string, TestCase>();
                 foreach (var testCase in testCases)
                 {
+                    if (!specsMap.ContainsKey(testCase.CodeFilePath))
+                    {
+                        specsMap.Add(testCase.CodeFilePath, testCase);
+                    }
                     frameworkHandle.SendMessage(TestMessageLevel.Informational, string.Format("{0} {1}",testCase.DisplayName, testCase.GetPropertyValue(TestDiscoverer.TestCaseType,string.Empty)));
                 }
                 GrpcEnvironment.Initialize();
@@ -51,28 +55,7 @@ namespace Gauge.VisualStudio.TestAdapter
 
                 var executionRequestBuilder = ExecutionRequest.CreateBuilder().SetDebug(isBeingDebugged);
 
-                var beforeSuiteHook = testCases.First(test => test.DisplayName == "BeforeSuite" &&
-                                                              string.CompareOrdinal(
-                                                                  test.GetPropertyValue(TestDiscoverer.TestCaseType,
-                                                                      string.Empty), "hook") == 0);
-                var afterSuiteHook = testCases.First(test => test.DisplayName == "AfterSuite" &&
-                                                             string.CompareOrdinal(
-                                                                 test.GetPropertyValue(TestDiscoverer.TestCaseType,
-                                                                     string.Empty), "hook") == 0);
-                var beforeSpecHooks = testCases.Where(test => test.DisplayName == "BeforeSpec" &&
-                                                              string.CompareOrdinal(
-                                                                  test.GetPropertyValue(TestDiscoverer.TestCaseType,
-                                                                      string.Empty), "hook") == 0)
-                    .ToDictionary(test => test.CodeFilePath, test => test);
-                var afterSpecHooks = testCases.Where(test => test.DisplayName == "AfterSpec" &&
-                                                             string.CompareOrdinal(
-                                                                 test.GetPropertyValue(TestDiscoverer.TestCaseType,
-                                                                     string.Empty), "hook") == 0)
-                    .ToDictionary(test => test.CodeFilePath, test => test);
-                var scenariosMap = testCases.Where(
-                    test =>
-                        string.CompareOrdinal(test.GetPropertyValue(TestDiscoverer.TestCaseType, string.Empty),
-                            "scenario") == 0)
+                var scenariosMap = testCases.Where(test => string.CompareOrdinal(test.GetPropertyValue(TestDiscoverer.TestCaseType, string.Empty), "scenario") == 0)
                     .ToDictionary(test => string.Format("{0}:{1}", test.CodeFilePath, test.LineNumber), test => test);
 
                 executionRequestBuilder.AddRangeSpecs(scenariosMap.Keys);
@@ -96,50 +79,73 @@ namespace Gauge.VisualStudio.TestAdapter
                     {
                         var executionResponse = call.ResponseStream.Current;
 
-                        frameworkHandle.SendMessage(TestMessageLevel.Informational,
-                            string.Format("Received: {0}", executionResponse.Type));
+                        if (executionResponse.HasResult && executionResponse.Result.Status == Result.Types.Status.FAILED)
+                        {
+                            var errors = string.Join(Environment.NewLine, executionResponse.Result.ErrorsList.Select(
+                                error => string.Format("{0}\n{1}", error.ErrorMessage, error.StackTrace)));
+                            frameworkHandle.SendMessage(TestMessageLevel.Error, errors);
+                            return;
+                        }
+
+                        Action<string, string> propogateIfSuiteFailure = (hook, spec) =>
+                        {
+                            if (!executionResponse.HasResult) return;
+                            var error = string.Empty;
+                            if (executionResponse.Result.HasBeforeHookFailure)
+                            {
+                                var failure = executionResponse.Result.BeforeHookFailure;
+                                error = string.Format("[Before{0} Failure] : {1}\n{2}\n", hook, failure.ErrorMessage, failure.StackTrace);
+                            }
+                            if (executionResponse.Result.HasAfterHookFailure)
+                            {
+                                var failure = executionResponse.Result.AfterHookFailure;
+                                error = string.Format("[Before{0} Failure] : {1}\n{2}\n", hook, failure.ErrorMessage, failure.StackTrace);
+                            }
+                            if (string.IsNullOrEmpty(error))
+                            {
+                                return;
+                            }
+                            foreach (var testCase in testCases)
+                            {
+                                if (spec == null || testCase.CodeFilePath.Contains(spec))
+                                {
+                                    var testResult = new TestResult(testCase) {Outcome = TestOutcome.Failed};
+                                    testResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardErrorCategory, error));
+                                    frameworkHandle.RecordResult(testResult);
+                                    frameworkHandle.RecordEnd(testCase, testResult.Outcome);
+                                }
+                            }
+                        };
+
                         if (!executionResponse.HasType)
                         {
                             continue;
                         }
                         switch (executionResponse.Type)
                         {
-                            case ExecutionResponse.Types.Type.SuiteStart:
+                            case ExecutionResponse.Types.Type.ErrorResult:
                             {
-                                var testResult = new TestResult(beforeSuiteHook)
+                                if (executionResponse.HasResult)
                                 {
-                                    Outcome = executionResponse.Result.HasStatus
-                                        ? GetVSResult(executionResponse.Result.Status)
-                                        : TestOutcome.None
-                                };
-                                frameworkHandle.RecordResult(testResult);
-                                frameworkHandle.RecordEnd(beforeSuiteHook, testResult.Outcome);
+                                    var errors = string.Join(Environment.NewLine, executionResponse.Result.ErrorsList.Select( error => string.Format("{0}\n{1}", error.ErrorMessage, error.StackTrace)));
+                                    frameworkHandle.SendMessage(TestMessageLevel.Error, errors);
+                                }
+                                else
+                                {
+                                    frameworkHandle.SendMessage(TestMessageLevel.Error, "An error occurred during execution, details unavailable. Check Gauge logs.");
+                                }
                                 break;
                             }
                             case ExecutionResponse.Types.Type.SuiteEnd:
                             {
-                                var testResult = new TestResult(afterSuiteHook)
-                                {
-                                    Outcome = executionResponse.Result.HasStatus
-                                        ? GetVSResult(executionResponse.Result.Status)
-                                        : TestOutcome.None
-                                };
-                                frameworkHandle.RecordResult(testResult);
-                                frameworkHandle.RecordEnd(afterSuiteHook, testResult.Outcome);
+                                propogateIfSuiteFailure("Suite", null);
                                 break;
                             }
-                            case ExecutionResponse.Types.Type.SpecStart:
+                            case ExecutionResponse.Types.Type.SpecEnd:
                             {
-                                var spec = executionResponse.ID.Split(':')[0];
-                                var testCase = beforeSpecHooks[spec];
-                                var testResult = new TestResult(testCase)
-                                {
-                                    Outcome = executionResponse.Result.HasStatus
-                                        ? GetVSResult(executionResponse.Result.Status)
-                                        : TestOutcome.None
-                                };
-                                frameworkHandle.RecordResult(testResult);
-                                frameworkHandle.RecordEnd(testCase, testResult.Outcome);
+                                var executionResponseId = executionResponse.ID;
+                                var spec = executionResponseId.Split(':')[0];
+                                propogateIfSuiteFailure("Spec", spec);
                                 break;
                             }
                             case ExecutionResponse.Types.Type.ScenarioStart:
@@ -161,20 +167,6 @@ namespace Gauge.VisualStudio.TestAdapter
                                 };
                                 frameworkHandle.RecordResult(result);
                                 frameworkHandle.RecordEnd(testCase, result.Outcome);
-                                break;
-                            }
-                            case ExecutionResponse.Types.Type.SpecEnd:
-                            {
-                                var spec = executionResponse.ID.Split(':')[0];
-                                var testCase = afterSpecHooks[spec];
-                                var testResult = new TestResult(testCase)
-                                {
-                                    Outcome = executionResponse.Result.HasStatus
-                                        ? GetVSResult(executionResponse.Result.Status)
-                                        : TestOutcome.None
-                                };
-                                frameworkHandle.RecordResult(testResult);
-                                frameworkHandle.RecordEnd(testCase, testResult.Outcome);
                                 break;
                             }
                         }

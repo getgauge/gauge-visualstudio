@@ -70,12 +70,6 @@ namespace Gauge.VisualStudio.TestAdapter
             var testSources = sources.Where(s => string.CompareOrdinal(s, "Suite") != 0);
             try
             {
-                var beforeSuiteHook = GetBeforeSuiteHook();
-                testCases.Add(beforeSuiteHook);
-                if (discoverySink != null)
-                {
-                    discoverySink.SendTestCase(beforeSuiteHook);
-                }
                 Parallel.ForEach(gaugeProjectProperties, properties =>
                 {
                     var protoSpecs = Specification.GetAllSpecs(properties.ApiPort);
@@ -86,12 +80,6 @@ namespace Gauge.VisualStudio.TestAdapter
                         if (testSources.All(s => string.CompareOrdinal(s, spec.FileName) != 0))
                             return;
 
-                        var beforeSpecHook = GetBeforeSpecHook(spec.SpecHeading, spec.FileName);
-                        testCases.Add(beforeSpecHook);
-                        if (discoverySink != null)
-                        {
-                            discoverySink.SendTestCase(beforeSpecHook);
-                        }
                         logger.SendMessage(TestMessageLevel.Informational, string.Format("Adding test cases from : {0}", spec.FileName));
                         var scenarioIndex = 0;
                         var scenarios = spec.ItemsList.Where(item => item.HasScenario).Select(item => item.Scenario);
@@ -108,71 +96,14 @@ namespace Gauge.VisualStudio.TestAdapter
 
                             scenarioIndex++;
                         }
-                        var afterSpecHook = GetAfterSpecHook(spec.SpecHeading, spec.FileName);
-                        testCases.Add(afterSpecHook);
-                        if (discoverySink != null)
-                        {
-                            discoverySink.SendTestCase(afterSpecHook);
-                        }
                     });
                 });
-                var afterSuiteHook = GetAfterSuiteHook();
-                testCases.Add(afterSuiteHook);
-                if (discoverySink != null)
-                {
-                    discoverySink.SendTestCase(afterSuiteHook);
-                }
             }
             catch (Exception e)
             {
                 logger.SendMessage(TestMessageLevel.Error, e.ToString());
             }
             return testCases.ToList();
-        }
-
-        public static IEnumerable<TestCase> GetSuiteAndScenarioHooks(IEnumerable<Tuple<string, string>> specs)
-        {
-            yield return GetBeforeSuiteHook();
-            foreach (var spec in specs)
-            {
-                yield return GetBeforeSpecHook(spec.Item1, spec.Item2);
-                yield return GetAfterSpecHook(spec.Item1, spec.Item2);
-            }
-            yield return GetAfterSuiteHook();
-        }
-
-        private static TestCase GetAfterSuiteHook()
-        {
-            var afterSuiteHook = new TestCase("Suite.After", TestExecutor.ExecutorUri, "Suite") {DisplayName = "AfterSuite"};
-            afterSuiteHook.Traits.Add("ExecutionHook", "AfterSuite");
-            afterSuiteHook.SetPropertyValue(TestCaseType, "hook");
-            return afterSuiteHook;
-        }
-
-        private static TestCase GetAfterSpecHook(string specHeading, string codeFilePath)
-        {
-            var afterSpecHook = new TestCase(string.Format("{0}.{1}", specHeading, "After"), TestExecutor.ExecutorUri, codeFilePath)
-                {DisplayName = "AfterSpec", CodeFilePath = codeFilePath};
-            afterSpecHook.Traits.Add("ExecutionHook", "AfterSpec");
-            afterSpecHook.SetPropertyValue(TestCaseType, "hook");
-            return afterSpecHook;
-        }
-
-        private static TestCase GetBeforeSpecHook(string specHeading, string codeFilePath)
-        {
-            var beforeSpecHook = new TestCase(string.Format("{0}.{1}", specHeading, "Before"), TestExecutor.ExecutorUri, codeFilePath)
-                {DisplayName = "BeforeSpec", CodeFilePath = codeFilePath};
-            beforeSpecHook.Traits.Add("ExecutionHook", "BeforeSpec");
-            beforeSpecHook.SetPropertyValue(TestCaseType, "hook");
-            return beforeSpecHook;
-        }
-
-        private static TestCase GetBeforeSuiteHook()
-        {
-            var beforeSuiteHook = new TestCase("Suite.Before", TestExecutor.ExecutorUri, "Suite") {DisplayName = "BeforeSuite"};
-            beforeSuiteHook.Traits.Add("ExecutionHook", "BeforeSuite");
-            beforeSuiteHook.SetPropertyValue(TestCaseType, "hook");
-            return beforeSuiteHook;
         }
 
         private static TestCase CreateTestCase(IMessageLogger logger, ProtoSpec spec, ProtoScenario scenario,

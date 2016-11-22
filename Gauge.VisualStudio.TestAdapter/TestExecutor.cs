@@ -33,9 +33,7 @@ namespace Gauge.VisualStudio.TestAdapter
         {
             var testSuites = new Dictionary<int, List<TestCase>>();
             _cancelled = false;
-            var testCases = tests as IList<TestCase> ?? tests.ToList();
-            var suiteAndScenarioHooks = TestDiscoverer.GetSuiteAndScenarioHooks(testCases.Select(t => Tuple.Create(t.DisplayName, t.Source)));
-            foreach (var testCase in testCases.Concat(suiteAndScenarioHooks))
+            foreach (var testCase in tests)
             {
                 if (_cancelled) break;
                 var port = testCase.GetPropertyValue(TestDiscoverer.GaugeApiV2Port, -1);

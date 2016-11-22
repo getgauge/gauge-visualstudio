@@ -83,7 +83,6 @@ namespace Gauge.VisualStudio.TestAdapter
         private IEnumerable<TestContainer> GetTestContainers()
         {
             var testContainers = new ConcurrentBag<TestContainer>();
-            testContainers.Add(new TestContainer(this, "Suite", DateTime.Now));
             var specs = Specification.GetAllSpecsFromGauge();
             Parallel.ForEach(specs, s =>
             {
