@@ -36,6 +36,8 @@ namespace Gauge.VisualStudio.TestAdapter
         {
         }
 
+        public bool UseExecutionAPI { get; set; }
+
         public List<GaugeProjectProperties> ProjectsProperties { get; private set; }
 
         public override XmlElement ToXml()

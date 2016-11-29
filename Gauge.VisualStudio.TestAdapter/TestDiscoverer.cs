@@ -54,7 +54,7 @@ namespace Gauge.VisualStudio.TestAdapter
             ITestCaseDiscoverySink discoverySink)
         {
             var settingsProvider = discoveryContext.RunSettings.GetSettings(GaugeTestRunSettings.SettingsName)
-                as GaugeTestRunSettingsService;
+                as IGaugeTestRunSettingsService;
             GetSpecs(settingsProvider.Settings, discoverySink, sources, logger);
         }
 

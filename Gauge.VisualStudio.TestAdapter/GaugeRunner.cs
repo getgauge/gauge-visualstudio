@@ -12,190 +12,88 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
+using Gauge.VisualStudio.Core.Helpers;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Gauge.Messages;
-using Gauge.VisualStudio.Core.Helpers;
-using Grpc.Core;
+using System;
+using Process = System.Diagnostics.Process;
 
 namespace Gauge.VisualStudio.TestAdapter
 {
     public class GaugeRunner
     {
-        // TODO:
-        // - Read STDOUT / STDERR from response
-
-        public async Task Debug(List<TestCase> testCases, int port, IFrameworkHandle frameworkHandle)
+        public void Run(TestCase testCase, bool isBeingDebugged, IFrameworkHandle frameworkHandle)
         {
-            await Run(testCases, port, frameworkHandle, true);
-        }
-
-        public async Task Run(List<TestCase> testCases, int port, IFrameworkHandle frameworkHandle,
-            bool isBeingDebugged = false)
-        {
+            var result = new TestResult(testCase);
+            frameworkHandle.RecordStart(testCase);
+            frameworkHandle.SendMessage(TestMessageLevel.Informational, string.Format("Executing Test: {0}", testCase));
+            var projectRoot = testCase.GetPropertyValue(TestDiscoverer.GaugeProjectRoot, string.Empty);
+            var scenarioIdentifier = testCase.GetPropertyValue(TestDiscoverer.ScenarioIdentifier, -1);
             try
             {
-                var specsMap = new Dictionary<string, TestCase>();
-                foreach (var testCase in testCases)
+                var arguments = string.Format(@"--simple-console ""{0}:{1}""", testCase.Source, scenarioIdentifier);
+                frameworkHandle.SendMessage(TestMessageLevel.Informational, string.Format("Invoking : gauge.exe {0} [Working Dir: {1}]", arguments, projectRoot));
+                var p = new Process
                 {
-                    if (!specsMap.ContainsKey(testCase.CodeFilePath))
+                    StartInfo =
                     {
-                        specsMap.Add(testCase.CodeFilePath, testCase);
+                        WorkingDirectory = projectRoot,
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        CreateNoWindow = true,
+                        FileName = "gauge.exe",
+                        RedirectStandardError = true,
+                        Arguments = arguments,
                     }
-                    frameworkHandle.SendMessage(TestMessageLevel.Informational, string.Format("{0} {1}",testCase.DisplayName, testCase.GetPropertyValue(TestDiscoverer.TestCaseType,string.Empty)));
+                };
+
+                var gaugeCustomBuildPath = testCase.GetPropertyValue(TestDiscoverer.GaugeCustomBuildPath, string.Empty);
+
+                if (!string.IsNullOrEmpty(gaugeCustomBuildPath))
+                {
+                    p.StartInfo.EnvironmentVariables["gauge_custom_build_path"] = gaugeCustomBuildPath;
                 }
-                GrpcEnvironment.Initialize();
-                var channel = new Channel("localhost", port);
-                var executionClient = new Execution.ExecutionClient(channel);
 
-                var executionRequestBuilder = ExecutionRequest.CreateBuilder().SetDebug(isBeingDebugged);
-
-                var scenariosMap = testCases.Where(test => string.CompareOrdinal(test.GetPropertyValue(TestDiscoverer.TestCaseType, string.Empty), "scenario") == 0)
-                    .ToDictionary(test => string.Format("{0}:{1}", test.CodeFilePath, test.LineNumber), test => test);
-
-                executionRequestBuilder.AddRangeSpecs(scenariosMap.Keys);
-
-                using (var call = executionClient.execute(executionRequestBuilder.Build()))
+                if (isBeingDebugged)
                 {
-                    var processId = testCases.First().GetPropertyValue(TestDiscoverer.DaemonProcessId, -1);
-                    if (isBeingDebugged)
-                    {
-                        try
-                        {
-                            DTEHelper.AttachToProcess(processId);
-                        }
-                        catch (Exception e)
-                        {
-                            frameworkHandle.SendMessage(TestMessageLevel.Error,
-                                string.Format("Unable to attach debugger. Details:\n{0}", e));
-                        }
-                    }
-                    while (await call.ResponseStream.MoveNext())
-                    {
-                        var executionResponse = call.ResponseStream.Current;
+                    //Gauge CSharp runner will wait for a debugger to be attached, when it finds this env variable set.
+                    p.StartInfo.EnvironmentVariables["DEBUGGING"] = "true";
+                    frameworkHandle.SendMessage(TestMessageLevel.Informational, string.Format("Debugging 'gauge.exe {0}'", arguments));
+                }
 
-                        if (executionResponse.HasResult && executionResponse.Result.Status == Result.Types.Status.FAILED)
-                        {
-                            var errors = string.Join(Environment.NewLine, executionResponse.Result.ErrorsList.Select(
-                                error => string.Format("{0}\n{1}", error.ErrorMessage, error.StackTrace)));
-                            frameworkHandle.SendMessage(TestMessageLevel.Error, errors);
-                            return;
-                        }
+                p.Start();
 
-                        Action<string, string> propogateIfSuiteFailure = (hook, spec) =>
-                        {
-                            if (!executionResponse.HasResult) return;
-                            var error = string.Empty;
-                            if (executionResponse.Result.HasBeforeHookFailure)
-                            {
-                                var failure = executionResponse.Result.BeforeHookFailure;
-                                error = string.Format("[Before{0} Failure] : {1}\n{2}\n", hook, failure.ErrorMessage, failure.StackTrace);
-                            }
-                            if (executionResponse.Result.HasAfterHookFailure)
-                            {
-                                var failure = executionResponse.Result.AfterHookFailure;
-                                error = string.Format("[Before{0} Failure] : {1}\n{2}\n", hook, failure.ErrorMessage, failure.StackTrace);
-                            }
-                            if (string.IsNullOrEmpty(error))
-                            {
-                                return;
-                            }
-                            foreach (var testCase in testCases)
-                            {
-                                if (spec == null || testCase.CodeFilePath.Contains(spec))
-                                {
-                                    var testResult = new TestResult(testCase) {Outcome = TestOutcome.Failed};
-                                    testResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardErrorCategory, error));
-                                    frameworkHandle.RecordResult(testResult);
-                                    frameworkHandle.RecordEnd(testCase, testResult.Outcome);
-                                }
-                            }
-                        };
+                if (isBeingDebugged)
+                {
+                    DTEHelper.AttachToProcess(p.Id);
+                    frameworkHandle.SendMessage(TestMessageLevel.Informational, string.Format("Attaching to ProcessID {0}", p.Id));
+                }
+                var output = p.StandardOutput.ReadToEnd();
+                var error = p.StandardError.ReadToEnd();
 
-                        if (!executionResponse.HasType)
-                        {
-                            continue;
-                        }
-                        switch (executionResponse.Type)
-                        {
-                            case ExecutionResponse.Types.Type.ErrorResult:
-                            {
-                                if (executionResponse.HasResult)
-                                {
-                                    var errors = string.Join(Environment.NewLine, executionResponse.Result.ErrorsList.Select( error => string.Format("{0}\n{1}", error.ErrorMessage, error.StackTrace)));
-                                    frameworkHandle.SendMessage(TestMessageLevel.Error, errors);
-                                }
-                                else
-                                {
-                                    frameworkHandle.SendMessage(TestMessageLevel.Error, "An error occurred during execution, details unavailable. Check Gauge logs.");
-                                }
-                                break;
-                            }
-                            case ExecutionResponse.Types.Type.SuiteEnd:
-                            {
-                                propogateIfSuiteFailure("Suite", null);
-                                break;
-                            }
-                            case ExecutionResponse.Types.Type.SpecEnd:
-                            {
-                                var executionResponseId = executionResponse.ID;
-                                var spec = executionResponseId.Split(':')[0];
-                                propogateIfSuiteFailure("Spec", spec);
-                                break;
-                            }
-                            case ExecutionResponse.Types.Type.ScenarioStart:
-                            {
-                                var testCase = scenariosMap[executionResponse.ID];
-                                frameworkHandle.RecordStart(testCase);
-                                frameworkHandle.SendMessage(TestMessageLevel.Informational,
-                                    string.Format("Executing Test: {0}", testCase));
-                                break;
-                            }
-                            case ExecutionResponse.Types.Type.ScenarioEnd:
-                            {
-                                var testCase = scenariosMap[executionResponse.ID];
-                                var result = new TestResult(testCase)
-                                {
-                                    Outcome = executionResponse.Result.HasStatus
-                                        ? GetVSResult(executionResponse.Result.Status)
-                                        : TestOutcome.None
-                                };
-                                frameworkHandle.RecordResult(result);
-                                frameworkHandle.RecordEnd(testCase, result.Outcome);
-                                break;
-                            }
-                        }
-                    }
-                    if (isBeingDebugged)
-                    {
-                        DTEHelper.DetachAllProcess();
-                    }
+                p.WaitForExit();
+
+                result.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, output));
+
+                if (p.ExitCode == 0)
+                {
+                    result.Outcome = TestOutcome.Passed;
+                }
+                else
+                {
+                    result.ErrorMessage = error;
+                    result.Messages.Add(new TestResultMessage(TestResultMessage.StandardErrorCategory, error));
+                    result.Outcome = TestOutcome.Failed;
                 }
             }
             catch (Exception ex)
             {
-                frameworkHandle.SendMessage(TestMessageLevel.Error, ex.ToString());
+                result.Outcome = TestOutcome.Failed;
+                result.ErrorMessage = string.Format("{0}\n{1}", ex.Message, ex.StackTrace);
             }
-        }
-
-        private static TestOutcome GetVSResult(Result.Types.Status status)
-        {
-            switch (status)
-            {
-                case Result.Types.Status.FAILED:
-                    return TestOutcome.Failed;
-                case Result.Types.Status.PASSED:
-                    return TestOutcome.Passed;
-                case Result.Types.Status.SKIPPED:
-                    return TestOutcome.Skipped;
-                default:
-                    return TestOutcome.None;
-            }
+            frameworkHandle.RecordResult(result);
+            frameworkHandle.RecordEnd(testCase, result.Outcome);
         }
     }
 }

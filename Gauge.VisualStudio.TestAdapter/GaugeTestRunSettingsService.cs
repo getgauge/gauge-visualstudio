@@ -25,8 +25,9 @@ namespace Gauge.VisualStudio.TestAdapter
 {
     [Export(typeof(ISettingsProvider))]
     [Export(typeof(IRunSettingsService))]
+    [Export(typeof(IGaugeTestRunSettingsService))]
     [SettingsName(GaugeTestRunSettings.SettingsName)]
-    public class GaugeTestRunSettingsService : IRunSettingsService, ISettingsProvider
+    public class GaugeTestRunSettingsService : IRunSettingsService, ISettingsProvider, IGaugeTestRunSettingsService
     {
         public GaugeTestRunSettingsService()
         {
@@ -36,6 +37,11 @@ namespace Gauge.VisualStudio.TestAdapter
         }
 
         public XmlSerializer Serializer { get; private set; }
+
+        public void MapSettings(bool useExecutionAPI)
+        {
+            Settings.UseExecutionAPI = useExecutionAPI;
+        }
 
         public GaugeTestRunSettings Settings { get; private set; }
 
@@ -76,7 +82,7 @@ namespace Gauge.VisualStudio.TestAdapter
         private string SerializeGaugeSettings()
         {
             var stringWriter = new StringWriter();
-            Serializer.Serialize(stringWriter, new GaugeTestRunSettings());
+            Serializer.Serialize(stringWriter, new GaugeTestRunSettings(){UseExecutionAPI = Settings.UseExecutionAPI});
             return stringWriter.ToString();
         }
     }

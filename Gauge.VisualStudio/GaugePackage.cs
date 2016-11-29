@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
@@ -21,6 +22,8 @@ using EnvDTE80;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using Gauge.VisualStudio.TestAdapter;
+using Microsoft.VisualStudio.ComponentModelHost;
 
 namespace Gauge.VisualStudio
 {
@@ -38,6 +41,7 @@ namespace Gauge.VisualStudio
         DefaultToInsertSpaces = true,
         EnableLineNumbers = true,
         RequestStockColors = true)]
+    [ProvideOptionPage(typeof(GaugeExecutionOptions),"Gauge", "Test Execution", 0, 0, true)]
     public class GaugePackage : Package, IDisposable
     {
         private Events2 _DTEEvents;
@@ -45,6 +49,17 @@ namespace Gauge.VisualStudio
         private FormatMenuCommand formatMenuCommand;
         private bool _disposed;
 
+        private IComponentModel componentModel;
+
+        public IComponentModel ComponentModel
+        {
+            get
+            {
+                if (componentModel == null)
+                    componentModel = (IComponentModel)GetGlobalService(typeof(SComponentModel));
+                return componentModel;
+            }
+        }
         protected override void Initialize()
         {
             Debug.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", ToString()));
@@ -59,7 +74,22 @@ namespace Gauge.VisualStudio
             RegisterEditorFactory(new GaugeEditorFactory(this));
 
             _solutionsEventListener = new SolutionsEventListener();
+
+            Options = GetDialogPage(typeof(GaugeExecutionOptions)) as GaugeExecutionOptions;
+            Options.PropertyChanged += SettingsPropertyChanged;
+
+            settingsService = ComponentModel.GetService<IGaugeTestRunSettingsService>();
+            settingsService.MapSettings(Options.UseExecutionAPI);
         }
+
+        public IGaugeTestRunSettingsService settingsService { get; private set; }
+
+        private void SettingsPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            settingsService.MapSettings(Options.UseExecutionAPI);
+        }
+
+        public GaugeExecutionOptions Options { get; private set; }
 
         public static DTE DTE { get; private set; }
 
