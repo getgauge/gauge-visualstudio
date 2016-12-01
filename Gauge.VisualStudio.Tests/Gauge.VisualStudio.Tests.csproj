@@ -58,7 +58,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
     <None Include="Gauge.VisualStudio.licenseheader" />
     <None Include="paket.references" />
   </ItemGroup>

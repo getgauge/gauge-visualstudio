@@ -19,6 +19,11 @@ If (Test-Path $outputPath)
 }
 New-Item -Itemtype directory $outputPath -Force
 $msbuild="$($env:systemroot)\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe"
+
+$paketBootstraper=Resolve-path -Relative ".paket\paket.bootstrapper.exe"
+
+&$paketBootstraper
+
 $paket=".\.paket\paket.exe"
 $sln = "Gauge.VisualStudio.sln"
 

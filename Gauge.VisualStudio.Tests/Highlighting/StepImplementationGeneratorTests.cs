@@ -125,20 +125,14 @@ namespace Gauge.VisualStudio.Tests.Highlighting
             var stepLiteral = string.Format("\"{0}\"", stepText);
             Setup(stepText, "DoSomethingWithSomethingandAnotherThing", false, "something", "anotherthing");
             
-            using (var scope = Fake.CreateScope())
-            {
-                CodeClass targetClass;
-                CodeFunction impl;
-                _stepImplementationGenerator.TryGenerateMethodStub(SelectedClass, _textSnapshotLine, out targetClass, out impl);
-                using (scope.OrderedAssertions())
-                {
-                    _functionCall.MustHaveHappened();
+            CodeClass targetClass;
+            CodeFunction impl;
+            _stepImplementationGenerator.TryGenerateMethodStub(SelectedClass, _textSnapshotLine, out targetClass, out impl);
+            _functionCall.MustHaveHappened();
 
-                    A.CallTo(() => impl.AddParameter("anotherthing", vsCMTypeRef.vsCMTypeRefString, A<object>._)).MustHaveHappened();
-                    A.CallTo(() => impl.AddParameter("something", vsCMTypeRef.vsCMTypeRefString, A<object>._)).MustHaveHappened();
-                    A.CallTo(() => impl.AddAttribute("Step", stepLiteral, A<object>._)).MustHaveHappened();
-                }
-            }
+            A.CallTo(() => impl.AddParameter("anotherthing", vsCMTypeRef.vsCMTypeRefString, A<object>._)).MustHaveHappened()
+                .Then(A.CallTo(() => impl.AddParameter("something", vsCMTypeRef.vsCMTypeRefString, A<object>._)).MustHaveHappened())
+                .Then(A.CallTo(() => impl.AddAttribute("Step", stepLiteral, A<object>._)).MustHaveHappened());
         }
 
         [Test]
@@ -164,21 +158,15 @@ namespace Gauge.VisualStudio.Tests.Highlighting
             var stepLiteral = string.Format("\"{0}\"", stepText);
             Setup(stepText, "DoSomethingWithAFilefootxtaTablebarcsvandTable", true, "file:foo.txt", "table:bar.csv", "table");
 
-            using (var scope = Fake.CreateScope())
-            {
-                CodeClass targetClass;
-                CodeFunction impl;
-                _stepImplementationGenerator.TryGenerateMethodStub(SelectedClass, _textSnapshotLine, out targetClass, out impl);
-                using (scope.OrderedAssertions())
-                {
-                    _functionCall.MustHaveHappened();
+            CodeClass targetClass;
+            CodeFunction impl;
+            _stepImplementationGenerator.TryGenerateMethodStub(SelectedClass, _textSnapshotLine, out targetClass, out impl);
+            _functionCall.MustHaveHappened();
 
-                    A.CallTo(() => impl.AddParameter("table", "Table", A<object>._)).MustHaveHappened();
-                    A.CallTo(() => impl.AddParameter("bar", "Table", A<object>._)).MustHaveHappened();
-                    A.CallTo(() => impl.AddParameter("foo", vsCMTypeRef.vsCMTypeRefString, A<object>._)).MustHaveHappened();
-                    A.CallTo(() => impl.AddAttribute("Step", stepLiteral, A<object>._)).MustHaveHappened();
-                }
-            }
+            A.CallTo(() => impl.AddParameter("table", "Table", A<object>._)).MustHaveHappened()
+                .Then(A.CallTo(() => impl.AddParameter("bar", "Table", A<object>._)).MustHaveHappened())
+                .Then(A.CallTo(() => impl.AddParameter("foo", vsCMTypeRef.vsCMTypeRefString, A<object>._)).MustHaveHappened())
+                .Then(A.CallTo(() => impl.AddAttribute("Step", stepLiteral, A<object>._)).MustHaveHappened());
         }
     }
 }
