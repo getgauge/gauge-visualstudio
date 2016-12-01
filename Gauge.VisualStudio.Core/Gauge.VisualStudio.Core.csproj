@@ -136,6 +136,7 @@
   <ItemGroup>
     <Compile Include="Exceptions\ConventionViolationException.cs" />
     <Compile Include="Exceptions\GaugeAPIInitializationException.cs" />
+    <Compile Include="Exceptions\GaugeVersionIncompatibleException.cs" />
     <Compile Include="Exceptions\GaugeVersionNotFoundException.cs" />
     <Compile Include="Extensions\DocumentExtensions.cs" />
     <Compile Include="Extensions\ProjectExtensions.cs" />

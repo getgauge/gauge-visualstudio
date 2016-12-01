@@ -43,6 +43,7 @@ namespace Gauge.VisualStudio.Core
         private static readonly Dictionary<string, PortInfo> PortsInfo = new Dictionary<string, PortInfo>();
 
         private static readonly List<Project> GaugeProjects = new List<Project>();
+        private static readonly Version MinGaugeVersion = new Version(0, 6, 3);
 
         public static void RegisterGaugeProject(Project project)
         {
@@ -208,8 +209,8 @@ namespace Gauge.VisualStudio.Core
                 }
                 catch (Exception ex)
                 {
-                    OutputPaneLogger.Error("Failed to start Gauge Daemon: {0}", ex);
-                    DisplayGaugeNotFoundMessage();
+                    var errorMessage = string.Format("Failed to start Gauge Daemon: {0}", ex);
+                    DisplayGaugeNotStartedMessage(errorMessage);
                     return null;
                 }
             }
@@ -225,15 +226,13 @@ namespace Gauge.VisualStudio.Core
             return Path.GetDirectoryName(gaugeProject.FullName);
         }
 
-        private static void DisplayGaugeNotFoundMessage()
+        public static void DisplayGaugeNotStartedMessage(string errorMessage)
         {
-            const string message = "Unable to launch Gauge Daemon. Ensure that\n" +
-                                   "1. Gauge is installed.\n" +
-                                   "2. Gauge.exe is available in PATH\n\n" +
-                                   "If issue persists, please report to authors";
+            const string message = "Unable to launch Gauge Daemon. Check Output Window for details";
             var uiShell = (IVsUIShell) Package.GetGlobalService(typeof (IVsUIShell));
             var clsId = Guid.Empty;
             var result = 0;
+            OutputPaneLogger.Error(errorMessage);
             uiShell.ShowMessageBox(0, ref clsId,
                 "Gauge - Critical Error Occurred",
                 message,
@@ -310,6 +309,21 @@ namespace Gauge.VisualStudio.Core
             }
 
             return projectOutputPath;
+        }
+
+        public static void AssertCompatibility(IGaugeProcess gaugeProcess = null)
+        {
+            var installedGaugeVersion = GetInstalledGaugeVersion(gaugeProcess);
+
+            if (new Version(installedGaugeVersion.version).CompareTo(MinGaugeVersion) >= 0)
+            {
+                return;
+            }
+
+            var message = string.Format("This plugin works with Gauge {0} or above. You have Gauge {1} installed. Please update your Gauge installation.\n" +
+                                        " Run gauge -v from your command prompt for installation information.", MinGaugeVersion, installedGaugeVersion.version);
+
+            throw new GaugeVersionIncompatibleException(message);
         }
     }
 

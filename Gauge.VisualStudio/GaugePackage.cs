@@ -19,6 +19,8 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using EnvDTE;
 using EnvDTE80;
+using Gauge.VisualStudio.Core;
+using Gauge.VisualStudio.Core.Exceptions;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -46,7 +48,7 @@ namespace Gauge.VisualStudio
     {
         private Events2 _DTEEvents;
         private SolutionsEventListener _solutionsEventListener;
-        private FormatMenuCommand formatMenuCommand;
+        private FormatMenuCommand _formatMenuCommand;
         private bool _disposed;
 
         private IComponentModel componentModel;
@@ -63,13 +65,28 @@ namespace Gauge.VisualStudio
         protected override void Initialize()
         {
             Debug.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", ToString()));
+
+            try
+            {
+                GaugeService.AssertCompatibility();
+                return;
+            }
+            catch (GaugeVersionIncompatibleException ex)
+            {
+                GaugeService.DisplayGaugeNotStartedMessage(ex.Data["GaugeError"].ToString());
+            }
+            catch (GaugeVersionNotFoundException ex)
+            {
+                GaugeService.DisplayGaugeNotStartedMessage(ex.Data["GaugeError"].ToString());
+            }
+
             base.Initialize();
 
             DTE = (DTE) GetService(typeof (DTE));
 
             // Add our command handlers for menu (commands must exist in the .vsct file)
-            formatMenuCommand = new FormatMenuCommand(this);
-            formatMenuCommand.Register();
+            _formatMenuCommand = new FormatMenuCommand(this);
+            _formatMenuCommand.Register();
 
             RegisterEditorFactory(new GaugeEditorFactory(this));
 
