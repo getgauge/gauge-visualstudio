@@ -56,3 +56,4 @@ group Test
 
     nuget FakeItEasy framework: >= net45
     nuget NUnit 3.0.1 framework: >= net45
+    nuget NUnit.Runners 3.0.1 framework: >= net45

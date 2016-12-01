@@ -168,3 +168,6 @@ NUGET
   remote: https://www.nuget.org/api/v2
     FakeItEasy (2.3.1) - framework: >= net45
     NUnit (3.0.1) - framework: >= net45
+    NUnit.Console (3.0.1) - framework: >= net45
+    NUnit.Runners (3.0.1) - framework: >= net45
+      NUnit.Console (3.0.1)

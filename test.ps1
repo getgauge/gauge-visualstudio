@@ -18,7 +18,7 @@ if(!(Test-Path ".\artifacts"))
     & ".\build.ps1"
 }
 
-$nunit = "$($pwd)\packages\NUnit.Console.3.0.1\tools\nunit3-console.exe"
+$nunit = "$($pwd)\packages\test\NUnit.Console\tools\nunit3-console.exe"
 
 if(!(Test-Path $nunit))
 {
