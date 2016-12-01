@@ -9,3 +9,4 @@ artifacts
 *.nupkg
 *.csproj.user
 Gauge.VisualStudio.sln.ide/
+.paket/paket.exe

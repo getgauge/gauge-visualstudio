@@ -1,0 +1,9 @@
+VSSDK.CoreUtility
+VSSDK.DTE
+VSSDK.IDE
+VSSDK.IDE.12
+VSSDK.Text
+
+group Test
+    FakeItEasy
+    NUnit

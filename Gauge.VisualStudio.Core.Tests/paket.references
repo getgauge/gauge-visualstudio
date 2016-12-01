@@ -1,0 +1,3 @@
+group Test
+    FakeItEasy
+    NUnit

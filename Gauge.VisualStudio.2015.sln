@@ -3,6 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".paket", ".paket", "{6091572D-7818-4589-8021-E5977B411AC3}"
+	ProjectSection(SolutionItems) = preProject
+		paket.dependencies = paket.dependencies
+	EndProjectSection
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauge.VisualStudio.Tests", "Gauge.VisualStudio.Tests\Gauge.VisualStudio.Tests.csproj", "{754095AA-91B0-40E4-98AD-3FD8746DB95D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauge.VisualStudio.TestAdapter", "Gauge.VisualStudio.TestAdapter\Gauge.VisualStudio.TestAdapter.csproj", "{62F2F1DA-2357-4F63-991A-5449B3F31E00}"

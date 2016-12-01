@@ -19,11 +19,11 @@ If (Test-Path $outputPath)
 }
 New-Item -Itemtype directory $outputPath -Force
 $msbuild="$($env:systemroot)\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe"
-$nuget=".\.nuget\nuget.exe"
+$paket=".\.paket\paket.exe"
 $sln = "Gauge.VisualStudio.sln"
 
-Write-Host -ForegroundColor Yellow "Restoring Nuget Packages..."
-&$nuget restore $sln
+Write-Host -ForegroundColor Yellow "Restoring Packages..."
+&$paket restore
 Write-Host -ForegroundColor Yellow "Done."
 
 $verbosity = "minimal"
@@ -40,4 +40,4 @@ if($env:NIGHTLY)
   & "$(Split-Path $MyInvocation.MyCommand.Path)\version_nightly.ps1" -nightly $nightly
 }
 
-&$msbuild $sln /m /nologo "/p:configuration=release;OutDir=$($outputPath);VisualStudioVersion=12.0" /t:rebuild /verbosity:$($verbosity)
+&$msbuild $sln /m /nologo "/p:configuration=release;OutDir=$($outputPath);VisualStudioVersion=12.0;RestorePackages=false" /t:rebuild /verbosity:$($verbosity)
