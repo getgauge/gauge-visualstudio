@@ -25,6 +25,21 @@ namespace Gauge.VisualStudio.Model
     {
         public static IEnumerable<string> GetAllSpecsFromGauge()
         {
+            try
+            {
+                GaugeService.AssertCompatibility();
+            }
+            catch (GaugeVersionIncompatibleException ex)
+            {
+                GaugeService.DisplayGaugeNotStartedMessage(ex.Data["GaugeError"].ToString());
+                return Enumerable.Empty<string>();
+            }
+            catch (GaugeVersionNotFoundException ex)
+            {
+                GaugeService.DisplayGaugeNotStartedMessage(ex.Data["GaugeError"].ToString());
+                return Enumerable.Empty<string>();
+            }
+
             var specifications = new List<ProtoSpec>();
             try
             {

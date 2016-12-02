@@ -65,19 +65,17 @@ namespace Gauge.VisualStudio
         protected override void Initialize()
         {
             Debug.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", ToString()));
-
             try
             {
                 GaugeService.AssertCompatibility();
+            }
+            catch (GaugeVersionIncompatibleException)
+            {
                 return;
             }
-            catch (GaugeVersionIncompatibleException ex)
+            catch (GaugeVersionNotFoundException)
             {
-                GaugeService.DisplayGaugeNotStartedMessage(ex.Data["GaugeError"].ToString());
-            }
-            catch (GaugeVersionNotFoundException ex)
-            {
-                GaugeService.DisplayGaugeNotStartedMessage(ex.Data["GaugeError"].ToString());
+                return;
             }
 
             base.Initialize();
@@ -121,7 +119,7 @@ namespace Gauge.VisualStudio
             if (_disposed)
                 return;
 
-            if (disposing)
+            if (disposing && _solutionsEventListener != null)
             {
                 _solutionsEventListener.Dispose();
             }
