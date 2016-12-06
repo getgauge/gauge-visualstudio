@@ -74,6 +74,7 @@
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="GaugePlugin.cs" />
     <Compile Include="GaugeProcess.cs" />
+    <Compile Include="GaugeVersion.cs" />
     <Compile Include="GaugeVersionInfo.cs" />
     <Compile Include="Helpers\DTEHelper.cs" />
     <Compile Include="GaugeService.cs" />

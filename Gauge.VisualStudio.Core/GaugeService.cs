@@ -43,7 +43,7 @@ namespace Gauge.VisualStudio.Core
         private static readonly Dictionary<string, PortInfo> PortsInfo = new Dictionary<string, PortInfo>();
 
         private static readonly List<Project> GaugeProjects = new List<Project>();
-        private static readonly Version MinGaugeVersion = new Version(0, 6, 3);
+        private static readonly GaugeVersion MinGaugeVersion = new GaugeVersion("0.6.3");
 
         public static void RegisterGaugeProject(Project project)
         {
@@ -315,7 +315,7 @@ namespace Gauge.VisualStudio.Core
         {
             var installedGaugeVersion = GetInstalledGaugeVersion(gaugeProcess);
 
-            if (new Version(installedGaugeVersion.version).CompareTo(MinGaugeVersion) >= 0)
+            if (new GaugeVersion(installedGaugeVersion.version).CompareTo(MinGaugeVersion) >= 0)
             {
                 return;
             }
