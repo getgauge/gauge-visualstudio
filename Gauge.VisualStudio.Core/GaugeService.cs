@@ -210,7 +210,7 @@ namespace Gauge.VisualStudio.Core
                 catch (Exception ex)
                 {
                     var errorMessage = string.Format("Failed to start Gauge Daemon: {0}", ex);
-                    DisplayGaugeNotStartedMessage(errorMessage);
+                    DisplayGaugeNotStartedMessage("Unable to launch Gauge Daemon. Check Output Window for details", errorMessage);
                     return null;
                 }
             }
@@ -226,16 +226,15 @@ namespace Gauge.VisualStudio.Core
             return Path.GetDirectoryName(gaugeProject.FullName);
         }
 
-        public static void DisplayGaugeNotStartedMessage(string errorMessage)
+        public static void DisplayGaugeNotStartedMessage(string dialogMessage, string errorMessageFormat, params object[] args)
         {
-            const string message = "Unable to launch Gauge Daemon. Check Output Window for details";
             var uiShell = (IVsUIShell) Package.GetGlobalService(typeof (IVsUIShell));
             var clsId = Guid.Empty;
             var result = 0;
-            OutputPaneLogger.Error(errorMessage);
+            OutputPaneLogger.Error(string.Format(errorMessageFormat, args));
             uiShell.ShowMessageBox(0, ref clsId,
                 "Gauge - Critical Error Occurred",
-                message,
+                dialogMessage,
                 string.Empty,
                 0,
                 OLEMSGBUTTON.OLEMSGBUTTON_OK,

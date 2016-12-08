@@ -13,8 +13,10 @@
 // limitations under the License.
 
 using System;
+using System.Linq;
 using Gauge.Messages;
 using Gauge.VisualStudio.Core;
+using Gauge.VisualStudio.Core.Loggers;
 using Gauge.VisualStudio.Model;
 using Gauge.VisualStudio.Model.Extensions;
 using Gauge.VisualStudio.UI;
@@ -84,7 +86,19 @@ namespace Gauge.VisualStudio.Refactor
                             var response = RefactorUsingGaugeDaemon(newText, originalText, project);
 
                             if (!response.PerformRefactoringResponse.Success)
+                            {
+                                var errorMessage = string.Empty;
+                                if (response.HasError)
+                                {
+                                    errorMessage = string.Format("{0}\n", response.Error.Error);
+                                }
+                                if (response.HasPerformRefactoringResponse && response.PerformRefactoringResponse.ErrorsCount > 0)
+                                {
+                                    response.PerformRefactoringResponse.ErrorsList.Aggregate(errorMessage, (s, s1) => string.Format("{0}\n{1}", s, s1));
+                                }
+                                GaugeService.DisplayGaugeNotStartedMessage("Refactoring failed.\nCheck Gauge output pane for details.", string.Format("Failed to refactor {0} to {1}. Error:\n{2}", originalText, newText, errorMessage));
                                 return VSConstants.S_FALSE;
+                            }
 
                             ReloadChangedDocuments(response);
                             new Project(GaugePackage.DTE).RefreshImplementationsForActiveProject();

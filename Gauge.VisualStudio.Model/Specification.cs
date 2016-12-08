@@ -31,12 +31,12 @@ namespace Gauge.VisualStudio.Model
             }
             catch (GaugeVersionIncompatibleException ex)
             {
-                GaugeService.DisplayGaugeNotStartedMessage(ex.Data["GaugeError"].ToString());
+                GaugeService.DisplayGaugeNotStartedMessage("Unable to launch Gauge Daemon. Check Output Window for details", ex.Data["GaugeError"].ToString());
                 return Enumerable.Empty<string>();
             }
             catch (GaugeVersionNotFoundException ex)
             {
-                GaugeService.DisplayGaugeNotStartedMessage(ex.Data["GaugeError"].ToString());
+                GaugeService.DisplayGaugeNotStartedMessage("Unable to launch Gauge Daemon. Check Output Window for details", ex.Data["GaugeError"].ToString());
                 return Enumerable.Empty<string>();
             }
 
