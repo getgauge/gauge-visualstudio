@@ -16,7 +16,6 @@ using System;
 using System.Linq;
 using Gauge.Messages;
 using Gauge.VisualStudio.Core;
-using Gauge.VisualStudio.Core.Loggers;
 using Gauge.VisualStudio.Model;
 using Gauge.VisualStudio.Model.Extensions;
 using Gauge.VisualStudio.UI;
@@ -52,69 +51,73 @@ namespace Gauge.VisualStudio.Refactor
         public int Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
         {
             var hresult = VSConstants.S_OK;
-            switch ((VSConstants.VSStd2KCmdID)nCmdID)
+            if ((VSConstants.VSStd2KCmdID) nCmdID == VSConstants.VSStd2KCmdID.RENAME)
             {
-                case VSConstants.VSStd2KCmdID.RENAME:
-                    GaugePackage.DTE.ExecuteCommand("File.SaveAll");
-                    var caretBufferPosition = _view.Caret.Position.BufferPosition;
-                    var currentLine = caretBufferPosition.GetContainingLine();
-                    var lineText = currentLine.GetText();
-                    if (!Parser.StepRegex.IsMatch(lineText))
-                        return hresult;
-
-                    var originalText = Step.GetStepText(currentLine);
-
-                    var refactorDialog = new RefactorDialog(originalText);
-                    var showModal = refactorDialog.ShowModal();
-                    if (!showModal.HasValue || !showModal.Value)
-                    {
-                        return hresult;
-                    }
-
-                    var newText = refactorDialog.StepText;
-                    var progressDialog = CreateProgressDialog();
-                    var startWaitDialog = progressDialog.StartWaitDialog("Gauge - Renaming",
-                        string.Format("Original: {0}", originalText), string.Format("To: {0}", newText), null,
-                        "Refactoring Step", 0, false, true);
-                    if (startWaitDialog == VSConstants.S_OK)
-                    {
-                        var undoContext = GaugePackage.DTE.UndoContext;
-                        undoContext.Open("GaugeRefactoring");
-                        try
-                        {
-                            var project = _view.TextBuffer.CurrentSnapshot.GetProject(GaugePackage.DTE);
-                            var response = RefactorUsingGaugeDaemon(newText, originalText, project);
-
-                            if (!response.PerformRefactoringResponse.Success)
-                            {
-                                var errorMessage = string.Empty;
-                                if (response.HasError)
-                                {
-                                    errorMessage = string.Format("{0}\n", response.Error.Error);
-                                }
-                                if (response.HasPerformRefactoringResponse && response.PerformRefactoringResponse.ErrorsCount > 0)
-                                {
-                                    response.PerformRefactoringResponse.ErrorsList.Aggregate(errorMessage, (s, s1) => string.Format("{0}\n{1}", s, s1));
-                                }
-                                GaugeService.DisplayGaugeNotStartedMessage("Refactoring failed.\nCheck Gauge output pane for details.", string.Format("Failed to refactor {0} to {1}. Error:\n{2}", originalText, newText, errorMessage));
-                                return VSConstants.S_FALSE;
-                            }
-
-                            ReloadChangedDocuments(response);
-                            new Project(GaugePackage.DTE).RefreshImplementationsForActiveProject();
-                        }
-                        finally
-                        {
-                            int cancelled;
-                            progressDialog.EndWaitDialog(out cancelled);
-                            undoContext.Close();
-                        }
-                    }
+                GaugePackage.DTE.ExecuteCommand("File.SaveAll");
+                var caretBufferPosition = _view.Caret.Position.BufferPosition;
+                var currentLine = caretBufferPosition.GetContainingLine();
+                var lineText = currentLine.GetText();
+                if (!Parser.StepRegex.IsMatch(lineText))
                     return hresult;
-                default:
-                    hresult = Next.Exec(pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
-                    break;
+
+                var originalText = Step.GetStepText(currentLine);
+
+                var refactorDialog = new RefactorDialog(originalText);
+                var showModal = refactorDialog.ShowModal();
+                if (!showModal.HasValue || !showModal.Value)
+                {
+                    return hresult;
+                }
+
+                var newText = refactorDialog.StepText;
+                var progressDialog = CreateProgressDialog();
+                var startWaitDialog = progressDialog.StartWaitDialog("Gauge - Renaming",
+                    string.Format("Original: {0}", originalText), string.Format("To: {0}", newText), null,
+                    "Refactoring Step", 0, false, true);
+                if (startWaitDialog != VSConstants.S_OK)
+                {
+                    return hresult;
+                }
+
+                var undoContext = GaugePackage.DTE.UndoContext;
+                undoContext.Open("GaugeRefactoring");
+                try
+                {
+                    var project = _view.TextBuffer.CurrentSnapshot.GetProject(GaugePackage.DTE);
+                    var response = RefactorUsingGaugeDaemon(newText, originalText, project);
+
+                    if (!response.PerformRefactoringResponse.Success)
+                    {
+                        var errorMessage = string.Empty;
+                        if (response.HasError)
+                        {
+                            errorMessage = string.Format("{0}\n", response.Error.Error);
+                        }
+                        if (response.HasPerformRefactoringResponse &&
+                            response.PerformRefactoringResponse.ErrorsCount > 0)
+                        {
+                            response.PerformRefactoringResponse.ErrorsList.Aggregate(errorMessage,
+                                (s, s1) => string.Format("{0}\n{1}", s, s1));
+                        }
+                        GaugeService.DisplayGaugeNotStartedMessage(
+                            "Refactoring failed.\nCheck Gauge output pane for details.",
+                            string.Format("Failed to refactor {0} to {1}. Error:\n{2}", originalText, newText,
+                                errorMessage));
+                        return VSConstants.S_FALSE;
+                    }
+
+                    ReloadChangedDocuments(response);
+                    new Project(GaugePackage.DTE).RefreshImplementationsForActiveProject();
+                }
+                finally
+                {
+                    int cancelled;
+                    progressDialog.EndWaitDialog(out cancelled);
+                    undoContext.Close();
+                }
+                return hresult;
             }
+            hresult = Next.Exec(pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
             return hresult;
         }
 
