@@ -71,9 +71,9 @@ namespace Gauge.VisualStudio.Refactor
 
                 var newText = refactorDialog.StepText;
                 var progressDialog = CreateProgressDialog();
-                var startWaitDialog = progressDialog.StartWaitDialog("Gauge - Renaming",
-                    string.Format("Original: {0}", originalText), string.Format("To: {0}", newText), null,
-                    "Refactoring Step", 0, false, true);
+                var startWaitDialog = progressDialog.StartWaitDialogWithPercentageProgress("Gauge - Renaming",
+                    string.Format("Original: {0}\nTo: {1}", originalText, newText), "Invoking Refactor action", null,
+                    "Refactoring Step", false, 0, 4, 1);
                 if (startWaitDialog != VSConstants.S_OK)
                 {
                     return hresult;
@@ -105,9 +105,15 @@ namespace Gauge.VisualStudio.Refactor
                                 errorMessage));
                         return VSConstants.S_FALSE;
                     }
-
+                    bool cancel;
+                    progressDialog.UpdateProgress(null, "Reloading changed files..", null, 2, 4, true, out cancel);
                     ReloadChangedDocuments(response);
+                    progressDialog.UpdateProgress(null, "Building Solution..", null, 3, 4, true, out cancel);
+                    GaugePackage.DTE.ExecuteCommand("Build.BuildSolution");
+                    progressDialog.UpdateProgress(null, "Refreshing Cache..", null, 3, 4, true, out cancel);
                     new Project(GaugePackage.DTE).RefreshImplementationsForActiveProject();
+                    GaugePackage.DTE.ExecuteCommand("File.SaveAll");
+                    GaugePackage.DTE.ActiveDocument.Save();
                 }
                 finally
                 {
