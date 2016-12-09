@@ -147,7 +147,7 @@ namespace Gauge.VisualStudio.Model
         {
             var parsedValue = GetParsedStepValueFromInput(project, input);
             parsedValue = parsedValue.Replace("* ", "");
-            return parsedValue.Replace("{}", "(.)*");
+            return string.Format(@"^(\*[ |\t]*|[ |\t]*\[Step\(""){0}(""\)\])?\r", parsedValue.Replace("{}", "((<|\").+(>|\"))"));
         }
 
         private static ProtoStepValue GetStepValueFromInput(EnvDTE.Project project, string input)

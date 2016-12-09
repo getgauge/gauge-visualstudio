@@ -38,7 +38,7 @@ namespace Gauge.VisualStudio.References
             {
                 case VSConstants.VSStd97CmdID.FindReferences:
                     var caretBufferPosition = TextView.Caret.Position.BufferPosition;
-                    var originalText = caretBufferPosition.GetContainingLine().GetText();
+                    var originalText = Step.GetStepText(caretBufferPosition.GetContainingLine());
 
                     var findRegex = Step.GetFindRegex(caretBufferPosition.Snapshot.GetProject(GaugePackage.DTE), originalText);
 
