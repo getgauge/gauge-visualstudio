@@ -33,8 +33,18 @@ using Thread = System.Threading.Thread;
 
 namespace Gauge.VisualStudio.Core
 {
-    public class GaugeService
+    public class GaugeService : IGaugeService
     {
+        private static readonly Lazy<GaugeService> LazyInstance = new Lazy<GaugeService>();
+
+        private GaugeService()
+        {
+        }
+
+        public static GaugeService Instance
+        {
+            get { return LazyInstance.Value; }
+        }
         private static readonly Dictionary<string, GaugeApiConnection> ApiConnections =
             new Dictionary<string, GaugeApiConnection>();
 
@@ -45,17 +55,17 @@ namespace Gauge.VisualStudio.Core
         private static readonly List<Project> GaugeProjects = new List<Project>();
         private static readonly GaugeVersion MinGaugeVersion = new GaugeVersion("0.6.3");
 
-        public static void RegisterGaugeProject(Project project)
+        public void RegisterGaugeProject(Project project)
         {
             GaugeProjects.Add(project);
         }
 
-        public static IEnumerable<GaugeApiConnection> GetAllApiConnections()
+        public IEnumerable<GaugeApiConnection> GetAllApiConnections()
         {
             return GaugeProjects.Select(GetApiConnectionFor);
         }
 
-        public static GaugeApiConnection GetApiConnectionFor(Project project)
+        public GaugeApiConnection GetApiConnectionFor(Project project)
         {
             GaugeApiConnection apiConnection;
             if (ApiConnections.TryGetValue(project.SlugifiedName(), out apiConnection))
@@ -85,7 +95,7 @@ namespace Gauge.VisualStudio.Core
             return unusedPort;
         }
 
-        public static void KillChildProcess(string slugifiedName)
+        public void KillChildProcess(string slugifiedName)
         {
             if (ApiConnections.ContainsKey(slugifiedName))
             {
@@ -118,12 +128,12 @@ namespace Gauge.VisualStudio.Core
                 GaugeProjects.Find(project => string.CompareOrdinal(project.SlugifiedName(), slugifiedName) == 0));
         }
 
-        public static bool ContainsApiConnectionFor(string slugifiedName)
+        public bool ContainsApiConnectionFor(string slugifiedName)
         {
             return ApiConnections.ContainsKey(slugifiedName);
         }
 
-        public static List<GaugeProjectProperties> GetPropertiesForAllGaugeProjects()
+        public List<GaugeProjectProperties> GetPropertiesForAllGaugeProjects()
         {
             return GaugeProjects.Where(project => PortsInfo.ContainsKey(project.SlugifiedName()))
                 .Select( project => new GaugeProjectProperties
@@ -136,7 +146,7 @@ namespace Gauge.VisualStudio.Core
                     }).ToList();
         }
 
-        public static GaugeVersionInfo GetInstalledGaugeVersion(IGaugeProcess gaugeProcess = null)
+        public GaugeVersionInfo GetInstalledGaugeVersion(IGaugeProcess gaugeProcess = null)
         {
             if (gaugeProcess == null)
             {
@@ -157,7 +167,7 @@ namespace Gauge.VisualStudio.Core
             return (GaugeVersionInfo) serializer.ReadObject(gaugeProcess.StandardOutput.BaseStream);
         }
 
-        private static GaugeApiConnection StartGaugeAsDaemon(Project gaugeProject)
+        private GaugeApiConnection StartGaugeAsDaemon(Project gaugeProject)
         {
             var slugifiedName = gaugeProject.SlugifiedName();
             if (ChildProcesses.ContainsKey(slugifiedName))
@@ -226,7 +236,7 @@ namespace Gauge.VisualStudio.Core
             return Path.GetDirectoryName(gaugeProject.FullName);
         }
 
-        public static void DisplayGaugeNotStartedMessage(string dialogMessage, string errorMessageFormat, params object[] args)
+        public void DisplayGaugeNotStartedMessage(string dialogMessage, string errorMessageFormat, params object[] args)
         {
             var uiShell = (IVsUIShell) Package.GetGlobalService(typeof (IVsUIShell));
             var clsId = Guid.Empty;
@@ -310,7 +320,7 @@ namespace Gauge.VisualStudio.Core
             return projectOutputPath;
         }
 
-        public static void AssertCompatibility(IGaugeProcess gaugeProcess = null)
+        public void AssertCompatibility(IGaugeProcess gaugeProcess = null)
         {
             var installedGaugeVersion = GetInstalledGaugeVersion(gaugeProcess);
 
@@ -324,18 +334,5 @@ namespace Gauge.VisualStudio.Core
 
             throw new GaugeVersionIncompatibleException(message);
         }
-    }
-
-    internal class PortInfo
-    {
-        public PortInfo(int apiPort, int apiV2Port)
-        {
-            ApiPort = apiPort;
-            ApiV2Port = apiV2Port;
-        }
-
-        public int ApiPort { get;private set; }
-
-        public int ApiV2Port { get;private set; }
     }
 }

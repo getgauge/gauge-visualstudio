@@ -40,11 +40,11 @@ namespace Gauge.VisualStudio
                 return VSConstants.S_OK;
 
             var slugifiedName = project.SlugifiedName();
-            if (GaugeService.ContainsApiConnectionFor(slugifiedName))
+            if (GaugeService.Instance.ContainsApiConnectionFor(slugifiedName))
                 return VSConstants.S_OK;
 
 
-            GaugeService.RegisterGaugeProject(project);
+            GaugeService.Instance.RegisterGaugeProject(project);
 
             StatusBarLogger.Log("Gauge Project detected, build solution to keep test explorer updated.");
             return VSConstants.S_OK;
@@ -60,7 +60,7 @@ namespace Gauge.VisualStudio
             var project = pHierarchy.ToProject();
             var slugifiedName = project.SlugifiedName();
 
-            GaugeService.KillChildProcess(slugifiedName);
+            GaugeService.Instance.KillChildProcess(slugifiedName);
 
             return VSConstants.S_OK;
         }

@@ -29,7 +29,6 @@ namespace Gauge.VisualStudio.Model
         List<string> Parameters { get; set; }
         bool HasInlineTable { get; }
         IEnumerable<string> GetAll();
-        string GetParameterizedStepValue(ITextSnapshotLine input);
     }
 
     public class Step : IStep
@@ -69,12 +68,6 @@ namespace Gauge.VisualStudio.Model
             return GetAllStepsFromGauge(_project).Select(x => x.ParameterizedStepValue);
         }
 
-        public string GetParameterizedStepValue(ITextSnapshotLine input)
-        {
-            var stepValueFromInput = GetStepValueFromInput(_project, GetStepText(input));
-            return stepValueFromInput == null ? string.Empty : stepValueFromInput.ParameterizedStepValue;
-        }
-
         public static string GetStepText(ITextSnapshotLine line)
         {
             var originalText = line.GetText();
@@ -98,7 +91,7 @@ namespace Gauge.VisualStudio.Model
         {
             try
             {
-                var gaugeApiConnection = GaugeService.GetApiConnectionFor(project);
+                var gaugeApiConnection = GaugeService.Instance.GetApiConnectionFor(project);
                 var stepsRequest = GetAllStepsRequest.DefaultInstance;
                 var apiMessage = APIMessage.CreateBuilder()
                     .SetMessageId(GenerateMessageId())
@@ -154,7 +147,7 @@ namespace Gauge.VisualStudio.Model
         {
             try
             {
-                var gaugeApiConnection = GaugeService.GetApiConnectionFor(project);
+                var gaugeApiConnection = GaugeService.Instance.GetApiConnectionFor(project);
                 var stepsRequest = GetStepValueRequest.CreateBuilder().SetStepText(input).Build();
                 var apiMessage = APIMessage.CreateBuilder()
                     .SetMessageId(GenerateMessageId())

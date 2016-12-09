@@ -30,7 +30,7 @@ namespace Gauge.VisualStudio.TestAdapter
 
         public GaugeTestRunSettings(string name) : base(name)
         {
-            ProjectsProperties = GaugeService.GetPropertiesForAllGaugeProjects();
+            ProjectsProperties = GaugeService.Instance.GetPropertiesForAllGaugeProjects();
         }
 
         public GaugeTestRunSettings() : this(SettingsName)

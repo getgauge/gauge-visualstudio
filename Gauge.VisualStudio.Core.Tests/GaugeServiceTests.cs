@@ -35,7 +35,7 @@ namespace Gauge.VisualStudio.Core.Tests
             A.CallTo(() => gaugeProcess.StandardOutput).Returns(new StreamReader(outputStream));
             A.CallTo(() => gaugeProcess.StandardError).Returns(new StreamReader(errorStream));
 
-            var installedGaugeVersion = GaugeService.GetInstalledGaugeVersion(gaugeProcess);
+            var installedGaugeVersion = GaugeService.Instance.GetInstalledGaugeVersion(gaugeProcess);
             Assert.AreEqual("0.4.0", installedGaugeVersion.version);
             Assert.AreEqual(2, installedGaugeVersion.plugins.Length);
         }
@@ -53,7 +53,7 @@ namespace Gauge.VisualStudio.Core.Tests
             A.CallTo(() => gaugeProcess.StandardOutput).Returns(new StreamReader(outputStream));
             A.CallTo(() => gaugeProcess.StandardError).Returns(new StreamReader(errorStream));
 
-            var exception = Assert.Throws<GaugeVersionNotFoundException>(() => GaugeService.GetInstalledGaugeVersion(gaugeProcess));
+            var exception = Assert.Throws<GaugeVersionNotFoundException>(() => GaugeService.Instance.GetInstalledGaugeVersion(gaugeProcess));
 
             Assert.NotNull(exception);
             Assert.NotNull(exception.Data);
@@ -75,7 +75,7 @@ namespace Gauge.VisualStudio.Core.Tests
             A.CallTo(() => gaugeProcess.StandardOutput).Returns(new StreamReader(outputStream));
             A.CallTo(() => gaugeProcess.StandardError).Returns(new StreamReader(errorStream));
 
-            var gaugeVersionIncompatibleException = Assert.Throws<GaugeVersionIncompatibleException>(() => GaugeService.AssertCompatibility(gaugeProcess));
+            var gaugeVersionIncompatibleException = Assert.Throws<GaugeVersionIncompatibleException>(() => GaugeService.Instance.AssertCompatibility(gaugeProcess));
 
             Assert.AreEqual(expectedMessage, gaugeVersionIncompatibleException.Data["GaugeError"]);
         }
@@ -92,7 +92,7 @@ namespace Gauge.VisualStudio.Core.Tests
             A.CallTo(() => gaugeProcess.StandardOutput).Returns(new StreamReader(outputStream));
             A.CallTo(() => gaugeProcess.StandardError).Returns(new StreamReader(errorStream));
 
-            Assert.DoesNotThrow(() => GaugeService.AssertCompatibility(gaugeProcess));
+            Assert.DoesNotThrow(() => GaugeService.Instance.AssertCompatibility(gaugeProcess));
         }
     }
 }

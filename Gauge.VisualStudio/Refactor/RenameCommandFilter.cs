@@ -99,7 +99,7 @@ namespace Gauge.VisualStudio.Refactor
                             response.PerformRefactoringResponse.ErrorsList.Aggregate(errorMessage,
                                 (s, s1) => string.Format("{0}\n{1}", s, s1));
                         }
-                        GaugeService.DisplayGaugeNotStartedMessage(
+                        GaugeService.Instance.DisplayGaugeNotStartedMessage(
                             "Refactoring failed.\nCheck Gauge output pane for details.",
                             string.Format("Failed to refactor {0} to {1}. Error:\n{2}", originalText, newText,
                                 errorMessage));
@@ -134,7 +134,7 @@ namespace Gauge.VisualStudio.Refactor
                 .SetNewStep(newText)
                 .SetOldStep(originalText)
                 .Build();
-            var apiConnection = GaugeService.GetApiConnectionFor(project);
+            var apiConnection = GaugeService.Instance.GetApiConnectionFor(project);
             var apiMessage = APIMessage.CreateBuilder()
                 .SetPerformRefactoringRequest(performRefactoringRequest)
                 .SetMessageType(APIMessage.Types.APIMessageType.PerformRefactoringRequest)

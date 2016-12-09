@@ -42,7 +42,7 @@ namespace Gauge.VisualStudio.Model
             }
             try
             {
-                var gaugeApiConnection = GaugeService.GetApiConnectionFor(_project);
+                var gaugeApiConnection = GaugeService.Instance.GetApiConnectionFor(_project);
                 var conceptsRequest = GetAllConceptsRequest.DefaultInstance;
                 var apiMessage = APIMessage.CreateBuilder()
                     .SetMessageId(GenerateMessageId())

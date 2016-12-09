@@ -67,7 +67,7 @@ namespace Gauge.VisualStudio
             Debug.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", ToString()));
             try
             {
-                GaugeService.AssertCompatibility();
+                GaugeService.Instance.AssertCompatibility();
             }
             catch (GaugeVersionIncompatibleException)
             {

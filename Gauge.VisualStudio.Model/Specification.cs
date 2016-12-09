@@ -27,23 +27,23 @@ namespace Gauge.VisualStudio.Model
         {
             try
             {
-                GaugeService.AssertCompatibility();
+                GaugeService.Instance.AssertCompatibility();
             }
             catch (GaugeVersionIncompatibleException ex)
             {
-                GaugeService.DisplayGaugeNotStartedMessage("Unable to launch Gauge Daemon. Check Output Window for details", ex.Data["GaugeError"].ToString());
+                GaugeService.Instance.DisplayGaugeNotStartedMessage("Unable to launch Gauge Daemon. Check Output Window for details", ex.Data["GaugeError"].ToString());
                 return Enumerable.Empty<string>();
             }
             catch (GaugeVersionNotFoundException ex)
             {
-                GaugeService.DisplayGaugeNotStartedMessage("Unable to launch Gauge Daemon. Check Output Window for details", ex.Data["GaugeError"].ToString());
+                GaugeService.Instance.DisplayGaugeNotStartedMessage("Unable to launch Gauge Daemon. Check Output Window for details", ex.Data["GaugeError"].ToString());
                 return Enumerable.Empty<string>();
             }
 
             var specifications = new List<ProtoSpec>();
             try
             {
-                foreach (var apiConnection in GaugeService.GetAllApiConnections())
+                foreach (var apiConnection in GaugeService.Instance.GetAllApiConnections())
                 {
                     specifications.AddRange(GetSpecsFromGauge(apiConnection));
                 }
