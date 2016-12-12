@@ -71,7 +71,31 @@ namespace Gauge.VisualStudio.Model.Tests
             Assert.AreEqual(string.Empty, actual);
         }
 
-        private static IEnumerable<TestCaseData> matchTestCases
+        [Test, TestCaseSource("MatchTestCases")]
+        public void ShouldLocateReferencesUsingRegex(string input, string parsedInput, string match)
+        {
+            var gaugeService = A.Fake<IGaugeService>();
+            var project = A.Fake<EnvDTE.Project>();
+            var gaugeServiceClient = GetGaugeServiceClient(input, parsedInput, gaugeService, project);
+
+            var findRegex = gaugeServiceClient.GetFindRegex(project, input);
+
+            StringAssert.IsMatch(findRegex, match);
+        }
+
+        [Test, TestCaseSource("MatchNegativeTestCases")]
+        public void ShouldNotLocateFalseMatchesUsingRegex(string input, string parsedInput, string match)
+        {
+            var gaugeService = A.Fake<IGaugeService>();
+            var project = A.Fake<EnvDTE.Project>();
+            var gaugeServiceClient = GetGaugeServiceClient(input, parsedInput, gaugeService, project);
+
+            var findRegex = gaugeServiceClient.GetFindRegex(project, input);
+
+            StringAssert.DoesNotMatch(findRegex, match);
+        }
+
+        private static IEnumerable<TestCaseData> MatchTestCases
         {
             get
             {
@@ -82,14 +106,10 @@ namespace Gauge.VisualStudio.Model.Tests
                 yield return new TestCaseData(@"Say ""hello"" to ""gauge""", @"Say {} to {}",
                         @"  [Step(""Say <what> to <whom>"")]" + Environment.NewLine);
 
-                //negative
-                yield return new TestCaseData(@"Say ""hello"" to ""gauge""", @"Say {} to {}",
-                        @"* Say <what> to <whom> at foo" + Environment.NewLine);
-
                 yield return new TestCaseData(@"Step that takes a <table>", @"Step that takes a",
                         @"  [Step(""Step that takes a <table>"")]" + Environment.NewLine);
                 yield return new TestCaseData(@"Step that takes a <table>", @"Step that takes a",
-                        @"*  Step that takes a" + Environment.NewLine+
+                        @"*  Step that takes a" + Environment.NewLine +
                         @"    |foo|bar|" + Environment.NewLine);
                 yield return new TestCaseData(@"Step that takes a <table>", @"Step that takes a",
                         @"*  Step that takes a " + Environment.NewLine +
@@ -97,11 +117,19 @@ namespace Gauge.VisualStudio.Model.Tests
             }
         }
 
-        [Test, TestCaseSource("matchTestCases")]
-        public void ShouldLocateReferencesUsingRegex(string input, string parsedInput, string match)
+        private static IEnumerable<TestCaseData> MatchNegativeTestCases
         {
-            var gaugeService = A.Fake<IGaugeService>();
-            var project = A.Fake<EnvDTE.Project>();
+            get
+            {
+                //negative
+                yield return new TestCaseData(@"Say ""hello"" to ""gauge""", @"Say {} to {}",
+                        @"* Say <what> to <whom> at foo" + Environment.NewLine);
+            }
+        }
+
+        private static GaugeServiceClient GetGaugeServiceClient(string input, string parsedInput, IGaugeService gaugeService,
+            EnvDTE.Project project)
+        {
             var gaugeServiceClient = new GaugeServiceClient(gaugeService);
             var gaugeApiConnection = A.Fake<IGaugeApiConnection>();
             var response = APIMessage.CreateBuilder()
@@ -109,16 +137,13 @@ namespace Gauge.VisualStudio.Model.Tests
                 .SetMessageId(0)
                 .SetStepValueResponse(GetStepValueResponse.CreateBuilder()
                     .SetStepValue(ProtoStepValue.CreateBuilder()
-                    .SetParameterizedStepValue(input)
+                        .SetParameterizedStepValue(input)
                         .SetStepValue(parsedInput)))
                 .Build();
             A.CallTo(() => gaugeApiConnection.WriteAndReadApiMessage(A<APIMessage>._))
                 .Returns(response);
             A.CallTo(() => gaugeService.GetApiConnectionFor(project)).Returns(gaugeApiConnection);
-
-            var findRegex = gaugeServiceClient.GetFindRegex(project, input);
-
-            StringAssert.IsMatch(findRegex, match);
+            return gaugeServiceClient;
         }
     }
 }
