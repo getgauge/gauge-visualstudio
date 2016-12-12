@@ -70,9 +70,10 @@ namespace Gauge.VisualStudio.Model
         {
             try
             {
+                var gaugeServiceClient = new GaugeServiceClient();
                 return GetAllConcepts().FirstOrDefault(
-                    concept => string.CompareOrdinal(Step.GetParsedStepValueFromInput(_project, concept.StepValue), 
-                                            Step.GetParsedStepValueFromInput(_project, lineText)) == 0);
+                    concept => string.CompareOrdinal(gaugeServiceClient.GetParsedStepValueFromInput(_project, concept.StepValue), 
+                                            gaugeServiceClient.GetParsedStepValueFromInput(_project, lineText)) == 0);
             }
             catch
             {

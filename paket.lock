@@ -20,7 +20,7 @@ NUGET
       EnvDTE80 (>= 8.0)
       EnvDTE90 (>= 9.0)
       stdole (>= 7.0.3300)
-    Gauge.CSharp.Core (0.0.9) - framework: >= net45
+    Gauge.CSharp.Core (0.0.10) - framework: >= net45
       Gauge.CSharp.Lib (>= 0.5.3)
       Google.Protobuf (>= 3.1)
       Google.ProtocolBuffers (>= 2.4.1.555)

@@ -14,7 +14,6 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using Gauge.CSharp.Core;
 using Gauge.Messages;
 using Gauge.VisualStudio.Core;
 using Gauge.VisualStudio.Core.Exceptions;
@@ -41,11 +40,12 @@ namespace Gauge.VisualStudio.Model
             }
 
             var specifications = new List<ProtoSpec>();
+            var gaugeServiceClient = new GaugeServiceClient();
             try
             {
                 foreach (var apiConnection in GaugeService.Instance.GetAllApiConnections())
                 {
-                    specifications.AddRange(GetSpecsFromGauge(apiConnection));
+                    specifications.AddRange(gaugeServiceClient.GetSpecsFromGauge(apiConnection));
                 }
 
                 return specifications.Select(spec => spec.FileName).Distinct();
@@ -59,23 +59,7 @@ namespace Gauge.VisualStudio.Model
 
         public static IEnumerable<ProtoSpec> GetAllSpecs(int apiPort)
         {
-            var gaugeApiConnection = new GaugeApiConnection(new TcpClientWrapper(apiPort));
-            return GetSpecsFromGauge(gaugeApiConnection);
-        }
-
-        private static IEnumerable<ProtoSpec> GetSpecsFromGauge(GaugeApiConnection apiConnection)
-        {
-            var specsRequest = SpecsRequest.DefaultInstance;
-            var apiMessage = APIMessage.CreateBuilder()
-                .SetMessageId(Step.GenerateMessageId())
-                .SetMessageType(APIMessage.Types.APIMessageType.SpecsRequest)
-                .SetSpecsRequest(specsRequest)
-                .Build();
-
-            var bytes = apiConnection.WriteAndReadApiMessage(apiMessage);
-
-            var specs = bytes.SpecsResponse.DetailsList.Where(detail => detail.HasSpec).Select(detail => detail.Spec);
-            return specs;
+            return new GaugeServiceClient().GetSpecsFromGauge(apiPort);
         }
     }
 }

@@ -40,7 +40,7 @@ namespace Gauge.VisualStudio.References
                     var caretBufferPosition = TextView.Caret.Position.BufferPosition;
                     var originalText = Step.GetStepText(caretBufferPosition.GetContainingLine());
 
-                    var findRegex = Step.GetFindRegex(caretBufferPosition.Snapshot.GetProject(GaugePackage.DTE), originalText);
+                    var findRegex = new GaugeServiceClient().GetFindRegex(caretBufferPosition.Snapshot.GetProject(GaugePackage.DTE), originalText);
 
                     var _dte = ServiceProvider.GlobalProvider.GetService(typeof(DTE)) as DTE2;
                     var find = (Find2)_dte.Find;

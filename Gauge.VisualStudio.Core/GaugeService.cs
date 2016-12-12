@@ -35,18 +35,18 @@ namespace Gauge.VisualStudio.Core
 {
     public class GaugeService : IGaugeService
     {
-        private static readonly Lazy<GaugeService> LazyInstance = new Lazy<GaugeService>();
+        private static readonly Lazy<GaugeService> LazyInstance = new Lazy<GaugeService>(() => new GaugeService());
 
         private GaugeService()
         {
         }
 
-        public static GaugeService Instance
+        public static IGaugeService Instance
         {
             get { return LazyInstance.Value; }
         }
-        private static readonly Dictionary<string, GaugeApiConnection> ApiConnections =
-            new Dictionary<string, GaugeApiConnection>();
+        private static readonly Dictionary<string, IGaugeApiConnection> ApiConnections =
+            new Dictionary<string, IGaugeApiConnection>();
 
         private static readonly Dictionary<string, Process> ChildProcesses = new Dictionary<string, Process>();
 
@@ -60,14 +60,14 @@ namespace Gauge.VisualStudio.Core
             GaugeProjects.Add(project);
         }
 
-        public IEnumerable<GaugeApiConnection> GetAllApiConnections()
+        public IEnumerable<IGaugeApiConnection> GetAllApiConnections()
         {
-            return GaugeProjects.Select(GetApiConnectionFor);
+            return GaugeProjects.Select(project => GetApiConnectionFor(project));
         }
 
-        public GaugeApiConnection GetApiConnectionFor(Project project)
+        public IGaugeApiConnection GetApiConnectionFor(Project project)
         {
-            GaugeApiConnection apiConnection;
+            IGaugeApiConnection apiConnection;
             if (ApiConnections.TryGetValue(project.SlugifiedName(), out apiConnection))
                 return apiConnection;
             apiConnection = StartGaugeAsDaemon(project);
@@ -167,7 +167,7 @@ namespace Gauge.VisualStudio.Core
             return (GaugeVersionInfo) serializer.ReadObject(gaugeProcess.StandardOutput.BaseStream);
         }
 
-        private GaugeApiConnection StartGaugeAsDaemon(Project gaugeProject)
+        private IGaugeApiConnection StartGaugeAsDaemon(Project gaugeProject)
         {
             var slugifiedName = gaugeProject.SlugifiedName();
             if (ChildProcesses.ContainsKey(slugifiedName))

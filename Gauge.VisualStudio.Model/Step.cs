@@ -15,47 +15,38 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Gauge.Messages;
-using Gauge.VisualStudio.Core;
-using Gauge.VisualStudio.Core.Exceptions;
 using Microsoft.VisualStudio.Text;
 
 namespace Gauge.VisualStudio.Model
 {
-    public interface IStep
-    {
-        ITextSnapshotLine ContainingLine { get; set; }
-        string Text { get; set; }
-        List<string> Parameters { get; set; }
-        bool HasInlineTable { get; }
-        IEnumerable<string> GetAll();
-    }
-
     public class Step : IStep
     {
-        public ITextSnapshotLine ContainingLine { get; set; }
+        public ITextSnapshotLine ContainingLine { get; private set; }
 
-        public string Text { get; set; }
+        public string Text { get; private set; }
 
-        public List<string> Parameters { get; set; }
+        public List<string> Parameters { get; private set; }
 
         private readonly EnvDTE.Project _project;
 
-        public Step(EnvDTE.Project project)
+        private readonly IGaugeServiceClient _gaugeServiceClient;
+
+        public Step(EnvDTE.Project project, ITextSnapshotLine inputLine, IGaugeServiceClient gaugeServiceClient)
         {
+            _gaugeServiceClient = gaugeServiceClient;
             _project = project;
-        }
-
-        public Step (EnvDTE.Project project, ITextSnapshotLine inputLine) : this(project)
-        {
             ContainingLine = inputLine;
-            var stepValueFromInput = GetStepValueFromInput(_project, GetStepText(inputLine));
+            var stepValueFromInput = _gaugeServiceClient.GetStepValueFromInput(_project, GetStepText(inputLine));
 
-            if (stepValueFromInput == null) 
+            if (stepValueFromInput == null)
                 return;
 
             Text = stepValueFromInput.ParameterizedStepValue;
             Parameters = stepValueFromInput.ParametersList.ToList();
+        }
+
+        public Step (EnvDTE.Project project, ITextSnapshotLine inputLine) : this(project, inputLine, new GaugeServiceClient())
+        {
         }
 
         public bool HasInlineTable
@@ -65,7 +56,11 @@ namespace Gauge.VisualStudio.Model
 
         public IEnumerable<string> GetAll()
         {
-            return GetAllStepsFromGauge(_project).Select(x => x.ParameterizedStepValue);
+            if (_project == null)
+            {
+                throw new InvalidOperationException("Cannot fetch steps when Project is not specified. Ensure that instance is not the Step singleton.");
+            }
+            return _gaugeServiceClient.GetAllStepsFromGauge(_project).Select(x => x.ParameterizedStepValue);
         }
 
         public static string GetStepText(ITextSnapshotLine line)
@@ -87,28 +82,6 @@ namespace Gauge.VisualStudio.Model
             return Parser.TableRegex.IsMatch(nextLineText);
         }
 
-        private static IEnumerable<ProtoStepValue> GetAllStepsFromGauge(EnvDTE.Project project)
-        {
-            try
-            {
-                var gaugeApiConnection = GaugeService.Instance.GetApiConnectionFor(project);
-                var stepsRequest = GetAllStepsRequest.DefaultInstance;
-                var apiMessage = APIMessage.CreateBuilder()
-                    .SetMessageId(GenerateMessageId())
-                    .SetMessageType(APIMessage.Types.APIMessageType.GetAllStepsRequest)
-                    .SetAllStepsRequest(stepsRequest)
-                    .Build();
-
-                var bytes = gaugeApiConnection.WriteAndReadApiMessage(apiMessage);
-                return bytes.AllStepsResponse.AllStepsList;
-
-            }
-            catch (GaugeApiInitializationException)
-            {
-                return Enumerable.Empty<ProtoStepValue>();
-            }
-        }
-
         private static string NextLineText(ITextSnapshotLine currentLine)
         {
             ITextSnapshotLine nextLine;
@@ -123,45 +96,6 @@ namespace Gauge.VisualStudio.Model
                 return string.Empty;
             }
             return nextLineText.Trim() == string.Empty && currentLine.LineNumber < currentLine.Snapshot.LineCount ? NextLineText(nextLine) : nextLineText;
-        }
-
-        public static long GenerateMessageId()
-        {
-            return DateTime.Now.Ticks/TimeSpan.TicksPerMillisecond;
-        }
-
-        internal static string GetParsedStepValueFromInput(EnvDTE.Project project, string input)
-        {
-            var stepValueFromInput = GetStepValueFromInput(project, input);
-            return stepValueFromInput == null ? string.Empty : stepValueFromInput.StepValue;
-        }
-
-        public static string GetFindRegex(EnvDTE.Project project, string input)
-        {
-            var parsedValue = GetParsedStepValueFromInput(project, input);
-            parsedValue = parsedValue.Replace("* ", "");
-            return string.Format(@"^(\*[ |\t]*|[ |\t]*\[Step\(""){0}(""\)\])?\r", parsedValue.Replace("{}", "((<|\").+(>|\"))"));
-        }
-
-        private static ProtoStepValue GetStepValueFromInput(EnvDTE.Project project, string input)
-        {
-            try
-            {
-                var gaugeApiConnection = GaugeService.Instance.GetApiConnectionFor(project);
-                var stepsRequest = GetStepValueRequest.CreateBuilder().SetStepText(input).Build();
-                var apiMessage = APIMessage.CreateBuilder()
-                    .SetMessageId(GenerateMessageId())
-                    .SetMessageType(APIMessage.Types.APIMessageType.GetStepValueRequest)
-                    .SetStepValueRequest(stepsRequest)
-                    .Build();
-
-                var bytes = gaugeApiConnection.WriteAndReadApiMessage(apiMessage);
-                return bytes.StepValueResponse.StepValue;
-            }
-            catch (GaugeApiInitializationException)
-            {
-                return default(ProtoStepValue);
-            }
         }
     }
 }

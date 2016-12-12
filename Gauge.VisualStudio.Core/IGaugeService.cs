@@ -22,8 +22,8 @@ namespace Gauge.VisualStudio.Core
     public interface IGaugeService
     {
         void RegisterGaugeProject(Project project);
-        IEnumerable<GaugeApiConnection> GetAllApiConnections();
-        GaugeApiConnection GetApiConnectionFor(Project project);
+        IEnumerable<IGaugeApiConnection> GetAllApiConnections();
+        IGaugeApiConnection GetApiConnectionFor(Project project);
         void KillChildProcess(string slugifiedName);
         bool ContainsApiConnectionFor(string slugifiedName);
         List<GaugeProjectProperties> GetPropertiesForAllGaugeProjects();

@@ -31,6 +31,13 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Gauge.CSharp.Core, Version=0.0.10.0, Culture=neutral, PublicKeyToken=4d2d442b45695923, processorArchitecture=MSIL">
+      <HintPath>..\packages\Gauge.CSharp.Core\lib\net45\Gauge.CSharp.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Google.ProtocolBuffers, Version=2.4.1.555, Culture=neutral, PublicKeyToken=55f7125234beb589, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Google.ProtocolBuffers\lib\net40\Google.ProtocolBuffers.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
@@ -44,6 +51,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GaugeServiceClientTests.cs" />
     <Compile Include="ParserTests.cs" />
     <Compile Include="StepTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -54,6 +62,10 @@
     <None Include="paket.references" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Gauge.VisualStudio.Core\Gauge.VisualStudio.Core.csproj">
+      <Project>{24c4951f-15a5-4c76-9a20-2e456a21500e}</Project>
+      <Name>Gauge.VisualStudio.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Gauge.VisualStudio.Model\Gauge.VisualStudio.Model.csproj">
       <Project>{6990376b-fd73-4a61-a26c-3c2fc9429164}</Project>
       <Name>Gauge.VisualStudio.Model</Name>

@@ -56,7 +56,10 @@
     <Compile Include="ConceptImplementation.cs" />
     <Compile Include="Extensions\ProjectItemExtensions.cs" />
     <Compile Include="Extensions\TextSnapshotExtensions.cs" />
+    <Compile Include="GaugeServiceClient.cs" />
+    <Compile Include="IGaugeServiceClient.cs" />
     <Compile Include="Implementation.cs" />
+    <Compile Include="IStep.cs" />
     <Compile Include="Parser.cs" />
     <Compile Include="Project.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
