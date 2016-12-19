@@ -12,17 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Microsoft.VisualStudio.Language.Intellisense;
 
 namespace Gauge.VisualStudio.Highlighting
 {
-    internal class UnimplementedStepTag : SmartTag, IGaugeErrorTag
+    internal class DuplicateStepImplementationTag : SmartTag, IGaugeErrorTag
     {
-        public UnimplementedStepTag(ReadOnlyCollection<SmartTagActionSet> actionSets) : base(SmartTagType.Ephemeral, actionSets)
+        public DuplicateStepImplementationTag() : this(SmartTagType.Ephemeral, new ReadOnlyCollection<SmartTagActionSet>(new List<SmartTagActionSet>()))
         {
-            ErrorType = "Unimplemented Step";
-            ToolTipContent = "Step is not implemented or does not have a public method implementation.\nUse 'Implement Step' option to generate a method, ensure that the implementation is public";
+            
+        }
+
+        public DuplicateStepImplementationTag(SmartTagType smartTagType, ReadOnlyCollection<SmartTagActionSet> actionSets) : base(smartTagType, actionSets)
+        {
+            ErrorType = "Duplicate Step Implementation";
+            ToolTipContent = "Multiple step implementations found. Gauge will skip execution of this scenario.";
         }
 
         public string ErrorType { get; private set; }

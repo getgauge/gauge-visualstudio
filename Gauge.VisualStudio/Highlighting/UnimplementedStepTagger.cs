@@ -25,7 +25,7 @@ using Project = Gauge.VisualStudio.Model.Project;
 
 namespace Gauge.VisualStudio.Highlighting
 {
-    internal class UnimplementedStepTagger : ITagger<UnimplementedStepTag>, IDisposable
+    internal class UnimplementedStepTagger : ITagger<IGaugeErrorTag>, IDisposable
     {
         private readonly ITextView _textView;
         private readonly IProject _project;
@@ -60,11 +60,11 @@ namespace Gauge.VisualStudio.Highlighting
             TagsChanged(this, new SnapshotSpanEventArgs(span));
         }
 
-        public IEnumerable<ITagSpan<UnimplementedStepTag>> GetTags(NormalizedSnapshotSpanCollection spans)
+        public IEnumerable<ITagSpan<IGaugeErrorTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {
             foreach (var span in spans)
             {
-                TagSpan<UnimplementedStepTag> tagSpan;
+                TagSpan<IGaugeErrorTag> tagSpan;
                 try
                 {
                     var line = span.Start.GetContainingLine();
@@ -72,12 +72,24 @@ namespace Gauge.VisualStudio.Highlighting
                     var match = Parser.StepRegex.Match(text);
                     var point = span.Start.Add(match.Index);
                     var unimplementedStepSpan = new SnapshotSpan(span.Snapshot, new Span(point.Position, match.Length));
-                    if (!match.Success || _project.GetStepImplementation(line) != null)
+                    if (!match.Success) 
                         continue;
 
-                    var actions = GetSmartTagActions(unimplementedStepSpan);
-                    var unimplementedStepTag = new UnimplementedStepTag(SmartTagType.Ephemeral, actions);
-                    tagSpan = new TagSpan<UnimplementedStepTag>(unimplementedStepSpan, unimplementedStepTag);
+                    IGaugeErrorTag gaugeErrorTag;
+                    if (_project.HasDuplicateImplementation(line))
+                    {
+                        gaugeErrorTag = new DuplicateStepImplementationTag();
+                    }
+                    else if (_project.GetStepImplementation(line) == null)
+                    {
+                        var actions = GetSmartTagActions(unimplementedStepSpan);
+                        gaugeErrorTag = new UnimplementedStepTag(actions);
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                    tagSpan = new TagSpan<IGaugeErrorTag>(unimplementedStepSpan, gaugeErrorTag);
                 }
                 catch (ArgumentOutOfRangeException)
                 {

@@ -12,20 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Collections.ObjectModel;
-using Microsoft.VisualStudio.Language.Intellisense;
+using Microsoft.VisualStudio.Text.Tagging;
 
 namespace Gauge.VisualStudio.Highlighting
 {
-    internal class UnimplementedStepTag : SmartTag, IGaugeErrorTag
+    internal interface IGaugeErrorTag : IErrorTag
     {
-        public UnimplementedStepTag(ReadOnlyCollection<SmartTagActionSet> actionSets) : base(SmartTagType.Ephemeral, actionSets)
-        {
-            ErrorType = "Unimplemented Step";
-            ToolTipContent = "Step is not implemented or does not have a public method implementation.\nUse 'Implement Step' option to generate a method, ensure that the implementation is public";
-        }
-
-        public string ErrorType { get; private set; }
-        public object ToolTipContent { get; private set; }
     }
 }

@@ -82,7 +82,7 @@ namespace Gauge.VisualStudio.Model
         public void RefreshImplementationsForActiveProject()
         {
             var activeDocument = _dte.ActiveDocument;
-            if (activeDocument!=null)
+            if (activeDocument != null)
             {
                 _implementations = GetGaugeImplementations(activeDocument.ProjectItem.ContainingProject);
             }
@@ -173,6 +173,19 @@ namespace Gauge.VisualStudio.Model
         {
             return GetAllClasses(project, false).FirstOrDefault(element => element.Name == className) as CodeClass ??
                    AddClass(className, project);
+        }
+
+        public bool HasDuplicateImplementation(ITextSnapshotLine line)
+        {
+            try
+            {
+                var project = line.Snapshot.GetProject(_dte);
+                return Implementations.Count(implementation => implementation.ContainsImplememntationFor(project, Step.GetStepText(line))) > 1;
+            }
+            catch (InvalidOperationException)
+            {
+                return false;
+            }
         }
 
         private static CodeClass AddClass(string className, EnvDTE.Project project)

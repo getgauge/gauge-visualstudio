@@ -97,6 +97,8 @@
     </Compile>
     <Compile Include="GotoDefn\GotoDefnCommandFilter.cs" />
     <Compile Include="Guids.cs" />
+    <Compile Include="Highlighting\DuplicateStepImplementationTag.cs" />
+    <Compile Include="Highlighting\IGaugeErrorTag.cs" />
     <Compile Include="Highlighting\ImplementStepAction.cs" />
     <Compile Include="Highlighting\StepImplementationGenerator.cs" />
     <Compile Include="Highlighting\StepTaggerProvider.cs" />

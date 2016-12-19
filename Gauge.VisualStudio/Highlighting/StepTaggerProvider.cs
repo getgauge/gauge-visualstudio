@@ -28,6 +28,7 @@ namespace Gauge.VisualStudio.Highlighting
     [ContentType(GaugeContentTypeDefinitions.GaugeContentType)]
     [Order(Before = "default")]
     [TagType(typeof(UnimplementedStepTag))]
+    [TagType(typeof(DuplicateStepImplementationTag))]
     public class StepTaggerProvider : IViewTaggerProvider
     {
         private readonly Dictionary<ITextView, UnimplementedStepTagger> _taggers = new Dictionary<ITextView, UnimplementedStepTagger>();
