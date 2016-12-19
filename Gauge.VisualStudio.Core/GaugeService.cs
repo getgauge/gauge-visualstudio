@@ -26,6 +26,7 @@ using Gauge.VisualStudio.Core.Exceptions;
 using Gauge.VisualStudio.Core.Extensions;
 using Gauge.VisualStudio.Core.Helpers;
 using Gauge.VisualStudio.Core.Loggers;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Process = System.Diagnostics.Process;
@@ -184,12 +185,12 @@ namespace Gauge.VisualStudio.Core
             var waitDialog = (IVsThreadedWaitDialog)Package.GetGlobalService(typeof(SVsThreadedWaitDialog));
             try
             {
-                waitDialog.StartWaitDialog("Initializing Gauge Project",
+                ErrorHandler.ThrowOnFailure(waitDialog.StartWaitDialog("Initializing Gauge Project",
                     string.Format("Initializing Gauge daemon for Project: {0}", gaugeProject.Name),
                     null,
                     0,
                     null,
-                    null);
+                    null));
                 var projectOutputPath = GetValidProjectOutputPath(gaugeProject);
 
                 var portInfo = new PortInfo(GetOpenPort(1000, 2000), GetOpenPort(2000, 3000));
@@ -227,7 +228,7 @@ namespace Gauge.VisualStudio.Core
             finally
             {
                 var cancelled = 0;
-                waitDialog.EndWaitDialog(ref cancelled);
+                ErrorHandler.ThrowOnFailure(waitDialog.EndWaitDialog(ref cancelled));
             }
         }
 

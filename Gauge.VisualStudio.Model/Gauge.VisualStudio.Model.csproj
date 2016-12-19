@@ -59,6 +59,7 @@
     <Compile Include="GaugeServiceClient.cs" />
     <Compile Include="IGaugeServiceClient.cs" />
     <Compile Include="Implementation.cs" />
+    <Compile Include="IProject.cs" />
     <Compile Include="IStep.cs" />
     <Compile Include="Parser.cs" />
     <Compile Include="Project.cs" />

@@ -31,15 +31,6 @@ using CodeNamespace = EnvDTE.CodeNamespace;
 
 namespace Gauge.VisualStudio.Model
 {
-    public interface IProject
-    {
-        void RefreshImplementations(ProjectItem projectItem);
-        void RefreshImplementationsForActiveProject();
-        Implementation GetStepImplementation(ITextSnapshotLine line);
-        IEnumerable<CodeElement> GetFunctionsForClass(CodeClass codeClass);
-        CodeClass FindOrCreateClass(EnvDTE.Project project, string className);
-    }
-
     public class Project : IProject
     {
         private readonly Events2 _events2;
@@ -120,7 +111,7 @@ namespace Gauge.VisualStudio.Model
                 foreach (var codeFunction in allFunctions)
                 {
                     var function = codeFunction as CodeFunction;
-                    if (function == null) continue;
+                    if (function == null || function.Access != vsCMAccess.vsCMAccessPublic) continue;
                     var allAttributes = GetCodeElementsFor(function.Attributes, vsCMElement.vsCMElementAttribute);
 
                     var attribute = allAttributes.FirstOrDefault(a => a.Name == "Step") as CodeAttribute;

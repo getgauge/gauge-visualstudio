@@ -23,7 +23,7 @@ namespace Gauge.VisualStudio.Highlighting
         public UnimplementedStepTag(SmartTagType smartTagType, ReadOnlyCollection<SmartTagActionSet> actionSets) : base(smartTagType, actionSets)
         {
             ErrorType = "Unimplemented Step";
-            ToolTipContent = "Step is not implemented, use 'Implement Step' option to generate a method";
+            ToolTipContent = "Step is not implemented or does not have a public method implementation.\nUse 'Implement Step' option to generate a method, ensure that the implementation is public";
         }
 
         public string ErrorType { get; private set; }
