@@ -17,15 +17,12 @@ using Microsoft.VisualStudio.Language.Intellisense;
 
 namespace Gauge.VisualStudio.Highlighting
 {
-    internal class UnimplementedStepTag : SmartTag, IGaugeErrorTag
+    internal class UnimplementedStepTag : AbstractGaugeErrorTag
     {
-        public UnimplementedStepTag(ReadOnlyCollection<SmartTagActionSet> actionSets) : base(SmartTagType.Ephemeral, actionSets)
+        public UnimplementedStepTag(ReadOnlyCollection<SmartTagActionSet> actionSets) : base(actionSets)
         {
             ErrorType = "Unimplemented Step";
             ToolTipContent = "Step is not implemented or does not have a public method implementation.\nUse 'Implement Step' option to generate a method, ensure that the implementation is public";
         }
-
-        public string ErrorType { get; private set; }
-        public object ToolTipContent { get; private set; }
     }
 }

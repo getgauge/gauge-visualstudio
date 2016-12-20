@@ -18,20 +18,16 @@ using Microsoft.VisualStudio.Language.Intellisense;
 
 namespace Gauge.VisualStudio.Highlighting
 {
-    internal class DuplicateStepImplementationTag : SmartTag, IGaugeErrorTag
+    internal class DuplicateStepImplementationTag : AbstractGaugeErrorTag
     {
-        public DuplicateStepImplementationTag() : this(SmartTagType.Ephemeral, new ReadOnlyCollection<SmartTagActionSet>(new List<SmartTagActionSet>()))
+        public DuplicateStepImplementationTag() : this(new ReadOnlyCollection<SmartTagActionSet>(new List<SmartTagActionSet>()))
         {
-            
         }
 
-        public DuplicateStepImplementationTag(SmartTagType smartTagType, ReadOnlyCollection<SmartTagActionSet> actionSets) : base(smartTagType, actionSets)
+        public DuplicateStepImplementationTag(ReadOnlyCollection<SmartTagActionSet> actionSets) : base(actionSets)
         {
             ErrorType = "Duplicate Step Implementation";
             ToolTipContent = "Multiple step implementations found. Gauge will skip execution of this scenario.";
         }
-
-        public string ErrorType { get; private set; }
-        public object ToolTipContent { get; private set; }
     }
 }

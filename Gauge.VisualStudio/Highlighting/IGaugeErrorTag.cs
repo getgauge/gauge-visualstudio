@@ -12,11 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Collections.ObjectModel;
+using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text.Tagging;
 
 namespace Gauge.VisualStudio.Highlighting
 {
-    internal interface IGaugeErrorTag : IErrorTag
+    internal abstract class AbstractGaugeErrorTag : SmartTag, IErrorTag
     {
+        public string ErrorType { get; protected set; }
+        public object ToolTipContent { get; protected set; }
+
+        public AbstractGaugeErrorTag(ReadOnlyCollection<SmartTagActionSet> actionSets) : base(SmartTagType.Ephemeral, actionSets)
+        {
+        }
     }
 }

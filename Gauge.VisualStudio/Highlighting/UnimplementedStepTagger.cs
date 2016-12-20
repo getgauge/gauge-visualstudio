@@ -25,7 +25,7 @@ using Project = Gauge.VisualStudio.Model.Project;
 
 namespace Gauge.VisualStudio.Highlighting
 {
-    internal class UnimplementedStepTagger : ITagger<IGaugeErrorTag>, IDisposable
+    internal class UnimplementedStepTagger : ITagger<AbstractGaugeErrorTag>, IDisposable
     {
         private readonly ITextView _textView;
         private readonly IProject _project;
@@ -60,11 +60,11 @@ namespace Gauge.VisualStudio.Highlighting
             TagsChanged(this, new SnapshotSpanEventArgs(span));
         }
 
-        public IEnumerable<ITagSpan<IGaugeErrorTag>> GetTags(NormalizedSnapshotSpanCollection spans)
+        public IEnumerable<ITagSpan<AbstractGaugeErrorTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {
             foreach (var span in spans)
             {
-                TagSpan<IGaugeErrorTag> tagSpan;
+                TagSpan<AbstractGaugeErrorTag> tagSpan;
                 try
                 {
                     var line = span.Start.GetContainingLine();
@@ -75,7 +75,7 @@ namespace Gauge.VisualStudio.Highlighting
                     if (!match.Success) 
                         continue;
 
-                    IGaugeErrorTag gaugeErrorTag;
+                    AbstractGaugeErrorTag gaugeErrorTag;
                     if (_project.HasDuplicateImplementation(line))
                     {
                         gaugeErrorTag = new DuplicateStepImplementationTag();
@@ -89,7 +89,7 @@ namespace Gauge.VisualStudio.Highlighting
                     {
                         continue;
                     }
-                    tagSpan = new TagSpan<IGaugeErrorTag>(unimplementedStepSpan, gaugeErrorTag);
+                    tagSpan = new TagSpan<AbstractGaugeErrorTag>(unimplementedStepSpan, gaugeErrorTag);
                 }
                 catch (ArgumentOutOfRangeException)
                 {
