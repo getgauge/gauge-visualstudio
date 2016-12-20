@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Threading.Tasks;
 using EnvDTE;
+using EnvDTE80;
 using Gauge.VisualStudio.Core.Extensions;
 using Gauge.VisualStudio.Core.Loggers;
 using Gauge.VisualStudio.Model;
@@ -33,6 +34,7 @@ namespace Gauge.VisualStudio.TestAdapter
         private readonly DocumentEvents _documentEvents;
         private readonly ProjectItemsEvents _solutionItemEvents;
         private readonly BuildEvents _buildEvents;
+        private ProjectItemsEvents _projectItemsEvents;
 
         [ImportingConstructor]
         public TestContainerDiscoverer([Import(typeof (SVsServiceProvider))] IServiceProvider serviceProvider)
@@ -41,12 +43,17 @@ namespace Gauge.VisualStudio.TestAdapter
             var dte = _serviceProvider.GetService(typeof (DTE)) as DTE;
             _documentEvents = dte.Events.DocumentEvents;
             _solutionItemEvents = dte.Events.SolutionItemsEvents;
+            var events2 = (Events2)dte.Events;
+            _projectItemsEvents = events2.ProjectItemsEvents;
             _buildEvents = dte.Events.BuildEvents;
 
-            _solutionItemEvents.ItemAdded += item => UpdateTestContainersIfGaugeSpecFile(item.Document);
-            _solutionItemEvents.ItemRemoved += item => UpdateTestContainersIfGaugeSpecFile(item.Document);
-            _solutionItemEvents.ItemRenamed += (item, s) => UpdateTestContainersIfGaugeSpecFile(item.Document);
-            _documentEvents.DocumentSaved += UpdateTestContainersIfGaugeSpecFile;
+            _projectItemsEvents.ItemAdded += UpdateTestContainersIfGaugeSpecFile;
+            _solutionItemEvents.ItemAdded += UpdateTestContainersIfGaugeSpecFile;
+            _solutionItemEvents.ItemRemoved += UpdateTestContainersIfGaugeSpecFile;
+            _projectItemsEvents.ItemRemoved += UpdateTestContainersIfGaugeSpecFile;
+            _solutionItemEvents.ItemRenamed += (item, s) => UpdateTestContainersIfGaugeSpecFile(item);
+            _projectItemsEvents.ItemRenamed += (item, s) => UpdateTestContainersIfGaugeSpecFile(item);
+            _documentEvents.DocumentSaved += document => UpdateTestContainersIfGaugeSpecFile(document.ProjectItem);
             _buildEvents.OnBuildDone += (scope, action) =>
             {
                 if (action == vsBuildAction.vsBuildActionBuild || action == vsBuildAction.vsBuildActionRebuildAll)
@@ -54,20 +61,6 @@ namespace Gauge.VisualStudio.TestAdapter
                     RaiseTestContainersUpdated();
                 }
             };
-        }
-
-        private void RaiseTestContainersUpdated()
-        {
-            if (TestContainersUpdated != null)
-            {
-                TestContainersUpdated(this, EventArgs.Empty);
-            }
-        }
-
-        private void UpdateTestContainersIfGaugeSpecFile(Document doc)
-        {
-            if (doc.IsGaugeSpecFile() && doc.ProjectItem.ContainingProject.IsGaugeProject())
-                RaiseTestContainersUpdated();
         }
 
         public Uri ExecutorUri
@@ -79,6 +72,8 @@ namespace Gauge.VisualStudio.TestAdapter
         {
             get { return GetTestContainers(); }
         }
+
+        public event EventHandler TestContainersUpdated;
 
         private IEnumerable<TestContainer> GetTestContainers()
         {
@@ -92,6 +87,30 @@ namespace Gauge.VisualStudio.TestAdapter
             return testContainers;
         }
 
-        public event EventHandler TestContainersUpdated;
+        private void UpdateTestContainersIfGaugeSpecFile(ProjectItem projectItem)
+        {
+            if (projectItem==null)
+            {
+                return;
+            }
+            var projectItemName = projectItem.Name;
+            if (projectItem.ContainingProject.IsGaugeProject() && IsGaugeFile(projectItemName))
+            {
+                RaiseTestContainersUpdated();
+            }
+        }
+
+        private static bool IsGaugeFile(string projectItemName)
+        {
+            return projectItemName.EndsWith(".spec", StringComparison.Ordinal) || projectItemName.EndsWith(".cpt", StringComparison.Ordinal);
+        }
+
+        private void RaiseTestContainersUpdated()
+        {
+            if (TestContainersUpdated != null)
+            {
+                TestContainersUpdated(this, EventArgs.Empty);
+            }
+        }
     }
 }

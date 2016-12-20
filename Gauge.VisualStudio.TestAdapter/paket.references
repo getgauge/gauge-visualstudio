@@ -30,3 +30,4 @@ VSSDK.TextManager.Interop
 VSSDK.TextManager.Interop.8
 VSSDK.Threading
 VSSDK.Threading.12
+EnvDTE80
