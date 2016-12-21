@@ -31,3 +31,5 @@ VSSDK.TextManager.Interop
 VSSDK.TextManager.Interop.8
 VSSDK.VSLangProj
 EnvDTE80
+VSSDK.Shell.Immutable.10
+VSSDK.Shell.12

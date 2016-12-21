@@ -46,6 +46,7 @@ namespace Gauge.VisualStudio.Core
         {
             get { return LazyInstance.Value; }
         }
+
         private static readonly Dictionary<string, IGaugeApiConnection> ApiConnections =
             new Dictionary<string, IGaugeApiConnection>();
 

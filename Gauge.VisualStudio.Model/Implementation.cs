@@ -19,7 +19,7 @@ namespace Gauge.VisualStudio.Model
 {
     public abstract class Implementation
     {
-        protected string StepText;
+        public string StepText;
 
         internal bool ContainsImplememntationFor(EnvDTE.Project project, string givenText)
         {

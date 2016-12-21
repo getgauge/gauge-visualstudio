@@ -16,7 +16,7 @@ using EnvDTE;
 
 namespace Gauge.VisualStudio.Model
 {
-    internal class StepImplementation : Implementation
+    public class StepImplementation : Implementation
     {
         private readonly CodeFunction _function;
 

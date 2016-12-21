@@ -24,6 +24,7 @@ using EnvDTE;
 using EnvDTE80;
 using Gauge.VisualStudio.Core.Extensions;
 using Gauge.VisualStudio.Model.Extensions;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using VSLangProj;
 using CodeAttributeArgument = EnvDTE80.CodeAttributeArgument;
@@ -40,9 +41,11 @@ namespace Gauge.VisualStudio.Model
         private ProjectItemsEvents _projectItemsEvents;
         private readonly DTE _dte;
 
-        public Project(DTE dte)
+        private static readonly Lazy<IProject> LazyInstance = new Lazy<IProject>(() => new Project());
+
+        private Project()
         {
-            _dte = dte;
+            _dte = Package.GetGlobalService(typeof(DTE)) as DTE;
             if (_events2 != null) return;
 
             _events2 = _dte.Events as Events2;
@@ -57,6 +60,11 @@ namespace Gauge.VisualStudio.Model
             _codeModelEvents.ElementAdded += element => RefreshImplementations(element.ProjectItem);
             _codeModelEvents.ElementChanged += (element, change) => RefreshImplementations(element.ProjectItem);
             _codeModelEvents.ElementDeleted += (parent, element) => RefreshImplementations(element.ProjectItem);
+        }
+
+        public static IProject Instance
+        {
+            get { return LazyInstance.Value; }
         }
 
         public void RefreshImplementations(ProjectItem projectItem)
@@ -269,6 +277,13 @@ namespace Gauge.VisualStudio.Model
             var startPoint = function.GetStartPoint(vsCMPart.vsCMPartHeader);
             startPoint.TryToShow();
             startPoint.Parent.Selection.MoveToPoint(startPoint);
+        }
+
+        public IEnumerable<string> GetAllStepsForCurrentProject()
+        {
+            return Implementations
+                .Where(implementation => implementation is StepImplementation)
+                .Select(implementation => implementation.StepText);
         }
     }
 }

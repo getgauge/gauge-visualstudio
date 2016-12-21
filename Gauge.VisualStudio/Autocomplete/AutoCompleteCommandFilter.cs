@@ -14,8 +14,6 @@
 
 using System;
 using System.Runtime.InteropServices;
-using Gauge.CSharp.Lib.Attribute;
-using Gauge.VisualStudio.Classification;
 using Gauge.VisualStudio.Model;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Language.Intellisense;
@@ -106,7 +104,6 @@ namespace Gauge.VisualStudio.AutoComplete
         private void Filter()
         {
             if (_currentSession == null || _currentSession.IsDismissed) return;
-//            _currentSession.Filter();
             _currentSession.SelectedCompletionSet.SelectBestMatch();
             _currentSession.SelectedCompletionSet.Recalculate();
         }

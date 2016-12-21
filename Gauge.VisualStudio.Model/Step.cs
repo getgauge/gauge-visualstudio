@@ -60,7 +60,12 @@ namespace Gauge.VisualStudio.Model
             {
                 throw new InvalidOperationException("Cannot fetch steps when Project is not specified. Ensure that instance is not the Step singleton.");
             }
-            return _gaugeServiceClient.GetAllStepsFromGauge(_project).Select(x => x.ParameterizedStepValue);
+            var implementedSteps = Project.Instance.GetAllStepsForCurrentProject().ToList();
+            var parsedImplementations = implementedSteps.Select(s => _gaugeServiceClient.GetParsedStepValueFromInput(_project, s));
+            var unimplementedSteps = _gaugeServiceClient.GetAllStepsFromGauge(_project)
+                .Where(s => !parsedImplementations.Contains(s.StepValue))
+                .Select(value => value.ParameterizedStepValue);
+            return unimplementedSteps.Union(implementedSteps);
         }
 
         public static string GetStepText(ITextSnapshotLine line)

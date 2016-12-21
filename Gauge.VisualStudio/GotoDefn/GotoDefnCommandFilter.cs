@@ -46,7 +46,7 @@ namespace Gauge.VisualStudio.GotoDefn
                     //Gauge parses and caches the concepts, its location (file + line number).
                     //The plugin's job is to simply make an api call and fetch this information.
 
-                    var stepImplementation = new Project(GaugePackage.DTE).GetStepImplementation(caretBufferPosition.GetContainingLine());
+                    var stepImplementation = Project.Instance.GetStepImplementation(caretBufferPosition.GetContainingLine());
 
                     if (stepImplementation != null)
                     {

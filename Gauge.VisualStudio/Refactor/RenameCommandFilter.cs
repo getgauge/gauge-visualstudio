@@ -111,7 +111,7 @@ namespace Gauge.VisualStudio.Refactor
                     progressDialog.UpdateProgress(null, "Building Solution..", null, 3, 4, true, out cancel);
                     GaugePackage.DTE.ExecuteCommand("Build.BuildSolution");
                     progressDialog.UpdateProgress(null, "Refreshing Cache..", null, 3, 4, true, out cancel);
-                    new Project(GaugePackage.DTE).RefreshImplementationsForActiveProject();
+                    Project.Instance.RefreshImplementationsForActiveProject();
                     GaugePackage.DTE.ExecuteCommand("File.SaveAll");
                     GaugePackage.DTE.ActiveDocument.Save();
                 }

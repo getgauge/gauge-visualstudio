@@ -27,18 +27,17 @@ namespace Gauge.VisualStudio.AutoComplete
         public GaugeCompletionSet(SnapshotPoint triggerPoint, IStep step, Concept concept)
         {
             var line = triggerPoint.GetContainingLine();
-
             BitmapSource stepImageSource = new BitmapImage(new Uri("pack://application:,,,/Gauge.VisualStudio;component/assets/glyphs/step.png"));
 
             var concepts = concept.GetAllConcepts();
             var prefix = line.GetText().TrimStart('*').TrimStart(' ');
-            var steps = step.GetAll().Where(s => concepts.All(c => string.CompareOrdinal(c.StepValue, s) != 0));
-            var applicableCompletions = prefix.Length < 1 ? steps : steps.Where(s => s.StartsWith(prefix));
+            var steps = step.GetAll().Where(s => concepts.All(c => string.CompareOrdinal(c.StepValue, s) != 0) && !string.IsNullOrEmpty(s));
+            var applicableCompletions = prefix.Length < 1 ? steps : steps.Where(s => s.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
             var stepCompletions = applicableCompletions.Select(x => new Completion(x, x, "Step", stepImageSource, "Step"));
             _gaugeCompletions.AddRange(stepCompletions);
 
             BitmapSource conceptImageSource = new BitmapImage(new Uri("pack://application:,,,/Gauge.VisualStudio;component/assets/glyphs/concept.png"));
-            var applicableConceptCompletions = prefix.Length < 1 ? concepts : concepts.Where(s => s.StepValue.StartsWith(prefix));
+            var applicableConceptCompletions = prefix.Length < 1 ? concepts : concepts.Where(s => s.StepValue.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
             _gaugeCompletions.AddRange(applicableConceptCompletions.Select(x => new Completion(x.StepValue, x.StepValue, "Concept", conceptImageSource, "Concept")));
 
             if (_gaugeCompletions.Count <= 0) return;

@@ -35,7 +35,7 @@ namespace Gauge.VisualStudio.Highlighting
             _textView = textView;
             _textView.LayoutChanged += OnLayoutChanged;
             _textView.Caret.PositionChanged += OnCaretMove;
-            _project = new Project(GaugePackage.DTE);
+            _project = Project.Instance;
         }
 
         private void OnCaretMove(object sender, CaretPositionChangedEventArgs e)

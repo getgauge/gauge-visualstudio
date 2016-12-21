@@ -36,7 +36,7 @@ namespace Gauge.VisualStudio.AutoComplete
 
             public ICompletionSource TryCreateCompletionSource(ITextBuffer textBuffer)
             {
-                return new GaugeCompletionSource(this, textBuffer);
+                return new GaugeCompletionSource(textBuffer);
             }
         }
 
@@ -46,7 +46,7 @@ namespace Gauge.VisualStudio.AutoComplete
             private bool _disposed;
             private readonly Concept _concept;
 
-            public GaugeCompletionSource(GaugeCompletionSourceProvider gaugeCompletionSourceProvider, ITextBuffer buffer)
+            public GaugeCompletionSource(ITextBuffer buffer)
             {
                 _concept = new Concept(buffer.CurrentSnapshot.GetProject(GaugePackage.DTE));
                 _buffer = buffer;
