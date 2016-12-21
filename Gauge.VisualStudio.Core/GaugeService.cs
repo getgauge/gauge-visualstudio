@@ -245,7 +245,7 @@ namespace Gauge.VisualStudio.Core
             var result = 0;
             OutputPaneLogger.Error(string.Format(errorMessageFormat, args));
             uiShell.ShowMessageBox(0, ref clsId,
-                "Gauge - Critical Error Occurred",
+                "Gauge - Error Occurred",
                 dialogMessage,
                 string.Empty,
                 0,

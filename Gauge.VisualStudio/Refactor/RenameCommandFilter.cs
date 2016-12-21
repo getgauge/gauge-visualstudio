@@ -96,8 +96,10 @@ namespace Gauge.VisualStudio.Refactor
                         if (response.HasPerformRefactoringResponse &&
                             response.PerformRefactoringResponse.ErrorsCount > 0)
                         {
-                            response.PerformRefactoringResponse.ErrorsList.Aggregate(errorMessage,
-                                (s, s1) => string.Format("{0}\n{1}", s, s1));
+                            foreach (var error in response.PerformRefactoringResponse.ErrorsList)
+                            {
+                                errorMessage = string.Format("{0}{1}\n", errorMessage, error);
+                            }
                         }
                         GaugeService.Instance.DisplayGaugeNotStartedMessage(
                             "Refactoring failed.\nCheck Gauge output pane for details.",
