@@ -53,7 +53,7 @@ namespace Gauge.VisualStudio.Refactor
             var hresult = VSConstants.S_OK;
             if ((VSConstants.VSStd2KCmdID) nCmdID == VSConstants.VSStd2KCmdID.RENAME)
             {
-                GaugePackage.DTE.ExecuteCommand("File.SaveAll");
+                GaugePackage.DTE.ExecuteCommand("Build.BuildSolution");
                 var caretBufferPosition = _view.Caret.Position.BufferPosition;
                 var currentLine = caretBufferPosition.GetContainingLine();
                 var lineText = currentLine.GetText();
