@@ -72,6 +72,7 @@
     <Compile Include="Extensions\DocumentExtensions.cs" />
     <Compile Include="Extensions\ProjectExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="GaugeDisplayErrorLevel.cs" />
     <Compile Include="GaugePlugin.cs" />
     <Compile Include="GaugeProcess.cs" />
     <Compile Include="GaugeVersion.cs" />

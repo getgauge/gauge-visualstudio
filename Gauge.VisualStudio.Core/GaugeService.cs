@@ -222,7 +222,7 @@ namespace Gauge.VisualStudio.Core
                 catch (Exception ex)
                 {
                     var errorMessage = string.Format("Failed to start Gauge Daemon: {0}", ex);
-                    DisplayGaugeNotStartedMessage("Unable to launch Gauge Daemon. Check Output Window for details", errorMessage);
+                    DisplayGaugeNotStartedMessage("Unable to launch Gauge Daemon. Check Output Window for details", errorMessage, GaugeDisplayErrorLevel.Error);
                     return null;
                 }
             }
@@ -238,12 +238,28 @@ namespace Gauge.VisualStudio.Core
             return Path.GetDirectoryName(gaugeProject.FullName);
         }
 
-        public void DisplayGaugeNotStartedMessage(string dialogMessage, string errorMessageFormat, params object[] args)
+        public void DisplayGaugeNotStartedMessage(string dialogMessage, string errorMessageFormat, GaugeDisplayErrorLevel errorLevel, params object[] args)
         {
             var uiShell = (IVsUIShell) Package.GetGlobalService(typeof (IVsUIShell));
             var clsId = Guid.Empty;
             var result = 0;
             OutputPaneLogger.Error(string.Format(errorMessageFormat, args));
+            OLEMSGICON msgicon;
+            switch (errorLevel)
+            {
+                case GaugeDisplayErrorLevel.Info:
+                    msgicon = OLEMSGICON.OLEMSGICON_INFO;
+                    break;
+                case GaugeDisplayErrorLevel.Warning:
+                    msgicon = OLEMSGICON.OLEMSGICON_WARNING;
+                    break;
+                case GaugeDisplayErrorLevel.Error:
+                    msgicon = OLEMSGICON.OLEMSGICON_CRITICAL;
+                    break;
+                default:
+                    msgicon = OLEMSGICON.OLEMSGICON_NOICON;
+                    break;
+            }
             uiShell.ShowMessageBox(0, ref clsId,
                 "Gauge - Error Occurred",
                 dialogMessage,
@@ -251,7 +267,7 @@ namespace Gauge.VisualStudio.Core
                 0,
                 OLEMSGBUTTON.OLEMSGBUTTON_OK,
                 OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST,
-                OLEMSGICON.OLEMSGICON_CRITICAL,
+                msgicon,
                 0, out result
                 );
         }

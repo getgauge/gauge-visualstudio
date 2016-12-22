@@ -40,6 +40,7 @@ namespace Gauge.VisualStudio.Core.Loggers
             outWindow.GetPane(ref customGuid, out customPane);
 
             customPane.OutputString(string.Format(message, parameters));
+            customPane.Activate();
         }
 
         public static void Error(string s, params object[] parameters)

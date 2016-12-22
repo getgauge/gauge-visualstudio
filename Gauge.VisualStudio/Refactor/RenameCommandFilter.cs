@@ -104,7 +104,7 @@ namespace Gauge.VisualStudio.Refactor
                         GaugeService.Instance.DisplayGaugeNotStartedMessage(
                             "Refactoring failed.\nCheck Gauge output pane for details.",
                             string.Format("Failed to refactor {0} to {1}. Error:\n{2}", originalText, newText,
-                                errorMessage));
+                                errorMessage), GaugeDisplayErrorLevel.Warning);
                         return VSConstants.S_FALSE;
                     }
                     bool cancel;
