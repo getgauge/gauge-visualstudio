@@ -229,7 +229,10 @@ namespace Gauge.VisualStudio.Core
             finally
             {
                 var cancelled = 0;
-                ErrorHandler.ThrowOnFailure(waitDialog.EndWaitDialog(ref cancelled));
+                if (waitDialog != null)
+                {
+                    waitDialog.EndWaitDialog(ref cancelled);
+                }
             }
         }
 
