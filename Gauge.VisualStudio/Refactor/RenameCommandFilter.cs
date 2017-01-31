@@ -89,14 +89,14 @@ namespace Gauge.VisualStudio.Refactor
                     if (!response.PerformRefactoringResponse.Success)
                     {
                         var errorMessage = string.Empty;
-                        if (response.HasError)
+                        if (response.Error != null)
                         {
                             errorMessage = string.Format("{0}\n", response.Error.Error);
                         }
-                        if (response.HasPerformRefactoringResponse &&
-                            response.PerformRefactoringResponse.ErrorsCount > 0)
+                        if (response.PerformRefactoringResponse != null&&
+                            response.PerformRefactoringResponse.Errors.Count > 0)
                         {
-                            foreach (var error in response.PerformRefactoringResponse.ErrorsList)
+                            foreach (var error in response.PerformRefactoringResponse.Errors)
                             {
                                 errorMessage = string.Format("{0}{1}\n", errorMessage, error);
                             }
@@ -131,17 +131,18 @@ namespace Gauge.VisualStudio.Refactor
 
         private static APIMessage RefactorUsingGaugeDaemon(string newText, string originalText, EnvDTE.Project project)
         {
-            var performRefactoringRequest = PerformRefactoringRequest
-                .CreateBuilder()
-                .SetNewStep(newText)
-                .SetOldStep(originalText)
-                .Build();
+            var performRefactoringRequest = new PerformRefactoringRequest()
+                {
+                    NewStep = newText,
+                    OldStep = originalText
+                };
             var apiConnection = GaugeService.Instance.GetApiConnectionFor(project);
-            var apiMessage = APIMessage.CreateBuilder()
-                .SetPerformRefactoringRequest(performRefactoringRequest)
-                .SetMessageType(APIMessage.Types.APIMessageType.PerformRefactoringRequest)
-                .SetMessageId(7)
-                .Build();
+            var apiMessage = new APIMessage()
+                {
+                    PerformRefactoringRequest = performRefactoringRequest,
+                    MessageType = APIMessage.Types.APIMessageType.PerformRefactoringRequest,
+                    MessageId = 7
+                };
             var response = apiConnection.WriteAndReadApiMessage(apiMessage);
             return response;
         }
@@ -151,7 +152,7 @@ namespace Gauge.VisualStudio.Refactor
             var serviceProvider = Package.GetGlobalService(typeof(IServiceProvider)) as IServiceProvider;
             var runningDocumentTable = new RunningDocumentTable(new ServiceProvider(serviceProvider));
 
-            foreach (var file in response.PerformRefactoringResponse.FilesChangedList)
+            foreach (var file in response.PerformRefactoringResponse.FilesChanged)
             {
                 var vsPersistDocData = runningDocumentTable.FindDocument(file) as IVsPersistDocData;
                 if (vsPersistDocData != null)

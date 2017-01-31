@@ -49,7 +49,7 @@ namespace Gauge.VisualStudio.Model
             }
             var parsedValue = GetParsedStepValueFromInput(project, input);
             parsedValue = parsedValue.Replace("* ", "");
-            return string.Format(@"^(\*[ |\t]*|[ |\t]*\[Step\(""){0}\s*(((\r?\n\s*)+\|([\w ]+\|)+)|(<table>))?(""\)\])?\r?\n", parsedValue.Replace("{}", "((<|\")(?!<table>).+(>|\"))"), Parser.TableRegex);
+            return string.Format(@"^(\*[ |\t]*|[ |\t]*\[Step\(""){0}\s*(((\r?\n\s*)+\|([\w ]+\|)+)|(<table>))?(""\)\])?\r?\n", parsedValue.Replace("{}", "((<|\")(?!<table>).+(>|\"))"));
         }
 
         public static long GenerateMessageId()
@@ -62,12 +62,13 @@ namespace Gauge.VisualStudio.Model
             try
             {
                 var gaugeApiConnection = _gaugeService.GetApiConnectionFor(project);
-                var stepsRequest = GetStepValueRequest.CreateBuilder().SetStepText(input).Build();
-                var apiMessage = APIMessage.CreateBuilder()
-                    .SetMessageId(GenerateMessageId())
-                    .SetMessageType(APIMessage.Types.APIMessageType.GetStepValueRequest)
-                    .SetStepValueRequest(stepsRequest)
-                    .Build();
+                var stepsRequest = new GetStepValueRequest(){ StepText = input};
+                var apiMessage = new APIMessage()
+                    {
+                        MessageId = GenerateMessageId(),
+                        MessageType = APIMessage.Types.APIMessageType.GetStepValueRequest,
+                        StepValueRequest = stepsRequest
+                    };
 
                 var bytes = gaugeApiConnection.WriteAndReadApiMessage(apiMessage);
                 return bytes.StepValueResponse.StepValue;
@@ -83,15 +84,16 @@ namespace Gauge.VisualStudio.Model
             try
             {
                 var gaugeApiConnection = _gaugeService.GetApiConnectionFor(project);
-                var stepsRequest = GetAllStepsRequest.DefaultInstance;
-                var apiMessage = APIMessage.CreateBuilder()
-                    .SetMessageId(GenerateMessageId())
-                    .SetMessageType(APIMessage.Types.APIMessageType.GetAllStepsRequest)
-                    .SetAllStepsRequest(stepsRequest)
-                    .Build();
+                var stepsRequest = new GetAllStepsRequest();
+                var apiMessage = new APIMessage()
+                {
+                    MessageId = GenerateMessageId(),
+                    MessageType = APIMessage.Types.APIMessageType.GetAllStepsRequest,
+                    AllStepsRequest = stepsRequest
+                };
 
                 var bytes = gaugeApiConnection.WriteAndReadApiMessage(apiMessage);
-                return bytes.AllStepsResponse.AllStepsList;
+                return bytes.AllStepsResponse.AllSteps;
 
             }
             catch (GaugeApiInitializationException)
@@ -102,16 +104,17 @@ namespace Gauge.VisualStudio.Model
 
         public IEnumerable<ProtoSpec> GetSpecsFromGauge(IGaugeApiConnection apiConnection)
         {
-            var specsRequest = SpecsRequest.DefaultInstance;
-            var apiMessage = APIMessage.CreateBuilder()
-                .SetMessageId(GenerateMessageId())
-                .SetMessageType(APIMessage.Types.APIMessageType.SpecsRequest)
-                .SetSpecsRequest(specsRequest)
-                .Build();
+            var specsRequest = new SpecsRequest();
+            var apiMessage = new APIMessage()
+                {
+                    MessageId = GenerateMessageId(),
+                    MessageType = APIMessage.Types.APIMessageType.SpecsRequest,
+                    SpecsRequest = specsRequest
+                };
 
             var bytes = apiConnection.WriteAndReadApiMessage(apiMessage);
 
-            var specs = bytes.SpecsResponse.DetailsList.Where(detail => detail.HasSpec).Select(detail => detail.Spec);
+            var specs = bytes.SpecsResponse.Details.Where(detail => detail.Spec != null).Select(detail => detail.Spec);
             return specs;
         }
 

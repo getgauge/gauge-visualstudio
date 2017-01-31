@@ -82,7 +82,7 @@ namespace Gauge.VisualStudio.TestAdapter
 
                         logger.SendMessage(TestMessageLevel.Informational, string.Format("Adding test cases from : {0}", spec.FileName));
                         var scenarioIndex = 0;
-                        var scenarios = spec.ItemsList.Where(item => item.HasScenario).Select(item => item.Scenario);
+                        var scenarios = spec.Items.Where(item => item.Scenario != null).Select(item => item.Scenario);
 
                         foreach (var scenario in scenarios)
                         {
@@ -127,7 +127,7 @@ namespace Gauge.VisualStudio.TestAdapter
 
             testCase.Traits.Add("Spec", spec.SpecHeading);
 
-            foreach (var tag in scenario.TagsList.Union(spec.TagsList))
+            foreach (var tag in scenario.Tags.Union(spec.Tags))
             {
                 testCase.Traits.Add("Tag", tag);
             }
@@ -136,7 +136,7 @@ namespace Gauge.VisualStudio.TestAdapter
 
         private static int GetScenarioIdentifier(int scenarioIndex, ProtoScenario scenario)
         {
-            return scenario.HasSpan ? (int) scenario.Span.Start : scenarioIndex;
+            return scenario.Span != null ? (int) scenario.Span.Start : scenarioIndex;
         }
     }
 }

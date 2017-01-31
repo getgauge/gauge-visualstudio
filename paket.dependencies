@@ -2,16 +2,15 @@ source https://www.nuget.org/api/v2/
 source https://www.myget.org/F/gauge-csharp/api/v2
 
 nuget NuGet.CommandLine
-nuget Gauge.CSharp.Core 0.0.10 framework: >= net45
+nuget Gauge.CSharp.Core 0.0.11 framework: >= net45
 nuget Gauge.CSharp.Lib 0.6.1 framework: >= net45
 nuget Google.Protobuf 3.1.0 framework: >= net45
-nuget Google.ProtocolBuffers 2.4.1.555
-nuget Grpc 0.6.1 framework: >= net45
-nuget Grpc.Core 0.6.1.1 framework: >= net45
+nuget Grpc 1.0.1 framework: >= net45
+nuget Grpc.Core 1.0.1 framework: >= net45
 nuget grpc.dependencies.openssl.redist 1.0.2.2 framework: >= net45
 nuget grpc.dependencies.zlib.redist 1.2.8.9 framework: >= net45
 nuget grpc.native.csharp_ext 0.10.1 framework: >= net45
-nuget Grpc.Tools 0.6.1 framework: >= net45
+nuget Grpc.Tools 1.0.1 framework: >= net45
 nuget Ix-Async 1.2.3 framework: >= net45
 nuget System.Collections.Immutable 1.1.36 framework: >= net45
 nuget VSSDK.ComponentModelHost 12.0.4 framework: >= net45

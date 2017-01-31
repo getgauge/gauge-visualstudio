@@ -5,6 +5,7 @@ VSSDK.IDE
 VSSDK.IDE.12
 VSSDK.Text
 VSSDK.Text.12
+Google.Protobuf
 
 group Test
 

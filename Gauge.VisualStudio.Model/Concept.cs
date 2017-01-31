@@ -43,16 +43,17 @@ namespace Gauge.VisualStudio.Model
             try
             {
                 var gaugeApiConnection = GaugeService.Instance.GetApiConnectionFor(_project);
-                var conceptsRequest = GetAllConceptsRequest.DefaultInstance;
-                var apiMessage = APIMessage.CreateBuilder()
-                    .SetMessageId(GenerateMessageId())
-                    .SetMessageType(APIMessage.Types.APIMessageType.GetAllConceptsRequest)
-                    .SetAllConceptsRequest(conceptsRequest)
-                    .Build();
+                var conceptsRequest = new GetAllConceptsRequest();
+                var apiMessage = new APIMessage()
+                    {
+                        MessageId = GenerateMessageId(),
+                        MessageType = APIMessage.Types.APIMessageType.GetAllConceptsRequest,
+                        AllConceptsRequest = conceptsRequest
+                    };
 
                 var bytes = gaugeApiConnection.WriteAndReadApiMessage(apiMessage);
 
-                return bytes.AllConceptsResponse.ConceptsList.Select(info => new Concept(_project) { StepValue = info.StepValue.ParameterizedStepValue, FilePath = info.Filepath, LineNumber = info.LineNumber });
+                return bytes.AllConceptsResponse.Concepts.Select(info => new Concept(_project) { StepValue = info.StepValue.ParameterizedStepValue, FilePath = info.Filepath, LineNumber = info.LineNumber });
 
             }
             catch (GaugeApiInitializationException)

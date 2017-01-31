@@ -283,6 +283,13 @@
     </When>
   </Choose>
   <Import Project="..\packages\grpc.dependencies.openssl.redist\build\$(__paket__grpc_dependencies_openssl_redist_props).props" Condition="Exists('..\packages\grpc.dependencies.openssl.redist\build\$(__paket__grpc_dependencies_openssl_redist_props).props')" Label="Paket" />
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1' Or $(TargetFrameworkVersion) == 'v4.6.2' Or $(TargetFrameworkVersion) == 'v4.6.3')">
+      <PropertyGroup>
+        <__paket__Grpc_Core_targets>net45\Grpc.Core</__paket__Grpc_Core_targets>
+      </PropertyGroup>
+    </When>
+  </Choose>
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />
   <Import Project="$(TemplateBuilderTargets)" Condition="Exists('$(TemplateBuilderTargets)')" Label="TemplateBuilder" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
@@ -381,92 +388,6 @@
     </When>
   </Choose>
   <Choose>
-    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v2.0' Or $(TargetFrameworkVersion) == 'v3.0')">
-      <ItemGroup>
-        <Reference Include="Google.ProtocolBuffers.Serialization">
-          <HintPath>..\packages\Google.ProtocolBuffers\lib\net20\Google.ProtocolBuffers.Serialization.dll</HintPath>
-          <Private>True</Private>
-          <Paket>True</Paket>
-        </Reference>
-        <Reference Include="Google.ProtocolBuffers">
-          <HintPath>..\packages\Google.ProtocolBuffers\lib\net20\Google.ProtocolBuffers.dll</HintPath>
-          <Private>True</Private>
-          <Paket>True</Paket>
-        </Reference>
-      </ItemGroup>
-    </When>
-    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v3.5'">
-      <ItemGroup>
-        <Reference Include="Google.ProtocolBuffers.Serialization">
-          <HintPath>..\packages\Google.ProtocolBuffers\lib\net35\Google.ProtocolBuffers.Serialization.dll</HintPath>
-          <Private>True</Private>
-          <Paket>True</Paket>
-        </Reference>
-        <Reference Include="Google.ProtocolBuffers">
-          <HintPath>..\packages\Google.ProtocolBuffers\lib\net35\Google.ProtocolBuffers.dll</HintPath>
-          <Private>True</Private>
-          <Paket>True</Paket>
-        </Reference>
-      </ItemGroup>
-    </When>
-    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1' Or $(TargetFrameworkVersion) == 'v4.6.2' Or $(TargetFrameworkVersion) == 'v4.6.3')">
-      <ItemGroup>
-        <Reference Include="Google.ProtocolBuffers.Serialization">
-          <HintPath>..\packages\Google.ProtocolBuffers\lib\net40\Google.ProtocolBuffers.Serialization.dll</HintPath>
-          <Private>True</Private>
-          <Paket>True</Paket>
-        </Reference>
-        <Reference Include="Google.ProtocolBuffers">
-          <HintPath>..\packages\Google.ProtocolBuffers\lib\net40\Google.ProtocolBuffers.dll</HintPath>
-          <Private>True</Private>
-          <Paket>True</Paket>
-        </Reference>
-      </ItemGroup>
-    </When>
-    <When Condition="($(TargetFrameworkIdentifier) == 'WindowsPhone') Or ($(TargetFrameworkIdentifier) == '.NETCore') Or ($(TargetFrameworkProfile) == 'Profile2') Or ($(TargetFrameworkProfile) == 'Profile3') Or ($(TargetFrameworkProfile) == 'Profile4') Or ($(TargetFrameworkProfile) == 'Profile5') Or ($(TargetFrameworkProfile) == 'Profile6') Or ($(TargetFrameworkProfile) == 'Profile7') Or ($(TargetFrameworkProfile) == 'Profile14') Or ($(TargetFrameworkProfile) == 'Profile18') Or ($(TargetFrameworkProfile) == 'Profile19') Or ($(TargetFrameworkProfile) == 'Profile23') Or ($(TargetFrameworkProfile) == 'Profile24') Or ($(TargetFrameworkProfile) == 'Profile31') Or ($(TargetFrameworkProfile) == 'Profile36') Or ($(TargetFrameworkProfile) == 'Profile37') Or ($(TargetFrameworkProfile) == 'Profile41') Or ($(TargetFrameworkProfile) == 'Profile42') Or ($(TargetFrameworkProfile) == 'Profile44') Or ($(TargetFrameworkProfile) == 'Profile46') Or ($(TargetFrameworkProfile) == 'Profile47') Or ($(TargetFrameworkProfile) == 'Profile49') Or ($(TargetFrameworkProfile) == 'Profile78') Or ($(TargetFrameworkProfile) == 'Profile88') Or ($(TargetFrameworkProfile) == 'Profile95') Or ($(TargetFrameworkProfile) == 'Profile96') Or ($(TargetFrameworkProfile) == 'Profile104') Or ($(TargetFrameworkProfile) == 'Profile143') Or ($(TargetFrameworkProfile) == 'Profile147') Or ($(TargetFrameworkProfile) == 'Profile154') Or ($(TargetFrameworkProfile) == 'Profile158')">
-      <ItemGroup>
-        <Reference Include="Google.ProtocolBuffers.Serialization">
-          <HintPath>..\packages\Google.ProtocolBuffers\lib\portable-net40+sl4+sl5+wp7+wp8+win8\Google.ProtocolBuffers.Serialization.dll</HintPath>
-          <Private>True</Private>
-          <Paket>True</Paket>
-        </Reference>
-        <Reference Include="Google.ProtocolBuffers">
-          <HintPath>..\packages\Google.ProtocolBuffers\lib\portable-net40+sl4+sl5+wp7+wp8+win8\Google.ProtocolBuffers.dll</HintPath>
-          <Private>True</Private>
-          <Paket>True</Paket>
-        </Reference>
-      </ItemGroup>
-    </When>
-    <When Condition="$(TargetFrameworkIdentifier) == 'Silverlight' And $(TargetFrameworkVersion) == 'v3.0'">
-      <ItemGroup>
-        <Reference Include="Google.ProtocolBuffers.Serialization">
-          <HintPath>..\packages\Google.ProtocolBuffers\lib\sl30\Google.ProtocolBuffers.Serialization.dll</HintPath>
-          <Private>True</Private>
-          <Paket>True</Paket>
-        </Reference>
-        <Reference Include="Google.ProtocolBuffers">
-          <HintPath>..\packages\Google.ProtocolBuffers\lib\sl30\Google.ProtocolBuffers.dll</HintPath>
-          <Private>True</Private>
-          <Paket>True</Paket>
-        </Reference>
-      </ItemGroup>
-    </When>
-    <When Condition="$(TargetFrameworkIdentifier) == 'Silverlight' And ($(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v5.0')">
-      <ItemGroup>
-        <Reference Include="Google.ProtocolBuffers.Serialization">
-          <HintPath>..\packages\Google.ProtocolBuffers\lib\sl40\Google.ProtocolBuffers.Serialization.dll</HintPath>
-          <Private>True</Private>
-          <Paket>True</Paket>
-        </Reference>
-        <Reference Include="Google.ProtocolBuffers">
-          <HintPath>..\packages\Google.ProtocolBuffers\lib\sl40\Google.ProtocolBuffers.dll</HintPath>
-          <Private>True</Private>
-          <Paket>True</Paket>
-        </Reference>
-      </ItemGroup>
-    </When>
-  </Choose>
-  <Choose>
     <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1' Or $(TargetFrameworkVersion) == 'v4.6.2' Or $(TargetFrameworkVersion) == 'v4.6.3')">
       <ItemGroup>
         <Reference Include="Grpc.Core">
@@ -504,6 +425,26 @@
       <ItemGroup>
         <Reference Include="System.Collections.Immutable">
           <HintPath>..\packages\System.Collections.Immutable\lib\portable-net45+win8+wp8+wpa81\System.Collections.Immutable.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3')">
+      <ItemGroup>
+        <Reference Include="System.Interactive.Async">
+          <HintPath>..\packages\System.Interactive.Async\lib\net45\System.Interactive.Async.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1' Or $(TargetFrameworkVersion) == 'v4.6.2' Or $(TargetFrameworkVersion) == 'v4.6.3')">
+      <ItemGroup>
+        <Reference Include="System.Interactive.Async">
+          <HintPath>..\packages\System.Interactive.Async\lib\net46\System.Interactive.Async.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>
@@ -782,6 +723,7 @@
       </ItemGroup>
     </When>
   </Choose>
+  <Import Project="..\packages\Grpc.Core\build\$(__paket__Grpc_Core_targets).targets" Condition="Exists('..\packages\Grpc.Core\build\$(__paket__Grpc_Core_targets).targets')" Label="Paket" />
   <Import Project="..\packages\grpc.dependencies.openssl.redist\build\$(__paket__grpc_dependencies_openssl_redist_targets).targets" Condition="Exists('..\packages\grpc.dependencies.openssl.redist\build\$(__paket__grpc_dependencies_openssl_redist_targets).targets')" Label="Paket" />
   <Import Project="..\packages\grpc.dependencies.zlib.redist\build\$(__paket__grpc_dependencies_zlib_redist_targets).targets" Condition="Exists('..\packages\grpc.dependencies.zlib.redist\build\$(__paket__grpc_dependencies_zlib_redist_targets).targets')" Label="Paket" />
   <Import Project="..\packages\grpc.native.csharp_ext\build\$(__paket__grpc_native_csharp_ext_targets).targets" Condition="Exists('..\packages\grpc.native.csharp_ext\build\$(__paket__grpc_native_csharp_ext_targets).targets')" Label="Paket" />

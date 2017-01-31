@@ -1,7 +1,6 @@
 Gauge.CSharp.Core
 Gauge.CSharp.Lib
 Google.Protobuf
-Google.ProtocolBuffers
 Grpc
 Grpc.Core
 grpc.dependencies.openssl.redist

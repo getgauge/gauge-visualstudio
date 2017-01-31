@@ -42,7 +42,7 @@ namespace Gauge.VisualStudio.Model
                 return;
 
             Text = stepValueFromInput.ParameterizedStepValue;
-            Parameters = stepValueFromInput.ParametersList.ToList();
+            Parameters = stepValueFromInput.Parameters.ToList();
         }
 
         public Step (EnvDTE.Project project, ITextSnapshotLine inputLine) : this(project, inputLine, new GaugeServiceClient())

@@ -49,18 +49,17 @@ namespace Gauge.VisualStudio.TestAdapter
                     }
                     frameworkHandle.SendMessage(TestMessageLevel.Informational, string.Format("{0} {1}",testCase.DisplayName, testCase.GetPropertyValue(TestDiscoverer.TestCaseType,string.Empty)));
                 }
-                GrpcEnvironment.Initialize();
-                var channel = new Channel("localhost", port);
+                
+                var channel = new Channel("localhost", port, ChannelCredentials.Insecure);
                 var executionClient = new Execution.ExecutionClient(channel);
 
-                var executionRequestBuilder = ExecutionRequest.CreateBuilder().SetDebug(isBeingDebugged);
+                var executionRequest = new ExecutionRequest(){Debug = isBeingDebugged};
 
                 var scenariosMap = testCases.Where(test => string.CompareOrdinal(test.GetPropertyValue(TestDiscoverer.TestCaseType, string.Empty), "scenario") == 0)
                     .ToDictionary(test => string.Format("{0}:{1}", test.CodeFilePath, test.LineNumber), test => test);
+                executionRequest.Specs.AddRange(scenariosMap.Keys);
 
-                executionRequestBuilder.AddRangeSpecs(scenariosMap.Keys);
-
-                using (var call = executionClient.execute(executionRequestBuilder.Build()))
+                using (var call = executionClient.execute(executionRequest))
                 {
                     var processId = testCases.First().GetPropertyValue(TestDiscoverer.DaemonProcessId, -1);
                     if (isBeingDebugged)
@@ -79,9 +78,9 @@ namespace Gauge.VisualStudio.TestAdapter
                     {
                         var executionResponse = call.ResponseStream.Current;
 
-                        if (executionResponse.HasResult && executionResponse.Result.Status == Result.Types.Status.FAILED)
+                        if (executionResponse.Result != null && executionResponse.Result.Status == Result.Types.Status.Failed)
                         {
-                            var errors = string.Join(Environment.NewLine, executionResponse.Result.ErrorsList.Select(
+                            var errors = string.Join(Environment.NewLine, executionResponse.Result.Errors.Select(
                                 error => string.Format("{0}\n{1}", error.ErrorMessage, error.StackTrace)));
                             frameworkHandle.SendMessage(TestMessageLevel.Error, errors);
                             return;
@@ -89,14 +88,14 @@ namespace Gauge.VisualStudio.TestAdapter
 
                         Action<string, string> propogateIfSuiteFailure = (hook, spec) =>
                         {
-                            if (!executionResponse.HasResult) return;
+                            if (executionResponse.Result == null) return;
                             var error = string.Empty;
-                            if (executionResponse.Result.HasBeforeHookFailure)
+                            if (executionResponse.Result.BeforeHookFailure != null)
                             {
                                 var failure = executionResponse.Result.BeforeHookFailure;
                                 error = string.Format("[Before{0} Failure] : {1}\n{2}\n", hook, failure.ErrorMessage, failure.StackTrace);
                             }
-                            if (executionResponse.Result.HasAfterHookFailure)
+                            if (executionResponse.Result.AfterHookFailure != null)
                             {
                                 var failure = executionResponse.Result.AfterHookFailure;
                                 error = string.Format("[Before{0} Failure] : {1}\n{2}\n", hook, failure.ErrorMessage, failure.StackTrace);
@@ -117,7 +116,7 @@ namespace Gauge.VisualStudio.TestAdapter
                             }
                         };
 
-                        if (!executionResponse.HasType)
+                        if (executionResponse.Type == null)
                         {
                             continue;
                         }
@@ -125,9 +124,9 @@ namespace Gauge.VisualStudio.TestAdapter
                         {
                             case ExecutionResponse.Types.Type.ErrorResult:
                             {
-                                if (executionResponse.HasResult)
+                                if (executionResponse.Result != null)
                                 {
-                                    var errors = string.Join(Environment.NewLine, executionResponse.Result.ErrorsList.Select( error => string.Format("{0}\n{1}", error.ErrorMessage, error.StackTrace)));
+                                    var errors = string.Join(Environment.NewLine, executionResponse.Result.Errors.Select( error => string.Format("{0}\n{1}", error.ErrorMessage, error.StackTrace)));
                                     frameworkHandle.SendMessage(TestMessageLevel.Error, errors);
                                 }
                                 else
@@ -161,7 +160,7 @@ namespace Gauge.VisualStudio.TestAdapter
                                 var testCase = scenariosMap[executionResponse.ID];
                                 var result = new TestResult(testCase)
                                 {
-                                    Outcome = executionResponse.Result.HasStatus
+                                    Outcome = executionResponse.Result.Status != null
                                         ? GetVSResult(executionResponse.Result.Status)
                                         : TestOutcome.None
                                 };
@@ -187,11 +186,11 @@ namespace Gauge.VisualStudio.TestAdapter
         {
             switch (status)
             {
-                case Result.Types.Status.FAILED:
+                case Result.Types.Status.Failed:
                     return TestOutcome.Failed;
-                case Result.Types.Status.PASSED:
+                case Result.Types.Status.Passed:
                     return TestOutcome.Passed;
-                case Result.Types.Status.SKIPPED:
+                case Result.Types.Status.Skipped:
                     return TestOutcome.Skipped;
                 default:
                     return TestOutcome.None;

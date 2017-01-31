@@ -35,14 +35,22 @@ namespace Gauge.VisualStudio.Model.Tests
             var gaugeService = A.Fake<IGaugeService>();
             var project = A.Fake<EnvDTE.Project>();
             var gaugeApiConnection = A.Fake<IGaugeApiConnection>();
-            var response = APIMessage.CreateBuilder()
-                .SetMessageType(APIMessage.Types.APIMessageType.GetStepValueResponse)
-                .SetMessageId(0)
-                .SetStepValueResponse(GetStepValueResponse.CreateBuilder()
-                    .SetStepValue(ProtoStepValue.CreateBuilder()
-                    .SetParameterizedStepValue(input)
-                        .SetStepValue(expected)))
-                .Build();
+            
+            var response = new APIMessage()
+                {
+                    MessageType = APIMessage.Types.APIMessageType.GetStepValueResponse,
+                    MessageId = 0,
+                    StepValueResponse = new GetStepValueResponse()
+                    {
+                        StepValue = new ProtoStepValue()
+                        {
+                            ParameterizedStepValue = input,
+                            StepValue = expected
+                            
+                        }
+                        
+                    }
+                };
             A.CallTo(() => gaugeApiConnection.WriteAndReadApiMessage(A<APIMessage>._))
                 .Returns(response);
             A.CallTo(() => gaugeService.GetApiConnectionFor(project)).Returns(gaugeApiConnection);
@@ -132,14 +140,19 @@ namespace Gauge.VisualStudio.Model.Tests
         {
             var gaugeServiceClient = new GaugeServiceClient(gaugeService);
             var gaugeApiConnection = A.Fake<IGaugeApiConnection>();
-            var response = APIMessage.CreateBuilder()
-                .SetMessageType(APIMessage.Types.APIMessageType.GetStepValueResponse)
-                .SetMessageId(0)
-                .SetStepValueResponse(GetStepValueResponse.CreateBuilder()
-                    .SetStepValue(ProtoStepValue.CreateBuilder()
-                        .SetParameterizedStepValue(input)
-                        .SetStepValue(parsedInput)))
-                .Build();
+            var response = new APIMessage()
+                {
+                    MessageType = APIMessage.Types.APIMessageType.GetStepValueResponse,
+                    MessageId = 0,
+                    StepValueResponse = new GetStepValueResponse()
+                    {
+                        StepValue = new ProtoStepValue()
+                        {
+                            ParameterizedStepValue = input,
+                            StepValue = parsedInput
+                        }
+                    }
+                };
             A.CallTo(() => gaugeApiConnection.WriteAndReadApiMessage(A<APIMessage>._))
                 .Returns(response);
             A.CallTo(() => gaugeService.GetApiConnectionFor(project)).Returns(gaugeApiConnection);
