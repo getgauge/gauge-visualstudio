@@ -8,6 +8,7 @@ grpc.dependencies.zlib.redist
 grpc.native.csharp_ext
 Grpc.Tools
 Ix-Async
+Microsoft.CSharp
 System.Collections.Immutable
 VSSDK.DTE
 VSSDK.GraphModel
