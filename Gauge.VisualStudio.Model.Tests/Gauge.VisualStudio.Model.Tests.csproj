@@ -35,10 +35,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Gauge.CSharp.Core\lib\net45\Gauge.CSharp.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Gauge.VisualStudio.Model, Version=0.2.0.0, Culture=neutral, PublicKeyToken=6c058579ae1f8ff2, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Gauge.VisualStudio.Model\obj\Debug\Gauge.VisualStudio.Model.dll</HintPath>
-    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -59,6 +55,10 @@
     <ProjectReference Include="..\Gauge.VisualStudio.Core\Gauge.VisualStudio.Core.csproj">
       <Project>{24c4951f-15a5-4c76-9a20-2e456a21500e}</Project>
       <Name>Gauge.VisualStudio.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Gauge.VisualStudio.Model\Gauge.VisualStudio.Model.csproj">
+      <Project>{6990376b-fd73-4a61-a26c-3c2fc9429164}</Project>
+      <Name>Gauge.VisualStudio.Model</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
