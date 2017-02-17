@@ -666,13 +666,13 @@
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>
-        <Reference Include="Microsoft.VisualStudio.Text.UI.Wpf">
-          <HintPath>..\packages\VSSDK.Text\lib\net45\Microsoft.VisualStudio.Text.UI.Wpf.dll</HintPath>
+        <Reference Include="Microsoft.VisualStudio.Text.UI">
+          <HintPath>..\packages\VSSDK.Text\lib\net45\Microsoft.VisualStudio.Text.UI.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>
-        <Reference Include="Microsoft.VisualStudio.Text.UI">
-          <HintPath>..\packages\VSSDK.Text\lib\net45\Microsoft.VisualStudio.Text.UI.dll</HintPath>
+        <Reference Include="Microsoft.VisualStudio.Text.UI.Wpf">
+          <HintPath>..\packages\VSSDK.Text\lib\net45\Microsoft.VisualStudio.Text.UI.Wpf.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>

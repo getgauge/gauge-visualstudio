@@ -20,6 +20,12 @@ NUGET
       EnvDTE80 (>= 8.0)
       EnvDTE90 (>= 9.0)
       stdole (>= 7.0.3300)
+    Gauge.CSharp.Core (0.1) - framework: >= net45
+      Gauge.CSharp.Lib (>= 0.5.3)
+      Google.Protobuf (>= 3.1)
+      Grpc (1.0.1)
+      Grpc.Core (1.0.1)
+      Grpc.Tools (1.0.1)
     Gauge.CSharp.Lib (0.6.1) - framework: >= net45
     Google.Protobuf (3.1) - framework: >= net45
     Grpc (1.0.1) - framework: >= net45
@@ -158,12 +164,12 @@ NUGET
       System.Runtime (>= 4.3) - framework: dnxcore50, netstandard10, netstandard13, >= netstandard15
     System.Runtime.Handles (4.3) - framework: dnxcore50
     System.Runtime.InteropServices (4.3) - framework: dnxcore50
-      Microsoft.NETCore.Platforms (>= 1.1) - framework: dnxcore50, netstandard11, netstandard12, netstandard13, >= netstandard15
-      Microsoft.NETCore.Targets (>= 1.1) - framework: dnxcore50, netstandard11, netstandard12, netstandard13, >= netstandard15
-      System.Reflection (>= 4.3) - framework: dnxcore50, netstandard11, netstandard12, netstandard13, >= netstandard15
-      System.Reflection.Primitives (>= 4.3) - framework: dnxcore50, netstandard11, netstandard12, netstandard13, >= netstandard15
-      System.Runtime (>= 4.3) - framework: net462, >= net463, dnxcore50, netstandard11, netstandard12, netstandard13, >= netstandard15
-      System.Runtime.Handles (>= 4.3) - framework: dnxcore50, netstandard13, >= netstandard15
+      Microsoft.NETCore.Platforms (>= 1.1) - framework: dnxcore50, netstandard11, netstandard12, netstandard13, >= netstandard15, netcore11
+      Microsoft.NETCore.Targets (>= 1.1) - framework: dnxcore50, netstandard11, netstandard12, netstandard13, >= netstandard15, netcore11
+      System.Reflection (>= 4.3) - framework: dnxcore50, netstandard11, netstandard12, netstandard13, >= netstandard15, netcore11
+      System.Reflection.Primitives (>= 4.3) - framework: dnxcore50, netstandard11, netstandard12, netstandard13, >= netstandard15, netcore11
+      System.Runtime (>= 4.3) - framework: net462, >= net463, dnxcore50, netstandard11, netstandard12, netstandard13, >= netstandard15, netcore11
+      System.Runtime.Handles (>= 4.3) - framework: dnxcore50, netstandard13, >= netstandard15, netcore11
     System.Text.Encoding (4.3) - framework: dnxcore50
       Microsoft.NETCore.Platforms (>= 1.1) - framework: dnxcore50, netstandard10, >= netstandard13
       Microsoft.NETCore.Targets (>= 1.1) - framework: dnxcore50, netstandard10, >= netstandard13
@@ -290,13 +296,6 @@ NUGET
     VSSDK.VSLangProj (7.0.4) - framework: >= net45
       VSSDK.DTE (>= 7.0.4 < 8.0)
       VSSDK.IDE (>= 7.0.4 < 8.0)
-  remote: https://www.myget.org/F/gauge-csharp/api/v2
-    Gauge.CSharp.Core (0.0.11) - framework: >= net45
-      Gauge.CSharp.Lib (>= 0.5.3)
-      Google.Protobuf (>= 3.1)
-      Grpc (1.0.1)
-      Grpc.Core (1.0.1)
-      Grpc.Tools (1.0.1)
 
 GROUP Test
 NUGET
