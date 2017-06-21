@@ -331,16 +331,6 @@ namespace Gauge.VisualStudio.Core
                 throw new GaugeApiInitializationException();
             }
 
-            if (!Directory.EnumerateFiles(projectOutputPath, "*.dll").Any())
-            {
-                OutputPaneLogger.Info(
-                    "Project Output path '{0}' does not contain any binaries. Building the project", projectOutputPath);
-                if (!gaugeProject.DTE.Solution.SolutionBuild.BuildState.Equals(vsBuildState.vsBuildStateInProgress))
-                {
-                    gaugeProject.DTE.Solution.SolutionBuild.Build(true);
-                }
-            }
-
             return projectOutputPath;
         }
 
