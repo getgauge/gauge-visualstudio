@@ -1,6 +1,8 @@
 # Gauge.VisualStudio
 Visual Studio plugin for Gauge - wires up Visual Studio features to Gauge.
 
+[![Build status](https://ci.appveyor.com/api/projects/status/bv404kn2hwujrd0i?svg=true)](https://ci.appveyor.com/project/getgauge/gauge-visualstudio)
+
  [ ![Download Nightly](https://api.bintray.com/packages/gauge/Gauge.VisualStudio/Nightly/images/download.svg) ](https://bintray.com/gauge/Gauge.VisualStudio/Nightly/_latestVersion)
 
 ## Installation
