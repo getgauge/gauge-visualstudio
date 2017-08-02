@@ -19,6 +19,7 @@ using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Runtime.Serialization.Json;
+using System.Text;
 using EnvDTE;
 using Gauge.CSharp.Core;
 using Gauge.Messages;
@@ -166,7 +167,21 @@ namespace Gauge.VisualStudio.Core
                 throw new GaugeVersionNotFoundException(error);
             }
             var serializer = new DataContractJsonSerializer(typeof (GaugeVersionInfo));
-            return (GaugeVersionInfo) serializer.ReadObject(gaugeProcess.StandardOutput.BaseStream);
+            var versionText = SanitizeDeprecationMessage(gaugeProcess.StandardOutput.ReadToEnd());
+            using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(versionText)))
+            {
+                return (GaugeVersionInfo)serializer.ReadObject(ms);
+            }
+        }
+
+        private static string SanitizeDeprecationMessage(string message)
+        {
+            var lines = message.Split(Environment.NewLine.ToCharArray());
+            if (lines[0].ToLower().StartsWith("[deprecated]"))
+            {
+                lines = lines.Skip(1).ToArray();
+            }
+            return string.Join(Environment.NewLine, lines);
         }
 
         private IGaugeApiConnection StartGaugeAsDaemon(Project gaugeProject)

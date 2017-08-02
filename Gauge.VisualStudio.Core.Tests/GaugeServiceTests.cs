@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using System.IO;
 using System.Text;
 using FakeItEasy;
@@ -27,6 +28,24 @@ namespace Gauge.VisualStudio.Core.Tests
         public void ShouldGetGaugeVersion()
         {
             const string json = "{\"version\": \"0.4.0\",\"plugins\": [{\"name\": \"csharp\",\"version\": \"0.7.3\"},{\"name\": \"html-report\",\"version\": \"2.1.0\"}]}";
+            var outputStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+            var errorStream = new MemoryStream(Encoding.UTF8.GetBytes(string.Empty));
+
+            var gaugeProcess = A.Fake<IGaugeProcess>();
+            A.CallTo(() => gaugeProcess.Start()).Returns(true);
+            A.CallTo(() => gaugeProcess.StandardOutput).Returns(new StreamReader(outputStream));
+            A.CallTo(() => gaugeProcess.StandardError).Returns(new StreamReader(errorStream));
+
+            var installedGaugeVersion = GaugeService.Instance.GetInstalledGaugeVersion(gaugeProcess);
+            Assert.AreEqual("0.4.0", installedGaugeVersion.version);
+            Assert.AreEqual(2, installedGaugeVersion.plugins.Length);
+        }
+
+        [Test]
+        public void ShouldGetGaugeVersionWhenDeprecated()
+        {
+            var json = string.Concat("[DEPRECATED] This usage will be removed soon. Run `gauge help --legacy` for more info.", Environment.NewLine,
+                "{\"version\": \"0.4.0\",\"plugins\": [{\"name\": \"csharp\",\"version\": \"0.7.3\"},{\"name\": \"html-report\",\"version\": \"2.1.0\"}]}");
             var outputStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
             var errorStream = new MemoryStream(Encoding.UTF8.GetBytes(string.Empty));
 
