@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".paket", ".paket", "{3CAF8249-7F8B-48D5-BF72-55F50AF0352D}"
 	ProjectSection(SolutionItems) = preProject
@@ -21,14 +21,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauge.VisualStudio.Core.Tests", "Gauge.VisualStudio.Core.Tests\Gauge.VisualStudio.Core.Tests.csproj", "{44A99A24-DE66-4FF1-8683-E001F5B7C55B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauge.VisualStudio.Tests", "Gauge.VisualStudio.Tests\Gauge.VisualStudio.Tests.csproj", "{754095AA-91B0-40E4-98AD-3FD8746DB95D}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauge.ItemTemplate.Spec", "Gauge.ItemTemplate.Spec\Gauge.ItemTemplate.Spec.csproj", "{A5552EDD-ECA1-4735-99C1-64F78FBA685D}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauge.ItemTemplate.Concept", "Gauge.ItemTemplate.Concept\Gauge.ItemTemplate.Concept.csproj", "{1443A909-01A8-43F2-9B74-1307ADA135E0}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauge.ProjectTemplates.Webdriver", "Gauge.ProjectTemplates.Webdriver\Gauge.ProjectTemplates.Webdriver.csproj", "{ADCFFA82-039F-48AF-90BA-550A05064454}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauge.ProjectTemplates.Basic", "Gauge.ProjectTemplates.Basic\Gauge.ProjectTemplates.Basic.csproj", "{6F5A1231-12FA-4354-9B14-1CA9DF5F1322}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -64,22 +56,6 @@ Global
 		{754095AA-91B0-40E4-98AD-3FD8746DB95D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{754095AA-91B0-40E4-98AD-3FD8746DB95D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{754095AA-91B0-40E4-98AD-3FD8746DB95D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A5552EDD-ECA1-4735-99C1-64F78FBA685D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A5552EDD-ECA1-4735-99C1-64F78FBA685D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A5552EDD-ECA1-4735-99C1-64F78FBA685D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A5552EDD-ECA1-4735-99C1-64F78FBA685D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1443A909-01A8-43F2-9B74-1307ADA135E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1443A909-01A8-43F2-9B74-1307ADA135E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1443A909-01A8-43F2-9B74-1307ADA135E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1443A909-01A8-43F2-9B74-1307ADA135E0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{ADCFFA82-039F-48AF-90BA-550A05064454}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{ADCFFA82-039F-48AF-90BA-550A05064454}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{ADCFFA82-039F-48AF-90BA-550A05064454}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{ADCFFA82-039F-48AF-90BA-550A05064454}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6F5A1231-12FA-4354-9B14-1CA9DF5F1322}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6F5A1231-12FA-4354-9B14-1CA9DF5F1322}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6F5A1231-12FA-4354-9B14-1CA9DF5F1322}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6F5A1231-12FA-4354-9B14-1CA9DF5F1322}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

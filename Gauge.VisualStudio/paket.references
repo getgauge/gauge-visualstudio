@@ -42,3 +42,6 @@ VSSDK.VSLangProj
 EnvDTE80
 EnvDTE90
 EnvDTE100
+Microsoft.TestPlatform.ObjectModel
+
+Microsoft.VSSDK.BuildTools

@@ -51,6 +51,10 @@ nuget EnvDTE80 8.0.0
 nuget EnvDTE90 9.0.0
 nuget EnvDTE100 10.0.0
 
+nuget Microsoft.TestPlatform.ObjectModel
+nuget Microsoft.VisualStudio.TestWindow.Interfaces 
+nuget Microsoft.VSSDK.BuildTools
+
 group Test
     source https://www.nuget.org/api/v2/
 
