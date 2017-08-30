@@ -18,7 +18,7 @@ If (Test-Path $outputPath)
   Remove-Item $outputPath -recurse
 }
 New-Item -Itemtype directory $outputPath -Force
-$msbuild="$($env:systemroot)\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe"
+$msbuild="${env:programfiles(x86)}\Microsoft Visual Studio\2017\Community\MSBuild\15.0\bin\msbuild.exe"
 
 $paketBootstraper=Resolve-path -Relative ".paket\paket.bootstrapper.exe"
 
@@ -45,4 +45,4 @@ if($env:NIGHTLY)
   & "$(Split-Path $MyInvocation.MyCommand.Path)\version_nightly.ps1" -nightly $nightly
 }
 
-&$msbuild $sln /m /nologo "/p:configuration=release;OutDir=$($outputPath);VisualStudioVersion=15.0;RestorePackages=false" /t:rebuild /verbosity:$($verbosity)
+&$msbuild $sln /m /nologo "/p:configuration=release;OutDir=$($outputPath);RestorePackages=false" /t:rebuild /verbosity:$($verbosity)

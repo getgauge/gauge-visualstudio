@@ -1,15 +1,7 @@
 Gauge.CSharp.Core
 Gauge.CSharp.Lib
 Google.Protobuf
-Grpc
-Grpc.Core
-grpc.dependencies.openssl.redist
-grpc.dependencies.zlib.redist
-grpc.native.csharp_ext
-Grpc.Tools
-Ix-Async
 Microsoft.CSharp
-System.Collections.Immutable
 VSSDK.DTE
 VSSDK.GraphModel
 VSSDK.IDE

@@ -32,13 +32,7 @@ NUGET
       Grpc.Core (>= 1.0.1)
     Grpc.Core (1.0.1) - restriction: >= net45
       System.Interactive.Async (>= 3.0) - restriction: || (>= net45) (>= netstandard1.5)
-    grpc.dependencies.openssl.redist (1.0.2.2) - restriction: >= net45
-    grpc.dependencies.zlib.redist (1.2.8.9) - restriction: >= net45
-    grpc.native.csharp_ext (0.10.1) - restriction: >= net45
-      grpc.dependencies.openssl.redist (>= 1.0.2.2)
-      grpc.dependencies.zlib.redist (>= 1.2.8.9)
     Grpc.Tools (1.0.1) - restriction: >= net45
-    Ix-Async (1.2.3) - restriction: >= net45
     Microsoft.CSharp (4.0)
       System.Collections (>= 4.0.10) - restriction: >= dnxcore50
       System.Diagnostics.Debug (>= 4.0.10) - restriction: >= dnxcore50
@@ -62,7 +56,6 @@ NUGET
     NuGet.CommandLine (3.5)
     stdole (7.0.3300)
     System.Collections (4.3) - restriction: >= dnxcore50
-    System.Collections.Immutable (1.1.36) - restriction: >= net45
     System.Diagnostics.Debug (4.3) - restriction: >= dnxcore50
     System.Dynamic.Runtime (4.3) - restriction: >= dnxcore50
     System.Globalization (4.3) - restriction: >= dnxcore50

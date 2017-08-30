@@ -1,15 +1,10 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
-  <Prerequisites>
-    <Prerequisite Id="Microsoft.VisualStudio.Component.DiagnosticTools" Version="[15.0.25814.0,16.0)" DisplayName="Visual Studio Diagnostic Tools"/>
-    <Prerequisite Id="Microsoft.VisualStudio.Shell.12.0" Version="[12.0]" DisplayName="Visual Studio Shell"/>
-    <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[15.0.26208.0,16.0)" DisplayName="Visual Studio core editor" />
-  </Prerequisites>
   <Metadata>
     <Identity Id="Gauge.ThoughtWorks.9731a722-d394-4c99-9df7-758867938fd6" Version="0.4.0" Language="en-US" Publisher="ThoughtWorks Inc." />
-    <DisplayName>Gauge plugin for VisualStudio</DisplayName>
-    <Description xml:space="preserve">Visual Studio Extension for Gauge.</Description>
-    <MoreInfo>http://getgauge.io</MoreInfo>
+    <DisplayName>Gauge plugin for Visual Studio</DisplayName>
+    <Description>Visual Studio Extension for Gauge.</Description>
+    <MoreInfo>https://getgauge.io</MoreInfo>
     <License>LICENSE.txt</License>
     <GettingStartedGuide>https://docs.getgauge.io/</GettingStartedGuide>
     <Icon>logo.png</Icon>
@@ -24,15 +19,9 @@
     <Dependency Id="Microsoft.VisualStudio.MPF.15.0" DisplayName="Visual Studio MPF 15.0" d:Source="Installed" Version="[15.0,16.0)" />
     <Dependency d:Source="Manual" DisplayName="Gauge" Id="ThoughtWorks.Gauge" Version="[0.9.1,]" d:InstallSource="Download" Location="https://getgauge.io/get-started.html" />
   </Dependencies>
-  <Assets>
-    <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
-    <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="Gauge.VisualStudio" Path="|Gauge.VisualStudio|" />
-    <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="Gauge.VisualStudio.TestAdapter" Path="|Gauge.VisualStudio.TestAdapter|" />
-    <Asset Type="UnitTestExtension" d:Source="Project" d:ProjectName="%CurrentProject%.TestAdapter" Path="|Gauge.VisualStudio.TestAdapter|" />
-    <Asset Type="Microsoft.VisualStudio.ItemTemplate" Path="ItemTemplates" d:Source="Project" d:ProjectName="Gauge.ItemTemplate.Spec" d:TargetPath="|Gauge.ItemTemplate.Spec;TemplateProjectOutputGroup|" d:VsixSubPath="ItemTemplates" />
-    <Asset Type="Microsoft.VisualStudio.ItemTemplate" d:Source="Project" d:ProjectName="Gauge.ItemTemplate.Concept" d:TargetPath="|Gauge.ItemTemplate.Concept;TemplateProjectOutputGroup|" Path="ItemTemplates" d:VsixSubPath="ItemTemplates" />
-    <Asset Type="Microsoft.VisualStudio.ProjectTemplate" Path="ProjectTemplates" d:Source="Project" d:TargetPath="|Gauge.ProjectTemplates.Basic;TemplateProjectOutputGroup|" d:VsixSubPath="ProjectTemplates" d:ProjectName="Gauge.ProjectTemplates.Basic" />
-    <Asset Type="Microsoft.VisualStudio.ProjectTemplate" Path="ProjectTemplates" d:Source="Project" d:TargetPath="|Gauge.ProjectTemplates.Webdriver;TemplateProjectOutputGroup|" d:VsixSubPath="ProjectTemplates" d:ProjectName="Gauge.ProjectTemplates.Webdriver" />
-    <Asset Type="Microsoft.VisualStudio.Assembly" d:Source="File" Path="..\packages\System.Collections.Immutable.1.1.36\lib\portable-net45+win8+wp8+wpa81\System.Collections.Immutable.dll" AssemblyName="System.Collections.Immutable, Version=1.1.36.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  </Assets>
+  <Prerequisites>
+    <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[15.0,16.0)" DisplayName="Visual Studio core editor" />
+    <Prerequisite Id="Microsoft.VisualStudio.Component.DiagnosticTools" Version="[15.0.25814.0,16.0)" DisplayName="Visual Studio Diagnostic Tools"/>
+    <Prerequisite Id="Microsoft.VisualStudio.Shell.12.0" Version="[12.0]" DisplayName="Visual Studio Shell"/>
+  </Prerequisites>
 </PackageManifest>
