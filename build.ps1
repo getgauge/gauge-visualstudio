@@ -45,4 +45,4 @@ if($env:NIGHTLY)
   & "$(Split-Path $MyInvocation.MyCommand.Path)\version_nightly.ps1" -nightly $nightly
 }
 
-&$msbuild $sln /m /nologo "/p:configuration=release;OutDir=$($outputPath);VisualStudioVersion=12.0;RestorePackages=false" /t:rebuild /verbosity:$($verbosity)
+&$msbuild $sln /m /nologo "/p:configuration=release;OutDir=$($outputPath);VisualStudioVersion=14.0;RestorePackages=false" /t:rebuild /verbosity:$($verbosity)

@@ -10,3 +10,4 @@ artifacts
 *.csproj.user
 Gauge.VisualStudio.sln.ide/
 .paket/paket.exe
+paket-files
