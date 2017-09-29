@@ -1,7 +1,7 @@
 source https://www.nuget.org/api/v2/
 
 nuget NuGet.CommandLine
-nuget Gauge.CSharp.Core 0.1.0 framework: >= net45
+nuget Gauge.CSharp.Core 0.2.1 framework: >= net45
 nuget Gauge.CSharp.Lib 0.6.1 framework: >= net45
 nuget Google.Protobuf 3.1.0 framework: >= net45
 nuget Microsoft.CSharp 4.0.0

@@ -1,11 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="14.0">
+  <Import Project="..\packages\Microsoft.VSSDK.BuildTools\build\Microsoft.VSSDK.BuildTools.props" Condition="Exists('..\packages\Microsoft.VSSDK.BuildTools\build\Microsoft.VSSDK.BuildTools.props')" Label="Paket" />
   <PropertyGroup>
     <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
-    <VsSDKInstall>..\packages\Microsoft.VSSDK.BuildTools\tools\vssdk</VsSDKInstall> 
-    <VsSDKBuild>..\packages\Microsoft.VSSDK.BuildTools\build</VsSDKBuild> 
-    <VsSDKIncludes>$(VsSDKInstall)\inc</VsSDKIncludes> 
-    <VsSDKToolsPath>$(VsSDKInstall)\bin</VsSDKToolsPath> 
+    <VsSDKInstall>..\packages\Microsoft.VSSDK.BuildTools\tools\vssdk</VsSDKInstall>
+    <VsSDKBuild>..\packages\Microsoft.VSSDK.BuildTools\build</VsSDKBuild>
+    <VsSDKIncludes>$(VsSDKInstall)\inc</VsSDKIncludes>
+    <VsSDKToolsPath>$(VsSDKInstall)\bin</VsSDKToolsPath>
   </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -240,13 +241,6 @@
     <TemplateBuilderTargets Condition=" '$(TemplateBuilderTargets)'=='' ">$(SolutionDir)\packages\TemplateBuilder.1.1.4.6-beta\tools\ligershark.templates.targets</TemplateBuilderTargets>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <Choose>
-    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1' Or $(TargetFrameworkVersion) == 'v4.6.2' Or $(TargetFrameworkVersion) == 'v4.6.3' Or $(TargetFrameworkVersion) == 'v4.7' Or $(TargetFrameworkVersion) == 'v5.0')">
-      <PropertyGroup>
-        <__paket__Grpc_Core_targets>net45\Grpc.Core</__paket__Grpc_Core_targets>
-      </PropertyGroup>
-    </When>
-  </Choose>
   <Import Project="$(TemplateBuilderTargets)" Condition="Exists('$(TemplateBuilderTargets)')" Label="TemplateBuilder" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
@@ -255,6 +249,20 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <!-- VSSDK build tasks rely on not only the $(VsSDKToolsPath) MSBuild property, but they also rely on this being set as an environment variable. -->
+  <UsingTask TaskName="SetVsSDKEnvironmentVariables" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <ProjectDirectory Required="true" />
+    </ParameterGroup>
+    <Task>
+      <Code Type="Fragment" Language="cs"> 
+        System.Environment.SetEnvironmentVariable("VsSDKToolsPath", System.IO.Path.GetFullPath(ProjectDirectory + @"\..\tools\vssdk\bin")); 
+      </Code>
+    </Task>
+  </UsingTask>
+  <Target Name="SetVsSDKEnvironmentVariables" BeforeTargets="VSCTCompile">
+    <SetVsSDKEnvironmentVariables ProjectDirectory="$(MSBuildProjectDirectory)" />
+  </Target>
   <Choose>
     <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework'">
       <ItemGroup>
@@ -344,41 +352,10 @@
     </When>
   </Choose>
   <Choose>
-    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1' Or $(TargetFrameworkVersion) == 'v4.6.2' Or $(TargetFrameworkVersion) == 'v4.6.3' Or $(TargetFrameworkVersion) == 'v4.7' Or $(TargetFrameworkVersion) == 'v5.0')">
-      <ItemGroup>
-        <Reference Include="Grpc.Core">
-          <HintPath>..\packages\Grpc.Core\lib\net45\Grpc.Core.dll</HintPath>
-          <Private>True</Private>
-          <Paket>True</Paket>
-        </Reference>
-      </ItemGroup>
-    </When>
-  </Choose>
-  <Choose>
     <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework'">
       <ItemGroup>
         <Reference Include="stdole">
           <HintPath>..\packages\stdole\lib\net10\stdole.dll</HintPath>
-          <Private>True</Private>
-          <Paket>True</Paket>
-        </Reference>
-      </ItemGroup>
-    </When>
-  </Choose>
-  <Choose>
-    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3')">
-      <ItemGroup>
-        <Reference Include="System.Interactive.Async">
-          <HintPath>..\packages\System.Interactive.Async\lib\net45\System.Interactive.Async.dll</HintPath>
-          <Private>True</Private>
-          <Paket>True</Paket>
-        </Reference>
-      </ItemGroup>
-    </When>
-    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1' Or $(TargetFrameworkVersion) == 'v4.6.2' Or $(TargetFrameworkVersion) == 'v4.6.3' Or $(TargetFrameworkVersion) == 'v4.7' Or $(TargetFrameworkVersion) == 'v5.0')">
-      <ItemGroup>
-        <Reference Include="System.Interactive.Async">
-          <HintPath>..\packages\System.Interactive.Async\lib\net46\System.Interactive.Async.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>
@@ -657,21 +634,5 @@
       </ItemGroup>
     </When>
   </Choose>
-  <Import Project="$(VsSDKBuild)\Microsoft.VSSDK.BuildTools.props" Condition="Exists('$(VsSDKBuild)\Microsoft.VSSDK.BuildTools.props')" Label="Paket" />
-  <UsingTask TaskName="SetVsSDKEnvironmentVariables" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"> 
-    <ParameterGroup> 
-      <ProjectDirectory Required="true" /> 
-    </ParameterGroup> 
-    <Task> 
-      <Code Type="Fragment" Language="cs"> 
-        System.Environment.SetEnvironmentVariable("VsSDKToolsPath", System.IO.Path.GetFullPath(ProjectDirectory + @"\..\tools\vssdk\bin")); 
-      </Code> 
-    </Task> 
-  </UsingTask> 
-  <Target Name="SetVsSDKEnvironmentVariables" BeforeTargets="VSCTCompile"> 
-    <SetVsSDKEnvironmentVariables ProjectDirectory="$(MSBuildProjectDirectory)" /> 
-  </Target>
-  <Import Project="..\packages\Grpc.Core\build\$(__paket__Grpc_Core_targets).targets" Condition="Exists('..\packages\Grpc.Core\build\$(__paket__Grpc_Core_targets).targets')" Label="Paket" />
-  <Import Project="$(VsSDKBuild)\Microsoft.VSSDK.BuildTools.targets" Condition="Exists('$(VsSDKBuild)\Microsoft.VSSDK.BuildTools.targets')" Label="Paket" />
-  <Import Project="$(VsSDKInstall)\Microsoft.VSSDK.targets" Label="Paket" />
+  <Import Project="..\packages\Microsoft.VSSDK.BuildTools\build\Microsoft.VSSDK.BuildTools.targets" Condition="Exists('..\packages\Microsoft.VSSDK.BuildTools\build\Microsoft.VSSDK.BuildTools.targets')" Label="Paket" />
 </Project>
