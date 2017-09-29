@@ -30,6 +30,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <CreateVsixContainer>True</CreateVsixContainer>
+    <DeployExtension>True</DeployExtension>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -175,34 +177,6 @@
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Gauge.ItemTemplate.Concept\Gauge.ItemTemplate.Concept.csproj">
-      <Project>{1443A909-01A8-43F2-9B74-1307ADA135E0}</Project>
-      <Name>Gauge.ItemTemplate.Concept</Name>
-      <VSIXSubPath>ItemTemplates</VSIXSubPath>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
-    </ProjectReference>
-    <ProjectReference Include="..\Gauge.ItemTemplate.Spec\Gauge.ItemTemplate.Spec.csproj">
-      <Project>{A5552EDD-ECA1-4735-99C1-64F78FBA685D}</Project>
-      <Name>Gauge.ItemTemplate.Spec</Name>
-      <VSIXSubPath>ItemTemplates</VSIXSubPath>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
-    </ProjectReference>
-    <ProjectReference Include="..\Gauge.ProjectTemplates.Basic\Gauge.ProjectTemplates.Basic.csproj">
-      <Project>{6F5A1231-12FA-4354-9B14-1CA9DF5F1322}</Project>
-      <Name>Gauge.ProjectTemplates.Basic</Name>
-      <VSIXSubPath>ProjectTemplates</VSIXSubPath>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
-    </ProjectReference>
-    <ProjectReference Include="..\Gauge.ProjectTemplates.Webdriver\Gauge.ProjectTemplates.Webdriver.csproj">
-      <Project>{ADCFFA82-039F-48AF-90BA-550A05064454}</Project>
-      <Name>Gauge.ProjectTemplates.Webdriver</Name>
-      <VSIXSubPath>ProjectTemplates</VSIXSubPath>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
-    </ProjectReference>
     <ProjectReference Include="..\Gauge.VisualStudio.Core\Gauge.VisualStudio.Core.csproj">
       <Project>{24c4951f-15a5-4c76-9a20-2e456a21500e}</Project>
       <Name>Gauge.VisualStudio.Core</Name>
@@ -634,5 +608,21 @@
       </ItemGroup>
     </When>
   </Choose>
-  <Import Project="..\packages\Microsoft.VSSDK.BuildTools\build\Microsoft.VSSDK.BuildTools.targets" Condition="Exists('..\packages\Microsoft.VSSDK.BuildTools\build\Microsoft.VSSDK.BuildTools.targets')" Label="Paket" />
+  <Import Project="$(VsSDKBuild)\Microsoft.VSSDK.BuildTools.props" Condition="Exists('$(VsSDKBuild)\Microsoft.VSSDK.BuildTools.props')" Label="Paket" />
+  <UsingTask TaskName="SetVsSDKEnvironmentVariables" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <ProjectDirectory Required="true" />
+    </ParameterGroup>
+    <Task>
+      <Code Type="Fragment" Language="cs">
+        System.Environment.SetEnvironmentVariable("VsSDKToolsPath", System.IO.Path.GetFullPath(ProjectDirectory + @"\..\tools\vssdk\bin"));
+      </Code>
+    </Task>
+  </UsingTask>
+  <Target Name="SetVsSDKEnvironmentVariables" BeforeTargets="VSCTCompile">
+    <SetVsSDKEnvironmentVariables ProjectDirectory="$(MSBuildProjectDirectory)" />
+  </Target>
+  <Import Project="..\packages\Grpc.Core\build\$(__paket__Grpc_Core_targets).targets" Condition="Exists('..\packages\Grpc.Core\build\$(__paket__Grpc_Core_targets).targets')" Label="Paket" />
+  <Import Project="$(VsSDKBuild)\Microsoft.VSSDK.BuildTools.targets" Condition="Exists('$(VsSDKBuild)\Microsoft.VSSDK.BuildTools.targets')" Label="Paket" />
+  <Import Project="$(VsSDKInstall)\Microsoft.VSSDK.targets" Label="Paket" />
 </Project>

@@ -76,7 +76,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GaugeRunner.cs" />
-    <Compile Include="GaugeRunnerV2.cs" />
     <Compile Include="GaugeTestRunSettings.cs" />
     <Compile Include="GaugeTestRunSettingsService.cs" />
     <Compile Include="IGaugeTestRunSettingsService.cs" />
