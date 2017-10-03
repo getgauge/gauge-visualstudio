@@ -1,3 +1,4 @@
+RESTRICTION: == net45
 NUGET
   remote: https://www.nuget.org/api/v2
     EnvDTE (8.0.1)
@@ -20,60 +21,30 @@ NUGET
       EnvDTE80 (>= 8.0)
       EnvDTE90 (>= 9.0)
       stdole (>= 7.0.3300)
-    Gauge.CSharp.Core (0.2.1) - restriction: >= net45
+    Gauge.CSharp.Core (0.2.1)
       Gauge.CSharp.Lib (>= 0.6.1)
       Google.Protobuf (>= 3.1)
-    Gauge.CSharp.Lib (0.6.1) - restriction: >= net45
-    Google.Protobuf (3.1) - restriction: >= net45
+    Gauge.CSharp.Lib (0.6.1)
+    Google.Protobuf (3.1)
     Microsoft.CSharp (4.0)
-      System.Collections (>= 4.0.10) - restriction: >= dnxcore50
-      System.Diagnostics.Debug (>= 4.0.10) - restriction: >= dnxcore50
-      System.Dynamic.Runtime (>= 4.0) - restriction: >= dnxcore50
-      System.Globalization (>= 4.0.10) - restriction: >= dnxcore50
-      System.Linq (>= 4.0) - restriction: >= dnxcore50
-      System.Linq.Expressions (>= 4.0) - restriction: >= dnxcore50
-      System.ObjectModel (>= 4.0.10) - restriction: >= dnxcore50
-      System.Reflection (>= 4.0.10) - restriction: >= dnxcore50
-      System.Reflection.Extensions (>= 4.0) - restriction: >= dnxcore50
-      System.Reflection.Primitives (>= 4.0) - restriction: >= dnxcore50
-      System.Reflection.TypeExtensions (>= 4.0) - restriction: >= dnxcore50
-      System.Resources.ResourceManager (>= 4.0) - restriction: >= dnxcore50
-      System.Runtime (>= 4.0.20) - restriction: >= dnxcore50
-      System.Runtime.Extensions (>= 4.0.10) - restriction: >= dnxcore50
-      System.Runtime.InteropServices (>= 4.0.20) - restriction: >= dnxcore50
-      System.Threading (>= 4.0.10) - restriction: >= dnxcore50
+    Microsoft.TestPlatform.ObjectModel (11.0)
+    Microsoft.VisualStudio.TestWindow.Interfaces (11.0.61030)
     Microsoft.VSSDK.BuildTools (14.3.25420)
     NuGet.CommandLine (4.3)
     stdole (7.0.3301)
-    System.Collections (4.3) - restriction: >= dnxcore50
-    System.Diagnostics.Debug (4.3) - restriction: >= dnxcore50
-    System.Dynamic.Runtime (4.3) - restriction: >= dnxcore50
-    System.Globalization (4.3) - restriction: >= dnxcore50
-    System.Linq (4.3) - restriction: >= dnxcore50
-    System.Linq.Expressions (4.3) - restriction: >= dnxcore50
-    System.ObjectModel (4.3) - restriction: >= dnxcore50
-    System.Reflection (4.3) - restriction: >= dnxcore50
-    System.Reflection.Extensions (4.3) - restriction: >= dnxcore50
-    System.Reflection.Primitives (4.3) - restriction: >= dnxcore50
-    System.Reflection.TypeExtensions (4.4) - restriction: >= dnxcore50
-    System.Resources.ResourceManager (4.3) - restriction: >= dnxcore50
-    System.Runtime (4.3) - restriction: >= dnxcore50
-    System.Runtime.Extensions (4.3) - restriction: >= dnxcore50
-    System.Runtime.InteropServices (4.3) - restriction: >= dnxcore50
-    System.Threading (4.3) - restriction: >= dnxcore50
-    VSSDK.ComponentModelHost (12.0.4) - restriction: >= net45
+    VSSDK.ComponentModelHost (12.0.4)
       VSSDK.IDE.12 (>= 12.0.4 < 13.0)
     VSSDK.CoreUtility (12.0.4)
       VSSDK.IDE.12 (>= 12.0.4 < 13.0)
-    VSSDK.CoreUtility.12 (12.0.4) - restriction: >= net45
+    VSSDK.CoreUtility.12 (12.0.4)
       VSSDK.CoreUtility (>= 12.0.4 < 13.0)
       VSSDK.IDE.12 (>= 12.0.4 < 13.0)
     VSSDK.DTE (7.0.4)
       VSSDK.IDE (>= 7.0.4 < 8.0)
-    VSSDK.DTE.8 (8.0.4) - restriction: >= net452
+    VSSDK.DTE.8 (8.0.4) - restriction: && (== net45) (>= net452)
       VSSDK.DTE (>= 7.0.4 < 8.0)
       VSSDK.IDE.8 (>= 8.0.4 < 9.0)
-    VSSDK.Editor (12.0.4) - restriction: >= net45
+    VSSDK.Editor (12.0.4)
       VSSDK.CoreUtility (>= 12.0.4)
       VSSDK.IDE.12 (>= 12.0.4 < 13.0)
       VSSDK.OLE.Interop (>= 7.0.4 < 8.0)
@@ -88,7 +59,7 @@ NUGET
     VSSDK.IDE.12 (12.0.4)
     VSSDK.IDE.8 (8.0.4)
     VSSDK.IDE.9 (9.0.4)
-    VSSDK.Language (12.0.4) - restriction: >= net45
+    VSSDK.Language (12.0.4)
       VSSDK.CoreUtility (>= 12.0.4)
       VSSDK.IDE.12 (>= 12.0.4 < 13.0)
       VSSDK.Text (>= 12.0.4)
@@ -119,19 +90,19 @@ NUGET
       VSSDK.IDE (>= 7.0.4 < 8.0)
       VSSDK.OLE.Interop (>= 7.0.4 < 8.0)
       VSSDK.TextManager.Interop (>= 7.0.4 < 8.0)
-    VSSDK.Shell.Interop.10 (10.0.4) - restriction: >= net45
+    VSSDK.Shell.Interop.10 (10.0.4)
       VSSDK.IDE.10 (>= 10.0.4 < 11.0)
       VSSDK.OLE.Interop (>= 7.0.4 < 8.0)
       VSSDK.Shell.Interop.8 (>= 8.0.4 < 9.0)
       VSSDK.Shell.Interop.9 (>= 9.0.4 < 10.0)
-    VSSDK.Shell.Interop.11 (11.0.4) - restriction: >= net45
+    VSSDK.Shell.Interop.11 (11.0.4)
       VSSDK.IDE.11 (>= 11.0.4 < 12.0)
       VSSDK.OLE.Interop (>= 7.0.4 < 8.0)
       VSSDK.Shell.Interop (>= 7.0.4 < 8.0)
       VSSDK.Shell.Interop.10 (>= 10.0.4 < 11.0)
       VSSDK.Shell.Interop.8 (>= 8.0.4 < 9.0)
       VSSDK.Shell.Interop.9 (>= 9.0.4 < 10.0)
-    VSSDK.Shell.Interop.12 (12.0.4) - restriction: >= net45
+    VSSDK.Shell.Interop.12 (12.0.4)
       VSSDK.IDE.12 (>= 12.0.4 < 13.0)
       VSSDK.OLE.Interop (>= 7.0.4 < 8.0)
       VSSDK.Shell.Interop (>= 7.0.4 < 8.0)
@@ -150,13 +121,10 @@ NUGET
       VSSDK.OLE.Interop (>= 7.0.4 < 8.0)
       VSSDK.Shell.Interop.8 (>= 8.0.4 < 9.0)
       VSSDK.TextManager.Interop (>= 7.0.4 < 8.0)
-    VSSDK.TemplateWizardInterface (12.0.4) - restriction: >= net45
-      VSSDK.DTE (>= 7.0.4 < 8.0)
-      VSSDK.IDE.12 (>= 12.0.4 < 13.0)
     VSSDK.Text (12.0.4)
       VSSDK.CoreUtility (>= 12.0.4)
       VSSDK.IDE.12 (>= 12.0.4 < 13.0)
-    VSSDK.Text.12 (12.0.4) - restriction: >= net45
+    VSSDK.Text.12 (12.0.4)
       VSSDK.CoreUtility.12 (>= 12.0.4 < 13.0)
       VSSDK.IDE.12 (>= 12.0.4 < 13.0)
       VSSDK.Text (>= 12.0.4 < 13.0)
@@ -173,15 +141,16 @@ NUGET
     VSSDK.Threading.12 (12.0.4)
       VSSDK.IDE.12 (>= 12.0.4 < 13.0)
       VSSDK.Threading (>= 12.0.4 < 13.0)
-    VSSDK.VSLangProj (7.0.4) - restriction: >= net45
+    VSSDK.VSLangProj (7.0.4)
       VSSDK.DTE (>= 7.0.4 < 8.0)
       VSSDK.IDE (>= 7.0.4 < 8.0)
 
 GROUP Test
+RESTRICTION: == net45
 NUGET
   remote: https://www.nuget.org/api/v2
-    FakeItEasy (4.0) - restriction: >= net45
-    NUnit (3.0.1) - restriction: >= net45
-    NUnit.Console (3.0.1) - restriction: >= net45
-    NUnit.Runners (3.0.1) - restriction: >= net45
+    FakeItEasy (4.0)
+    NUnit (3.0.1)
+    NUnit.Console (3.0.1)
+    NUnit.Runners (3.0.1)
       NUnit.Console (3.0.1)

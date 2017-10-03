@@ -1,3 +1,5 @@
+framework: net45
+
 source https://www.nuget.org/api/v2/
 
 nuget NuGet.CommandLine
@@ -30,7 +32,6 @@ nuget VSSDK.Shell.Interop.11 11.0.4 framework: >= net45
 nuget VSSDK.Shell.Interop.12 12.0.4 framework: >= net45
 nuget VSSDK.Shell.Interop.8 8.0.4
 nuget VSSDK.Shell.Interop.9 9.0.4
-nuget VSSDK.TemplateWizardInterface 12.0.4 framework: >= net45
 nuget VSSDK.Text 12.0.4
 nuget VSSDK.Text.12 12.0.4 framework: >= net45
 nuget VSSDK.TextManager.Interop 7.0.4
@@ -42,8 +43,11 @@ nuget EnvDTE80 8.0.0
 nuget EnvDTE90 9.0.0
 nuget EnvDTE100 10.0.0
 nuget Microsoft.VSSDK.BuildTools 14.3.25420
+nuget Microsoft.TestPlatform.ObjectModel 11.0.0
+nuget Microsoft.VisualStudio.TestWindow.Interfaces 11.0.61030
 
 group Test
+    framework: net45
     source https://www.nuget.org/api/v2/
 
     nuget FakeItEasy framework: >= net45

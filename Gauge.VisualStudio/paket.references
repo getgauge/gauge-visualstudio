@@ -24,7 +24,6 @@ VSSDK.Shell.Interop.11
 VSSDK.Shell.Interop.12
 VSSDK.Shell.Interop.8
 VSSDK.Shell.Interop.9
-VSSDK.TemplateWizardInterface
 VSSDK.Text
 VSSDK.TextManager.Interop
 VSSDK.TextManager.Interop.8
