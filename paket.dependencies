@@ -10,28 +10,13 @@ nuget Microsoft.CSharp 4.0.0
 nuget VSSDK.ComponentModelHost 12.0.4 framework: >= net45
 nuget VSSDK.CoreUtility 12.0.4
 nuget VSSDK.CoreUtility.12 12.0.4 framework: >= net45
-nuget VSSDK.DTE 7.0.4
-nuget VSSDK.DTE.8 8.0.4 framework: >= net452
 nuget VSSDK.Editor 12.0.4 framework: >= net45
 nuget VSSDK.GraphModel 12.0.4
-nuget VSSDK.IDE 7.0.4
-nuget VSSDK.IDE.10 10.0.4
-nuget VSSDK.IDE.11 11.0.4
 nuget VSSDK.IDE.12 12.0.4
-nuget VSSDK.IDE.8 8.0.4
-nuget VSSDK.IDE.9 9.0.4
 nuget VSSDK.Language 12.0.4 framework: >= net45
 nuget VSSDK.OLE.Interop 7.0.4
 nuget VSSDK.Shell.12 12.0.4
-nuget VSSDK.Shell.Immutable.10 10.0.4
-nuget VSSDK.Shell.Immutable.11 11.0.4
-nuget VSSDK.Shell.Immutable.12 12.0.4
-nuget VSSDK.Shell.Interop 7.0.4
-nuget VSSDK.Shell.Interop.10 10.0.4 framework: >= net45
-nuget VSSDK.Shell.Interop.11 11.0.4 framework: >= net45
 nuget VSSDK.Shell.Interop.12 12.0.4 framework: >= net45
-nuget VSSDK.Shell.Interop.8 8.0.4
-nuget VSSDK.Shell.Interop.9 9.0.4
 nuget VSSDK.Text 12.0.4
 nuget VSSDK.Text.12 12.0.4 framework: >= net45
 nuget VSSDK.TextManager.Interop 7.0.4
@@ -40,8 +25,6 @@ nuget VSSDK.Threading 12.0.4
 nuget VSSDK.Threading.12 12.0.4
 nuget VSSDK.VSLangProj 7.0.4 framework: >= net45
 nuget EnvDTE80 8.0.0
-nuget EnvDTE90 9.0.0
-nuget EnvDTE100 10.0.0
 nuget Microsoft.VSSDK.BuildTools 14.3.25420
 nuget Microsoft.TestPlatform.ObjectModel 11.0.0
 nuget Microsoft.VisualStudio.TestWindow.Interfaces 11.0.61030
