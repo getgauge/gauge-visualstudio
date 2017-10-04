@@ -1,25 +1,10 @@
-RESTRICTION: == net45
+RESTRICTION: == net46
 NUGET
   remote: https://www.nuget.org/api/v2
     EnvDTE (8.0.1)
       stdole (>= 7.0.3301)
-    EnvDTE100 (10.0)
-      EnvDTE (>= 8.0)
-      EnvDTE80 (>= 8.0)
-      EnvDTE90 (>= 9.0)
-      EnvDTE90a (>= 9.0)
-      stdole (>= 7.0.3300)
     EnvDTE80 (8.0)
       EnvDTE (>= 8.0)
-      stdole (>= 7.0.3300)
-    EnvDTE90 (9.0)
-      EnvDTE (>= 8.0)
-      EnvDTE80 (>= 8.0)
-      stdole (>= 7.0.3300)
-    EnvDTE90a (9.0)
-      EnvDTE (>= 8.0)
-      EnvDTE80 (>= 8.0)
-      EnvDTE90 (>= 9.0)
       stdole (>= 7.0.3300)
     Gauge.CSharp.Core (0.2.1)
       Gauge.CSharp.Lib (>= 0.6.1)
@@ -143,7 +128,7 @@ NUGET
       VSSDK.IDE (>= 7.0.4 < 8.0)
 
 GROUP Test
-RESTRICTION: == net45
+RESTRICTION: == net46
 NUGET
   remote: https://www.nuget.org/api/v2
     FakeItEasy (4.0)

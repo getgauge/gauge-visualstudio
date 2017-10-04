@@ -31,6 +31,4 @@ VSSDK.Threading
 VSSDK.Threading.12
 VSSDK.VSLangProj
 EnvDTE80
-EnvDTE90
-EnvDTE100
 Microsoft.VSSDK.BuildTools

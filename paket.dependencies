@@ -1,4 +1,4 @@
-framework: net45
+framework: net46
 
 source https://www.nuget.org/api/v2/
 
@@ -30,7 +30,7 @@ nuget Microsoft.TestPlatform.ObjectModel 11.0.0
 nuget Microsoft.VisualStudio.TestWindow.Interfaces 11.0.61030
 
 group Test
-    framework: net45
+    framework: net46
     source https://www.nuget.org/api/v2/
 
     nuget FakeItEasy framework: >= net45
