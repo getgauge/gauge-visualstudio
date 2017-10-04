@@ -37,24 +37,26 @@ namespace Gauge.VisualStudio.Model
         public IEnumerable<Concept> GetAllConcepts()
         {
             if (_project == null)
-            {
                 return Enumerable.Empty<Concept>();
-            }
             try
             {
                 var gaugeApiConnection = GaugeService.Instance.GetApiConnectionFor(_project);
                 var conceptsRequest = new GetAllConceptsRequest();
-                var apiMessage = new APIMessage()
-                    {
-                        MessageId = GenerateMessageId(),
-                        MessageType = APIMessage.Types.APIMessageType.GetAllConceptsRequest,
-                        AllConceptsRequest = conceptsRequest
-                    };
+                var apiMessage = new APIMessage
+                {
+                    MessageId = GenerateMessageId(),
+                    MessageType = APIMessage.Types.APIMessageType.GetAllConceptsRequest,
+                    AllConceptsRequest = conceptsRequest
+                };
 
                 var bytes = gaugeApiConnection.WriteAndReadApiMessage(apiMessage);
 
-                return bytes.AllConceptsResponse.Concepts.Select(info => new Concept(_project) { StepValue = info.StepValue.ParameterizedStepValue, FilePath = info.Filepath, LineNumber = info.LineNumber });
-
+                return bytes.AllConceptsResponse.Concepts.Select(info => new Concept(_project)
+                {
+                    StepValue = info.StepValue.ParameterizedStepValue,
+                    FilePath = info.Filepath,
+                    LineNumber = info.LineNumber
+                });
             }
             catch (GaugeApiInitializationException)
             {
@@ -73,12 +75,13 @@ namespace Gauge.VisualStudio.Model
             {
                 var gaugeServiceClient = new GaugeServiceClient();
                 return GetAllConcepts().FirstOrDefault(
-                    concept => string.CompareOrdinal(gaugeServiceClient.GetParsedStepValueFromInput(_project, concept.StepValue), 
-                                            gaugeServiceClient.GetParsedStepValueFromInput(_project, lineText)) == 0);
+                    concept => string.CompareOrdinal(
+                                   gaugeServiceClient.GetParsedStepValueFromInput(_project, concept.StepValue),
+                                   gaugeServiceClient.GetParsedStepValueFromInput(_project, lineText)) == 0);
             }
             catch
             {
-                return null;                
+                return null;
             }
         }
     }

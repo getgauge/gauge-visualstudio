@@ -24,7 +24,8 @@ namespace Gauge.VisualStudio.Model.Extensions
         {
             ITextDocument textDoc;
             snapshot.TextBuffer.Properties.TryGetProperty(typeof(ITextDocument), out textDoc);
-            var document = dte.Documents.Cast<Document>().FirstOrDefault(d => string.CompareOrdinal(d.FullName, textDoc.FilePath) == 0);
+            var document = dte.Documents.Cast<Document>()
+                .FirstOrDefault(d => string.CompareOrdinal(d.FullName, textDoc.FilePath) == 0);
             return document == null ? null : document.ProjectItem.ContainingProject;
         }
     }

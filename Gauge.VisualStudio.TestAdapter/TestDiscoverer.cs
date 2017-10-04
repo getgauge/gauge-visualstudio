@@ -33,24 +33,25 @@ namespace Gauge.VisualStudio.TestAdapter
     {
         public static readonly TestProperty GaugeCustomBuildPath = TestProperty.Register(
             "TestCase.GaugeCustomBuildPath",
-            "Custom build path for Gauge project binaries.", typeof (string), typeof (TestCase));
+            "Custom build path for Gauge project binaries.", typeof(string), typeof(TestCase));
 
         public static readonly TestProperty GaugeProjectRoot = TestProperty.Register("TestCase.GaugeProjectRoot",
-            "GAUGE_PROJECT_ROOT value set in Gauge.", typeof (string), typeof (TestCase));
+            "GAUGE_PROJECT_ROOT value set in Gauge.", typeof(string), typeof(TestCase));
 
         public static readonly TestProperty GaugeApiV2Port = TestProperty.Register("TestCase.GaugeApiV2Port",
             "GAUGE_API_V2_Port value set in Gauge.", typeof(int), typeof(TestCase));
 
         public static readonly TestProperty ScenarioIdentifier = TestProperty.Register("TestCase.ScenarioIdentifier",
-            "Scenario identifier in a given spec.", typeof (int), typeof (TestCase));
+            "Scenario identifier in a given spec.", typeof(int), typeof(TestCase));
 
         public static readonly TestProperty DaemonProcessId = TestProperty.Register("TestCase.DaemonProcessId",
-            "PID of the corresponding daemon process.", typeof (int), typeof (TestCase));
+            "PID of the corresponding daemon process.", typeof(int), typeof(TestCase));
 
         public static readonly TestProperty TestCaseType = TestProperty.Register("TestCase.Type",
-            "Type of the testcase object. Can be [hook, scenario].", typeof (string), typeof (TestCase));
+            "Type of the testcase object. Can be [hook, scenario].", typeof(string), typeof(TestCase));
 
-        public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger logger,
+        public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext,
+            IMessageLogger logger,
             ITestCaseDiscoverySink discoverySink)
         {
             var settingsProvider = discoveryContext.RunSettings.GetSettings(GaugeTestRunSettings.SettingsName)
@@ -58,13 +59,16 @@ namespace Gauge.VisualStudio.TestAdapter
             GetSpecs(settingsProvider.Settings, discoverySink, sources, logger);
         }
 
-        public static List<TestCase> GetSpecs(GaugeTestRunSettings testRunSettings, ITestCaseDiscoverySink discoverySink,
+        public static List<TestCase> GetSpecs(GaugeTestRunSettings testRunSettings,
+            ITestCaseDiscoverySink discoverySink,
             IEnumerable<string> sources, IMessageLogger logger)
         {
             var gaugeProjectProperties = testRunSettings.ProjectsProperties;
             var props = string.Join(",", gaugeProjectProperties.Select(p =>
-                        string.Format("ProjectRoot: {0}, OutputPath: {1}, API Port: {2}, API V2 Port: {3}", p.ProjectRoot, p.BuildOutputPath, p.ApiPort, p.ApiV2Port)));
-            logger.SendMessage(TestMessageLevel.Informational, string.Format("Discover Scenarios started. Using : {0}", props));
+                string.Format("ProjectRoot: {0}, OutputPath: {1}, API Port: {2}, API V2 Port: {3}", p.ProjectRoot,
+                    p.BuildOutputPath, p.ApiPort, p.ApiV2Port)));
+            logger.SendMessage(TestMessageLevel.Informational,
+                string.Format("Discover Scenarios started. Using : {0}", props));
 
             var testCases = new ConcurrentBag<TestCase>();
             var testSources = sources.Where(s => string.CompareOrdinal(s, "Suite") != 0);
@@ -76,11 +80,11 @@ namespace Gauge.VisualStudio.TestAdapter
 
                     Parallel.ForEach(protoSpecs, spec =>
                     {
-
                         if (testSources.All(s => string.CompareOrdinal(s, spec.FileName) != 0))
                             return;
 
-                        logger.SendMessage(TestMessageLevel.Informational, string.Format("Adding test cases from : {0}", spec.FileName));
+                        logger.SendMessage(TestMessageLevel.Informational,
+                            string.Format("Adding test cases from : {0}", spec.FileName));
                         var scenarioIndex = 0;
                         var scenarios = spec.Items.Where(item => item.Scenario != null).Select(item => item.Scenario);
 
@@ -90,9 +94,7 @@ namespace Gauge.VisualStudio.TestAdapter
                             testCases.Add(testCase);
 
                             if (discoverySink != null)
-                            {
                                 discoverySink.SendTestCase(testCase);
-                            }
 
                             scenarioIndex++;
                         }
@@ -123,14 +125,13 @@ namespace Gauge.VisualStudio.TestAdapter
             testCase.SetPropertyValue(DaemonProcessId, properties.DaemonProcessId);
             testCase.SetPropertyValue(TestCaseType, "scenario");
 
-            logger.SendMessage(TestMessageLevel.Informational, string.Format("Discovered scenario: {0}", testCase.DisplayName));
+            logger.SendMessage(TestMessageLevel.Informational,
+                string.Format("Discovered scenario: {0}", testCase.DisplayName));
 
             testCase.Traits.Add("Spec", spec.SpecHeading);
 
             foreach (var tag in scenario.Tags.Union(spec.Tags))
-            {
                 testCase.Traits.Add("Tag", tag);
-            }
             return testCase;
         }
 

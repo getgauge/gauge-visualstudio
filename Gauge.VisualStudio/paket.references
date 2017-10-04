@@ -32,3 +32,4 @@ VSSDK.Threading.12
 VSSDK.VSLangProj
 EnvDTE80
 Microsoft.VSSDK.BuildTools
+Microsoft.Net.Compilers

@@ -24,7 +24,7 @@ namespace Gauge.VisualStudio.Core.Tests.Extensions
         public void ShouldConvertStringToLiteral()
         {
             const string s = "this is some step text";
-            var expected = string.Format("\"{0}\"",s);
+            var expected = string.Format("\"{0}\"", s);
 
             var literal = s.ToLiteral();
 

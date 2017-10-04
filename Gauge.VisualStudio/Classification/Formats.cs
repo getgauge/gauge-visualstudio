@@ -18,14 +18,14 @@ using Microsoft.VisualStudio.Utilities;
 
 namespace Gauge.VisualStudio.Classification
 {
-    static class Formats
+    internal static class Formats
     {
         [Export(typeof(EditorFormatDefinition))]
         [ClassificationType(ClassificationTypeNames = "gauge.specification")]
         [Name("gauge.specification")]
         [DisplayName("Gauge Specification")]
         [UserVisible(true)]
-        sealed class GaugeSpecificationFormat : ClassificationFormatDefinition
+        private sealed class GaugeSpecificationFormat : ClassificationFormatDefinition
         {
             public GaugeSpecificationFormat()
             {
@@ -39,7 +39,7 @@ namespace Gauge.VisualStudio.Classification
         [Name("gauge.scenario")]
         [DisplayName("Gauge Scenario")]
         [UserVisible(true)]
-        sealed class GaugeScenarioFormat : ClassificationFormatDefinition
+        private sealed class GaugeScenarioFormat : ClassificationFormatDefinition
         {
             public GaugeScenarioFormat()
             {
@@ -53,16 +53,16 @@ namespace Gauge.VisualStudio.Classification
         [Name("gauge.step")]
         [DisplayName("Gauge Step")]
         [UserVisible(true)]
-        sealed class GaugeStepFormat : ClassificationFormatDefinition
+        private sealed class GaugeStepFormat : ClassificationFormatDefinition
         {
         }
-        
+
         [Export(typeof(EditorFormatDefinition))]
         [ClassificationType(ClassificationTypeNames = "gauge.static_param")]
         [Name("gauge.static_param")]
         [DisplayName("Gauge Static Parameter")]
         [UserVisible(true)]
-        sealed class GaugeStaticParamFormat : ClassificationFormatDefinition
+        private sealed class GaugeStaticParamFormat : ClassificationFormatDefinition
         {
             public GaugeStaticParamFormat()
             {
@@ -75,7 +75,7 @@ namespace Gauge.VisualStudio.Classification
         [Name("gauge.dynamic_param")]
         [DisplayName("Gauge Dynamic Parameter")]
         [UserVisible(true)]
-        sealed class GaugeDynamicParamFormat : ClassificationFormatDefinition
+        private sealed class GaugeDynamicParamFormat : ClassificationFormatDefinition
         {
             public GaugeDynamicParamFormat()
             {
@@ -88,11 +88,11 @@ namespace Gauge.VisualStudio.Classification
         [Name("gauge.tag")]
         [DisplayName("Gauge Tag")]
         [UserVisible(true)]
-        sealed class GaugeTagFormat : ClassificationFormatDefinition
+        private sealed class GaugeTagFormat : ClassificationFormatDefinition
         {
             public GaugeTagFormat()
             {
-                IsBold= true;
+                IsBold = true;
             }
         }
 
@@ -101,7 +101,7 @@ namespace Gauge.VisualStudio.Classification
         [Name("gauge.tagvalue")]
         [DisplayName("Gauge Tag Value")]
         [UserVisible(true)]
-        sealed class GaugeTagValueFormat : ClassificationFormatDefinition
+        private sealed class GaugeTagValueFormat : ClassificationFormatDefinition
         {
             public GaugeTagValueFormat()
             {

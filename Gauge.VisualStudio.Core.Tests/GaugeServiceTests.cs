@@ -25,9 +25,70 @@ namespace Gauge.VisualStudio.Core.Tests
     public class GaugeServiceTests
     {
         [Test]
+        public void ShouldBeCompatibleWithGaugeGreaterThanGaugeMinVersion()
+        {
+            var curGaugeMinVersion = GaugeService.MinGaugeVersion;
+            var testGaugeVersion = new GaugeVersion(string.Format("{0}.{1}.{2}", curGaugeMinVersion.Major,
+                curGaugeMinVersion.Minor, curGaugeMinVersion.Patch + 1));
+            var json = "{\"version\": \"" + testGaugeVersion +
+                       "\",\"plugins\": [{\"name\": \"csharp\",\"version\": \"0.9.2\"},{\"name\": \"html-report\",\"version\": \"2.1.0\"}]}";
+            var outputStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+            var errorStream = new MemoryStream(Encoding.UTF8.GetBytes(string.Empty));
+
+            var gaugeProcess = A.Fake<IGaugeProcess>();
+            A.CallTo(() => gaugeProcess.Start()).Returns(true);
+            A.CallTo(() => gaugeProcess.StandardOutput).Returns(new StreamReader(outputStream));
+            A.CallTo(() => gaugeProcess.StandardError).Returns(new StreamReader(errorStream));
+
+            Assert.DoesNotThrow(() => GaugeService.Instance.AssertCompatibility(gaugeProcess));
+        }
+
+        [Test]
+        public void ShouldBeCompatibleWithGaugeMinVersionForVs()
+        {
+            var curGaugeMinVersion = GaugeService.MinGaugeVersion;
+            var json = "{\"version\": \"" + curGaugeMinVersion +
+                       "\",\"plugins\": [{\"name\": \"csharp\",\"version\": \"0.9.2\"},{\"name\": \"html-report\",\"version\": \"2.1.0\"}]}";
+            var outputStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+            var errorStream = new MemoryStream(Encoding.UTF8.GetBytes(string.Empty));
+
+            var gaugeProcess = A.Fake<IGaugeProcess>();
+            A.CallTo(() => gaugeProcess.Start()).Returns(true);
+            A.CallTo(() => gaugeProcess.StandardOutput).Returns(new StreamReader(outputStream));
+            A.CallTo(() => gaugeProcess.StandardError).Returns(new StreamReader(errorStream));
+
+            Assert.DoesNotThrow(() => GaugeService.Instance.AssertCompatibility(gaugeProcess));
+        }
+
+        [Test]
+        public void ShouldBeIncompatibleWithOldGaugeVersion()
+        {
+            const string json =
+                "{\"version\": \"0.6.2\",\"plugins\": [{\"name\": \"csharp\",\"version\": \"0.9.2\"},{\"name\": \"html-report\",\"version\": \"2.1.0\"}]}";
+            var outputStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+            var errorStream = new MemoryStream(Encoding.UTF8.GetBytes(string.Empty));
+            var curGaugeMinVersion = GaugeService.MinGaugeVersion;
+            var expectedMessage = "This plugin works with Gauge " + curGaugeMinVersion +
+                                  " or above. You have Gauge 0.6.2 installed. Please update your Gauge installation.\n" +
+                                  " Run gauge -v from your command prompt for installation information.";
+
+            var gaugeProcess = A.Fake<IGaugeProcess>();
+            A.CallTo(() => gaugeProcess.Start()).Returns(true);
+            A.CallTo(() => gaugeProcess.StandardOutput).Returns(new StreamReader(outputStream));
+            A.CallTo(() => gaugeProcess.StandardError).Returns(new StreamReader(errorStream));
+
+            var gaugeVersionIncompatibleException =
+                Assert.Throws<GaugeVersionIncompatibleException>(() =>
+                    GaugeService.Instance.AssertCompatibility(gaugeProcess));
+
+            Assert.AreEqual(expectedMessage, gaugeVersionIncompatibleException.Data["GaugeError"]);
+        }
+
+        [Test]
         public void ShouldGetGaugeVersion()
         {
-            const string json = "{\"version\": \"0.4.0\",\"plugins\": [{\"name\": \"csharp\",\"version\": \"0.7.3\"},{\"name\": \"html-report\",\"version\": \"2.1.0\"}]}";
+            const string json =
+                "{\"version\": \"0.4.0\",\"plugins\": [{\"name\": \"csharp\",\"version\": \"0.7.3\"},{\"name\": \"html-report\",\"version\": \"2.1.0\"}]}";
             var outputStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
             var errorStream = new MemoryStream(Encoding.UTF8.GetBytes(string.Empty));
 
@@ -44,7 +105,9 @@ namespace Gauge.VisualStudio.Core.Tests
         [Test]
         public void ShouldGetGaugeVersionWhenDeprecated()
         {
-            var json = string.Concat("[DEPRECATED] This usage will be removed soon. Run `gauge help --legacy` for more info.", Environment.NewLine,
+            var json = string.Concat(
+                "[DEPRECATED] This usage will be removed soon. Run `gauge help --legacy` for more info.",
+                Environment.NewLine,
                 "{\"version\": \"0.4.0\",\"plugins\": [{\"name\": \"csharp\",\"version\": \"0.7.3\"},{\"name\": \"html-report\",\"version\": \"2.1.0\"}]}");
             var outputStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
             var errorStream = new MemoryStream(Encoding.UTF8.GetBytes(string.Empty));
@@ -72,65 +135,14 @@ namespace Gauge.VisualStudio.Core.Tests
             A.CallTo(() => gaugeProcess.StandardOutput).Returns(new StreamReader(outputStream));
             A.CallTo(() => gaugeProcess.StandardError).Returns(new StreamReader(errorStream));
 
-            var exception = Assert.Throws<GaugeVersionNotFoundException>(() => GaugeService.Instance.GetInstalledGaugeVersion(gaugeProcess));
+            var exception =
+                Assert.Throws<GaugeVersionNotFoundException>(() =>
+                    GaugeService.Instance.GetInstalledGaugeVersion(gaugeProcess));
 
             Assert.NotNull(exception);
             Assert.NotNull(exception.Data);
             Assert.AreEqual("Unable to read Gauge version", exception.Message);
             Assert.AreEqual(errorMessage, exception.Data["GaugeError"]);
-        }
-
-        [Test]
-        public void ShouldBeIncompatibleWithOldGaugeVersion()
-        {
-            const string json = "{\"version\": \"0.6.2\",\"plugins\": [{\"name\": \"csharp\",\"version\": \"0.9.2\"},{\"name\": \"html-report\",\"version\": \"2.1.0\"}]}";
-            var outputStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
-            var errorStream = new MemoryStream(Encoding.UTF8.GetBytes(string.Empty));
-            var curGaugeMinVersion = GaugeService.MinGaugeVersion;
-            string expectedMessage = "This plugin works with Gauge "+curGaugeMinVersion+" or above. You have Gauge 0.6.2 installed. Please update your Gauge installation.\n" + 
-                " Run gauge -v from your command prompt for installation information.";
-
-            var gaugeProcess = A.Fake<IGaugeProcess>();
-            A.CallTo(() => gaugeProcess.Start()).Returns(true);
-            A.CallTo(() => gaugeProcess.StandardOutput).Returns(new StreamReader(outputStream));
-            A.CallTo(() => gaugeProcess.StandardError).Returns(new StreamReader(errorStream));
-
-            var gaugeVersionIncompatibleException = Assert.Throws<GaugeVersionIncompatibleException>(() => GaugeService.Instance.AssertCompatibility(gaugeProcess));
-
-            Assert.AreEqual(expectedMessage, gaugeVersionIncompatibleException.Data["GaugeError"]);
-        }
-
-        [Test]
-        public void ShouldBeCompatibleWithGaugeMinVersionForVs()
-        {
-            var curGaugeMinVersion = GaugeService.MinGaugeVersion;
-            string json = "{\"version\": \""+curGaugeMinVersion+"\",\"plugins\": [{\"name\": \"csharp\",\"version\": \"0.9.2\"},{\"name\": \"html-report\",\"version\": \"2.1.0\"}]}";
-            var outputStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
-            var errorStream = new MemoryStream(Encoding.UTF8.GetBytes(string.Empty));
-
-            var gaugeProcess = A.Fake<IGaugeProcess>();
-            A.CallTo(() => gaugeProcess.Start()).Returns(true);
-            A.CallTo(() => gaugeProcess.StandardOutput).Returns(new StreamReader(outputStream));
-            A.CallTo(() => gaugeProcess.StandardError).Returns(new StreamReader(errorStream));
-
-            Assert.DoesNotThrow(() => GaugeService.Instance.AssertCompatibility(gaugeProcess));
-        }
-
-        [Test]
-        public void ShouldBeCompatibleWithGaugeGreaterThanGaugeMinVersion()
-        {
-            var curGaugeMinVersion = GaugeService.MinGaugeVersion;
-            var testGaugeVersion = new GaugeVersion(string.Format("{0}.{1}.{2}",curGaugeMinVersion.Major,curGaugeMinVersion.Minor,curGaugeMinVersion.Patch+1));
-            string json = "{\"version\": \"" + testGaugeVersion + "\",\"plugins\": [{\"name\": \"csharp\",\"version\": \"0.9.2\"},{\"name\": \"html-report\",\"version\": \"2.1.0\"}]}";
-            var outputStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
-            var errorStream = new MemoryStream(Encoding.UTF8.GetBytes(string.Empty));
-
-            var gaugeProcess = A.Fake<IGaugeProcess>();
-            A.CallTo(() => gaugeProcess.Start()).Returns(true);
-            A.CallTo(() => gaugeProcess.StandardOutput).Returns(new StreamReader(outputStream));
-            A.CallTo(() => gaugeProcess.StandardError).Returns(new StreamReader(errorStream));
-
-            Assert.DoesNotThrow(() => GaugeService.Instance.AssertCompatibility(gaugeProcess));
         }
     }
 }

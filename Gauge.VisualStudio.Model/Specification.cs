@@ -30,12 +30,16 @@ namespace Gauge.VisualStudio.Model
             }
             catch (GaugeVersionIncompatibleException ex)
             {
-                GaugeService.Instance.DisplayGaugeNotStartedMessage("Unable to launch Gauge Daemon. Check Output Window for details",ex.Data["GaugeError"].ToString(), GaugeDisplayErrorLevel.Error);
+                GaugeService.Instance.DisplayGaugeNotStartedMessage(
+                    "Unable to launch Gauge Daemon. Check Output Window for details", ex.Data["GaugeError"].ToString(),
+                    GaugeDisplayErrorLevel.Error);
                 return Enumerable.Empty<string>();
             }
             catch (GaugeVersionNotFoundException ex)
             {
-                GaugeService.Instance.DisplayGaugeNotStartedMessage("Unable to launch Gauge Daemon. Check Output Window for details", ex.Data["GaugeError"].ToString(), GaugeDisplayErrorLevel.Error);
+                GaugeService.Instance.DisplayGaugeNotStartedMessage(
+                    "Unable to launch Gauge Daemon. Check Output Window for details", ex.Data["GaugeError"].ToString(),
+                    GaugeDisplayErrorLevel.Error);
                 return Enumerable.Empty<string>();
             }
 
@@ -44,12 +48,9 @@ namespace Gauge.VisualStudio.Model
             try
             {
                 foreach (var apiConnection in GaugeService.Instance.GetAllApiConnections())
-                {
                     specifications.AddRange(gaugeServiceClient.GetSpecsFromGauge(apiConnection));
-                }
 
                 return specifications.Select(spec => spec.FileName).Distinct();
-
             }
             catch (GaugeApiInitializationException)
             {

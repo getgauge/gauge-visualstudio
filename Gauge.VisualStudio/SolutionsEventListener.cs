@@ -22,15 +22,23 @@ using Microsoft.VisualStudio.Shell.Interop;
 
 namespace Gauge.VisualStudio
 {
-    public sealed class SolutionsEventListener : IVsSolutionEvents, IDisposable    {
+    public sealed class SolutionsEventListener : IVsSolutionEvents, IDisposable
+    {
+        private bool _disposed;
         private IVsSolution _solution;
         private uint _solutionCookie;
-        private bool _disposed;
 
         public SolutionsEventListener()
         {
             _solution = Package.GetGlobalService(typeof(SVsSolution)) as IVsSolution;
             ErrorHandler.ThrowOnFailure(_solution.AdviseSolutionEvents(this, out _solutionCookie));
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+
+            GC.SuppressFinalize(this);
         }
 
         public int OnAfterOpenProject(IVsHierarchy pHierarchy, int fAdded)
@@ -98,13 +106,6 @@ namespace Gauge.VisualStudio
         public int OnAfterCloseSolution(object pUnkReserved)
         {
             return VSConstants.S_OK;
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-
-            GC.SuppressFinalize(this);
         }
 
         private void Dispose(bool disposing)

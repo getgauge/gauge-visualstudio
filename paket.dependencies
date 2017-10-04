@@ -28,6 +28,7 @@ nuget EnvDTE80 8.0.0
 nuget Microsoft.VSSDK.BuildTools 14.3.25420
 nuget Microsoft.TestPlatform.ObjectModel 11.0.0
 nuget Microsoft.VisualStudio.TestWindow.Interfaces 11.0.61030
+nuget Microsoft.Net.Compilers
 
 group Test
     framework: net46

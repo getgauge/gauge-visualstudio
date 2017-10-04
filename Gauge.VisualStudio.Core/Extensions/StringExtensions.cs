@@ -12,14 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using System.CodeDom;
 using System.CodeDom.Compiler;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading;
 
 namespace Gauge.VisualStudio.Core.Extensions
 {
@@ -41,7 +39,8 @@ namespace Gauge.VisualStudio.Core.Extensions
         {
             var identifierRegex = new Regex("[a-zA-Z][a-zA-Z0-9 _]*", RegexOptions.Compiled | RegexOptions.IgnoreCase);
             var matches = identifierRegex.Matches(input);
-            var identifier = matches.Cast<Match>().Aggregate(string.Empty, (current, match) => string.Concat(current, match.Value));
+            var identifier = matches.Cast<Match>()
+                .Aggregate(string.Empty, (current, match) => string.Concat(current, match.Value));
             return new CultureInfo("en").TextInfo.ToTitleCase(identifier).Replace(" ", "");
         }
 

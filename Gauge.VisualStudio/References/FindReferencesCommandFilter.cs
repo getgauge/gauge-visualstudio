@@ -31,6 +31,9 @@ namespace Gauge.VisualStudio.References
             TextView = textView;
         }
 
+        public IOleCommandTarget Next { get; set; }
+        private IWpfTextView TextView { get; }
+
         public int Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
         {
             var hresult = VSConstants.S_OK;
@@ -40,10 +43,12 @@ namespace Gauge.VisualStudio.References
                     var caretBufferPosition = TextView.Caret.Position.BufferPosition;
                     var originalText = Step.GetStepText(caretBufferPosition.GetContainingLine());
 
-                    var findRegex = new GaugeServiceClient().GetFindRegex(caretBufferPosition.Snapshot.GetProject(GaugePackage.DTE), originalText);
+                    var findRegex =
+                        new GaugeServiceClient().GetFindRegex(caretBufferPosition.Snapshot.GetProject(GaugePackage.DTE),
+                            originalText);
 
                     var _dte = ServiceProvider.GlobalProvider.GetService(typeof(DTE)) as DTE2;
-                    var find = (Find2)_dte.Find;
+                    var find = (Find2) _dte.Find;
 
                     var types = find.FilesOfType;
                     var matchCase = find.MatchCase;
@@ -76,14 +81,11 @@ namespace Gauge.VisualStudio.References
 
         public int QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText)
         {
-            if ((VSConstants.VSStd97CmdID)prgCmds[0].cmdID != VSConstants.VSStd97CmdID.FindReferences)
+            if ((VSConstants.VSStd97CmdID) prgCmds[0].cmdID != VSConstants.VSStd97CmdID.FindReferences)
                 return Next.QueryStatus(pguidCmdGroup, cCmds, prgCmds, pCmdText);
 
-            prgCmds[0].cmdf = (uint)OLECMDF.OLECMDF_ENABLED | (uint)OLECMDF.OLECMDF_SUPPORTED;
+            prgCmds[0].cmdf = (uint) OLECMDF.OLECMDF_ENABLED | (uint) OLECMDF.OLECMDF_SUPPORTED;
             return VSConstants.S_OK;
         }
-
-        public IOleCommandTarget Next { get; set; }
-        private IWpfTextView TextView { get; set; }
     }
 }

@@ -26,7 +26,8 @@ namespace Gauge.VisualStudio.Core.Helpers
 {
     public static class DTEHelper
     {
-        private static readonly string[] TestRunners = { "vstest.executionengine.x86", "te.processhost.managed" };
+        private static readonly string[] TestRunners = {"vstest.executionengine.x86", "te.processhost.managed"};
+
         public static DTE GetCurrent()
         {
             var testRunnerProcess = Process.GetCurrentProcess();
@@ -57,16 +58,15 @@ namespace Gauge.VisualStudio.Core.Helpers
                     try
                     {
                         if (runningObjectMoniker != null)
-                        {
                             runningObjectMoniker.GetDisplayName(bindCtx, null, out parentProcessName);
-                        }
                     }
                     catch (UnauthorizedAccessException)
                     {
                         // do nothing.
                     }
 
-                    var isVSProcess = IsVisualStudioProcessName(parentProcessName, GetVisualStudioProcessId(testRunnerProcess.Id));
+                    var isVSProcess = IsVisualStudioProcessName(parentProcessName,
+                        GetVisualStudioProcessId(testRunnerProcess.Id));
 
                     if (!isVSProcess) continue;
 
@@ -77,22 +77,16 @@ namespace Gauge.VisualStudio.Core.Helpers
             finally
             {
                 if (enumMonikers != null)
-                {
                     Marshal.ReleaseComObject(enumMonikers);
-                }
 
                 if (rot != null)
-                {
                     Marshal.ReleaseComObject(rot);
-                }
 
                 if (bindCtx != null)
-                {
                     Marshal.ReleaseComObject(bindCtx);
-                }
             }
 
-            return (DTE)runningObject;
+            return (DTE) runningObject;
         }
 
         public static bool IsVisualStudioProcessName(string name, int visualStudioProcessId)
@@ -109,12 +103,13 @@ namespace Gauge.VisualStudio.Core.Helpers
             var retries = 0;
             while (retries < 5)
             {
-                var mos = new ManagementObjectSearcher(string.Format("Select * From Win32_Process Where ParentProcessID={0} and Name='Gauge.CSharp.Runner.exe'", parentProcessId));
-                var processes = mos.Get().Cast<ManagementObject>().Select(mo => Convert.ToInt32(mo["ProcessID"])).ToList();
+                var mos = new ManagementObjectSearcher(string.Format(
+                    "Select * From Win32_Process Where ParentProcessID={0} and Name='Gauge.CSharp.Runner.exe'",
+                    parentProcessId));
+                var processes = mos.Get().Cast<ManagementObject>().Select(mo => Convert.ToInt32(mo["ProcessID"]))
+                    .ToList();
                 if (processes.Any())
-                {
                     return processes.First();
-                }
                 retries++;
                 Thread.Sleep(200);
             }
@@ -140,12 +135,12 @@ namespace Gauge.VisualStudio.Core.Helpers
 
         private static int GetVisualStudioProcessId(int testRunnerProcessId)
         {
-            var mos = new ManagementObjectSearcher(string.Format("Select * From Win32_Process Where ProcessID={0}", testRunnerProcessId));
-            var processes = mos.Get().Cast<ManagementObject>().Select(mo => Convert.ToInt32(mo["ParentProcessID"])).ToList();
+            var mos = new ManagementObjectSearcher(string.Format("Select * From Win32_Process Where ProcessID={0}",
+                testRunnerProcessId));
+            var processes = mos.Get().Cast<ManagementObject>().Select(mo => Convert.ToInt32(mo["ParentProcessID"]))
+                .ToList();
             if (processes.Any())
-            {
                 return processes.First();
-            }
             return -1;
         }
     }

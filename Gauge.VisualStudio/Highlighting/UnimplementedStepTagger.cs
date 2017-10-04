@@ -21,14 +21,13 @@ using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
-using Project = Gauge.VisualStudio.Model.Project;
 
 namespace Gauge.VisualStudio.Highlighting
 {
     internal class UnimplementedStepTagger : ITagger<AbstractGaugeErrorTag>, IDisposable
     {
-        private readonly ITextView _textView;
         private readonly IProject _project;
+        private readonly ITextView _textView;
 
         public UnimplementedStepTagger(ITextView textView)
         {
@@ -38,26 +37,10 @@ namespace Gauge.VisualStudio.Highlighting
             _project = Project.Instance;
         }
 
-        private void OnCaretMove(object sender, CaretPositionChangedEventArgs e)
+        public void Dispose()
         {
-            if (TagsChanged == null || GaugePackage.DTE.ActiveDocument == null || !GaugePackage.DTE.ActiveDocument.IsGaugeSpecFile()) return;
-            var line = _textView.GetTextViewLineContainingBufferPosition(e.NewPosition.BufferPosition);
-            TagsChanged(this, new SnapshotSpanEventArgs(line.Extent));
-        }
-
-        private void OnLayoutChanged(object sender, TextViewLayoutChangedEventArgs e)
-        {
-            if (TagsChanged == null || e.OldSnapshot == e.NewSnapshot) return;
-
-            foreach (var span in e.NewOrReformattedSpans)
-            {
-                TagsChanged(this, new SnapshotSpanEventArgs(span));
-            }
-        }
-
-        internal void MarkTagImplemented(SnapshotSpan span)
-        {
-            TagsChanged(this, new SnapshotSpanEventArgs(span));
+            _textView.Caret.PositionChanged -= OnCaretMove;
+            _textView.LayoutChanged -= OnLayoutChanged;
         }
 
         public IEnumerable<ITagSpan<AbstractGaugeErrorTag>> GetTags(NormalizedSnapshotSpanCollection spans)
@@ -72,7 +55,7 @@ namespace Gauge.VisualStudio.Highlighting
                     var match = Parser.StepRegex.Match(text);
                     var point = span.Start.Add(match.Index);
                     var unimplementedStepSpan = new SnapshotSpan(span.Snapshot, new Span(point.Position, match.Length));
-                    if (!match.Success) 
+                    if (!match.Success)
                         continue;
 
                     AbstractGaugeErrorTag gaugeErrorTag;
@@ -102,22 +85,39 @@ namespace Gauge.VisualStudio.Highlighting
 
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
-        private ReadOnlyCollection<SmartTagActionSet> GetSmartTagActions(SnapshotSpan span)
+        private void OnCaretMove(object sender, CaretPositionChangedEventArgs e)
         {
-            var actionList = new ReadOnlyCollection<ISmartTagAction>(new ISmartTagAction[] {new ImplementStepAction(span, this, _project)});
-            return new ReadOnlyCollection<SmartTagActionSet>(new[] {new SmartTagActionSet(actionList)});
+            if (TagsChanged == null || GaugePackage.DTE.ActiveDocument == null ||
+                !GaugePackage.DTE.ActiveDocument.IsGaugeSpecFile()) return;
+            var line = _textView.GetTextViewLineContainingBufferPosition(e.NewPosition.BufferPosition);
+            TagsChanged(this, new SnapshotSpanEventArgs(line.Extent));
         }
 
-        public void Dispose()
+        private void OnLayoutChanged(object sender, TextViewLayoutChangedEventArgs e)
         {
-            _textView.Caret.PositionChanged -= OnCaretMove;
-            _textView.LayoutChanged -= OnLayoutChanged;
+            if (TagsChanged == null || e.OldSnapshot == e.NewSnapshot) return;
+
+            foreach (var span in e.NewOrReformattedSpans)
+                TagsChanged(this, new SnapshotSpanEventArgs(span));
+        }
+
+        internal void MarkTagImplemented(SnapshotSpan span)
+        {
+            TagsChanged(this, new SnapshotSpanEventArgs(span));
+        }
+
+        private ReadOnlyCollection<SmartTagActionSet> GetSmartTagActions(SnapshotSpan span)
+        {
+            var actionList = new ReadOnlyCollection<ISmartTagAction>(new ISmartTagAction[]
+                {new ImplementStepAction(span, this, _project)});
+            return new ReadOnlyCollection<SmartTagActionSet>(new[] {new SmartTagActionSet(actionList)});
         }
 
         public void RaiseLayoutChanged()
         {
             var length = _textView.TextSnapshot.Length;
-            TagsChanged(this, new SnapshotSpanEventArgs(new SnapshotSpan(new SnapshotPoint(_textView.TextSnapshot, 0), length)));
+            TagsChanged(this,
+                new SnapshotSpanEventArgs(new SnapshotSpan(new SnapshotPoint(_textView.TextSnapshot, 0), length)));
         }
     }
 }

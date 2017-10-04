@@ -20,11 +20,12 @@ namespace Gauge.VisualStudio.Highlighting
 {
     internal abstract class AbstractGaugeErrorTag : SmartTag, IErrorTag
     {
-        public string ErrorType { get; protected set; }
-        public object ToolTipContent { get; protected set; }
-
-        public AbstractGaugeErrorTag(ReadOnlyCollection<SmartTagActionSet> actionSets) : base(SmartTagType.Ephemeral, actionSets)
+        public AbstractGaugeErrorTag(ReadOnlyCollection<SmartTagActionSet> actionSets) : base(SmartTagType.Ephemeral,
+            actionSets)
         {
         }
+
+        public string ErrorType { get; protected set; }
+        public object ToolTipContent { get; protected set; }
     }
 }

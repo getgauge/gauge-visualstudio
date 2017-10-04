@@ -19,20 +19,20 @@ namespace Gauge.VisualStudio.UI
 {
     public partial class RefactorDialog
     {
-        public string StepText { get; private set; }
-
         public RefactorDialog(string stepText)
         {
             InitializeComponent();
             StepTextBox.Text = stepText;
             StepTextBox.Focus();
             StepTextBox.SelectAll();
-            WindowStartupLocation=WindowStartupLocation.CenterScreen;
+            WindowStartupLocation = WindowStartupLocation.CenterScreen;
         }
+
+        public string StepText { get; private set; }
 
         private void BtnOk_Click(object sender, RoutedEventArgs e)
         {
-            StepText=StepTextBox.Text;
+            StepText = StepTextBox.Text;
             DialogResult = true;
         }
 
@@ -43,10 +43,8 @@ namespace Gauge.VisualStudio.UI
 
         private void RefactorDialog_OnKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key==Key.Escape)
-            {
+            if (e.Key == Key.Escape)
                 DialogResult = false;
-            }
         }
     }
 }

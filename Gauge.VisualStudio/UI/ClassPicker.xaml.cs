@@ -18,28 +18,33 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
-using Gauge.VisualStudio.Model;
+using EnvDTE;
 using Microsoft.CSharp;
-using Color = System.Windows.Media.Color;
 
 namespace Gauge.VisualStudio.UI
 {
     public partial class ClassPicker : IDisposable
     {
+        private readonly SolidColorBrush _blackColor = new SolidColorBrush(Color.FromRgb(0, 0, 0));
         private readonly IEnumerable<string> _classNames;
         private readonly CSharpCodeProvider _cSharpCodeProvider = new CSharpCodeProvider();
-        private readonly SolidColorBrush _redColor = new SolidColorBrush(Color.FromRgb(255,0,0));
-        private readonly SolidColorBrush _blackColor = new SolidColorBrush(Color.FromRgb(0,0,0));
+        private readonly SolidColorBrush _redColor = new SolidColorBrush(Color.FromRgb(255, 0, 0));
         private bool _disposed;
+
+        public ClassPicker(Project project)
+        {
+            InitializeComponent();
+            WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            _classNames = Model.Project.GetAllClasses(project, false).Select(element => element.Name).Take(10);
+            ClassListBox.ItemsSource = _classNames;
+        }
 
         public string SelectedClass { get; private set; }
 
-        public ClassPicker(EnvDTE.Project project)
+        public void Dispose()
         {
-            InitializeComponent();
-            WindowStartupLocation=WindowStartupLocation.CenterScreen;
-            _classNames = Project.GetAllClasses(project, false).Select(element => element.Name).Take(10);
-            ClassListBox.ItemsSource = _classNames;
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         private void ClassPicker_OnKeyDown(object sender, KeyEventArgs e)
@@ -65,21 +70,13 @@ namespace Gauge.VisualStudio.UI
             return _cSharpCodeProvider.IsValidIdentifier(ClassListBox.Text);
         }
 
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
         protected virtual void Dispose(bool disposing)
         {
             if (_disposed)
                 return;
 
             if (disposing)
-            {
                 _cSharpCodeProvider.Dispose();
-            }
 
             _disposed = true;
         }

@@ -21,11 +21,11 @@ using EnvDTE;
 using EnvDTE80;
 using Gauge.VisualStudio.Core;
 using Gauge.VisualStudio.Core.Exceptions;
+using Gauge.VisualStudio.TestAdapter;
 using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
-using Gauge.VisualStudio.TestAdapter;
-using Microsoft.VisualStudio.ComponentModelHost;
 
 namespace Gauge.VisualStudio
 {
@@ -39,17 +39,18 @@ namespace Gauge.VisualStudio
     [ProvideEditorExtension(typeof(GaugeEditorFactory), GaugeContentTypeDefinitions.SpecFileExtension, 32)]
     [ProvideEditorExtension(typeof(GaugeEditorFactory), GaugeContentTypeDefinitions.ConceptFileExtension, 32)]
     [ProvideEditorExtension(typeof(GaugeEditorFactory), GaugeContentTypeDefinitions.MarkdownFileExtension, 32)]
-    [ProvideLanguageService(typeof(GaugeLanguageInfo), GaugeLanguageInfo.LanguageName, GaugeLanguageInfo.LanguageResourceId,
+    [ProvideLanguageService(typeof(GaugeLanguageInfo), GaugeLanguageInfo.LanguageName,
+        GaugeLanguageInfo.LanguageResourceId,
         DefaultToInsertSpaces = true,
         EnableLineNumbers = true,
         RequestStockColors = true)]
-    [ProvideOptionPage(typeof(GaugeExecutionOptions),"Gauge", "Test Execution", 0, 0, true)]
+    [ProvideOptionPage(typeof(GaugeExecutionOptions), "Gauge", "Test Execution", 0, 0, true)]
     public class GaugePackage : Package, IDisposable
     {
-        private Events2 _DTEEvents;
-        private SolutionsEventListener _solutionsEventListener;
-        private FormatMenuCommand _formatMenuCommand;
         private bool _disposed;
+        private Events2 _DTEEvents;
+        private FormatMenuCommand _formatMenuCommand;
+        private SolutionsEventListener _solutionsEventListener;
 
         private IComponentModel componentModel;
 
@@ -58,10 +59,23 @@ namespace Gauge.VisualStudio
             get
             {
                 if (componentModel == null)
-                    componentModel = (IComponentModel)GetGlobalService(typeof(SComponentModel));
+                    componentModel = (IComponentModel) GetGlobalService(typeof(SComponentModel));
                 return componentModel;
             }
         }
+
+        public IGaugeTestRunSettingsService settingsService { get; private set; }
+
+        public GaugeExecutionOptions Options { get; private set; }
+
+        public static DTE DTE { get; private set; }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
         protected override void Initialize()
         {
             Debug.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", ToString()));
@@ -80,7 +94,7 @@ namespace Gauge.VisualStudio
 
             base.Initialize();
 
-            DTE = (DTE) GetService(typeof (DTE));
+            DTE = (DTE) GetService(typeof(DTE));
 
             // Add our command handlers for menu (commands must exist in the .vsct file)
             _formatMenuCommand = new FormatMenuCommand(this);
@@ -97,21 +111,9 @@ namespace Gauge.VisualStudio
             settingsService.MapSettings(Options.UseExecutionAPI);
         }
 
-        public IGaugeTestRunSettingsService settingsService { get; private set; }
-
         private void SettingsPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             settingsService.MapSettings(Options.UseExecutionAPI);
-        }
-
-        public GaugeExecutionOptions Options { get; private set; }
-
-        public static DTE DTE { get; private set; }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         protected override void Dispose(bool disposing)
@@ -120,9 +122,7 @@ namespace Gauge.VisualStudio
                 return;
 
             if (disposing && _solutionsEventListener != null)
-            {
                 _solutionsEventListener.Dispose();
-            }
 
             _disposed = true;
             base.Dispose(disposing);

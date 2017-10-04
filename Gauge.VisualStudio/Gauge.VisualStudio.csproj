@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="14.0">
   <Import Project="..\packages\Microsoft.VSSDK.BuildTools\build\Microsoft.VSSDK.BuildTools.props" Condition="Exists('..\packages\Microsoft.VSSDK.BuildTools\build\Microsoft.VSSDK.BuildTools.props')" Label="Paket" />
+  <Import Project="..\packages\Microsoft.Net.Compilers\build\Microsoft.Net.Compilers.props" Condition="Exists('..\packages\Microsoft.Net.Compilers\build\Microsoft.Net.Compilers.props')" Label="Paket" />
   <PropertyGroup>
     <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
     <VsSDKInstall>..\packages\Microsoft.VSSDK.BuildTools\tools\vssdk</VsSDKInstall>

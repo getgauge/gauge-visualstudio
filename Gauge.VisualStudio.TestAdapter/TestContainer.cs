@@ -23,12 +23,11 @@ namespace Gauge.VisualStudio.TestAdapter
 {
     public class TestContainer : ITestContainer
     {
-        private readonly ITestContainerDiscoverer _testContainerDiscoverer;
         private DateTime _timestamp;
 
         public TestContainer(ITestContainerDiscoverer testContainerDiscoverer, string s, DateTime timestamp)
         {
-            _testContainerDiscoverer = testContainerDiscoverer;
+            Discoverer = testContainerDiscoverer;
             Source = s;
             _timestamp = timestamp;
         }
@@ -53,31 +52,16 @@ namespace Gauge.VisualStudio.TestAdapter
             return new TestContainer(Discoverer, Source, _timestamp);
         }
 
-        public ITestContainerDiscoverer Discoverer
-        {
-            get { return _testContainerDiscoverer; }
-        }
+        public ITestContainerDiscoverer Discoverer { get; }
 
-        public string Source { get; private set; }
+        public string Source { get; }
 
-        public IEnumerable<Guid> DebugEngines
-        {
-            get { return Enumerable.Empty<Guid>(); }
-        }
+        public IEnumerable<Guid> DebugEngines => Enumerable.Empty<Guid>();
 
-        public FrameworkVersion TargetFramework
-        {
-            get { return FrameworkVersion.None; }
-        }
+        public FrameworkVersion TargetFramework => FrameworkVersion.None;
 
-        public Architecture TargetPlatform
-        {
-            get { return Architecture.AnyCPU; }
-        }
+        public Architecture TargetPlatform => Architecture.AnyCPU;
 
-        public bool IsAppContainerTestContainer
-        {
-            get { return false; }
-        }
+        public bool IsAppContainerTestContainer => false;
     }
 }

@@ -24,23 +24,25 @@ using Gauge.VisualStudio.Loggers;
 using Gauge.VisualStudio.Model;
 using Gauge.VisualStudio.Model.Extensions;
 using Microsoft.VisualStudio.Text;
+using Project = EnvDTE.Project;
 
 namespace Gauge.VisualStudio.Highlighting
 {
     public class StepImplementationGenerator
     {
-        private readonly EnvDTE.Project _vsProject;
         private readonly IProject _project;
         private readonly IStep _step;
+        private readonly Project _vsProject;
 
-        public StepImplementationGenerator(EnvDTE.Project vsProject, IProject project, IStep step)
+        public StepImplementationGenerator(Project vsProject, IProject project, IStep step)
         {
             _vsProject = vsProject;
             _step = step;
             _project = project;
         }
 
-        public bool TryGenerateMethodStub(string selectedClass, ITextSnapshotLine containingLine, out CodeClass targetClass, out CodeFunction implementationFunction)
+        public bool TryGenerateMethodStub(string selectedClass, ITextSnapshotLine containingLine,
+            out CodeClass targetClass, out CodeFunction implementationFunction)
         {
             targetClass = null;
             implementationFunction = null;
@@ -55,16 +57,13 @@ namespace Gauge.VisualStudio.Highlighting
             }
 
             if (targetClass == null)
-            {
-                //TODO: Display error to user?
                 return false;
-            }
 
             EnsureGaugeImport(targetClass);
 
             var functionName = _step.Text.ToMethodIdentifier();
             var functionCount = _project.GetFunctionsForClass(targetClass)
-                    .Count(element => string.CompareOrdinal(element.Name, functionName) == 0);
+                .Count(element => string.CompareOrdinal(element.Name, functionName) == 0);
             functionName = functionCount == 0 ? functionName : functionName + functionCount;
 
             try
@@ -78,12 +77,11 @@ namespace Gauge.VisualStudio.Highlighting
 
                 if (_step.HasInlineTable)
                 {
-                    implementationFunction.AddParameter("table", typeof (Table).Name);
+                    implementationFunction.AddParameter("table", typeof(Table).Name);
                     parameterList.RemoveAt(0);
                 }
 
                 foreach (var parameter in parameterList)
-                {
                     if (IsSpecialParameter(parameter))
                     {
                         AddSpecialParam(implementationFunction, parameter);
@@ -93,7 +91,6 @@ namespace Gauge.VisualStudio.Highlighting
                         var newName = GenerateNewParameterIdentifier(implementationFunction, parameter);
                         implementationFunction.AddParameter(newName, vsCMTypeRef.vsCMTypeRefString);
                     }
-                }
 
                 AddStepAttribute(implementationFunction, _step.Text);
             }
@@ -116,21 +113,15 @@ namespace Gauge.VisualStudio.Highlighting
             var targetClassUsingStatements = targetClass.ProjectItem.GetUsingStatements().ToList();
 
             foreach (var usingStatement in usings)
-            {
                 if (!targetClassUsingStatements.Any(s => s.Contains(usingStatement)))
-                {
                     targetClass.ProjectItem.AddUsingStatement(usingStatement);
-                }
-            }
         }
 
         private static void AddSpecialParam(CodeFunction implementationFunction, string parameter)
         {
             object paramType = vsCMTypeRef.vsCMTypeRefString;
             if (parameter.StartsWith("table:"))
-            {
                 paramType = typeof(Table).Name;
-            }
             var paramValue = GetParamName(parameter.Split(':').Last());
             var variableIdentifier = GenerateNewParameterIdentifier(implementationFunction, paramValue);
             implementationFunction.AddParameter(variableIdentifier, paramType);
@@ -144,7 +135,7 @@ namespace Gauge.VisualStudio.Highlighting
         private static string GenerateNewParameterIdentifier(CodeFunction implementationFunction, string parameter)
         {
             var i = implementationFunction.Parameters.Cast<CodeParameter2>()
-                    .Count(param => string.CompareOrdinal(param.Name, parameter) == 0);
+                .Count(param => string.CompareOrdinal(param.Name, parameter) == 0);
             var newName = i == 0 ? parameter : parameter + i;
             return newName.ToVariableIdentifier();
         }
@@ -154,9 +145,7 @@ namespace Gauge.VisualStudio.Highlighting
             var codeAttribute = implementationFunction.AddAttribute("Step", stepValue.ToLiteral(), -1);
 
             if (codeAttribute == null)
-            {
                 throw new ChangeRejectedException("Step Attribute not created");
-            }
         }
 
         private static string GetParamName(string tableName)

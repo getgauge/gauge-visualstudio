@@ -25,3 +25,4 @@ VSSDK.Threading.12
 EnvDTE80
 Microsoft.TestPlatform.ObjectModel
 Microsoft.VisualStudio.TestWindow.Interfaces
+Microsoft.Net.Compilers

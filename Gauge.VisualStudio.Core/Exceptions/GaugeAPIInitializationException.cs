@@ -23,7 +23,6 @@ namespace Gauge.VisualStudio.Core.Exceptions
 
         public GaugeApiInitializationException() : base(ErrorMessage)
         {
-            
         }
     }
 }

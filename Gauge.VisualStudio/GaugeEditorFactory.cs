@@ -35,7 +35,8 @@ namespace Gauge.VisualStudio
             _package = package;
         }
 
-        public int CreateEditorInstance(uint grfCreateDoc, string pszMkDocument, string pszPhysicalView, IVsHierarchy pvHier,
+        public int CreateEditorInstance(uint grfCreateDoc, string pszMkDocument, string pszPhysicalView,
+            IVsHierarchy pvHier,
             uint itemid, IntPtr punkDocDataExisting, out IntPtr ppunkDocView, out IntPtr ppunkDocData,
             out string pbstrEditorCaption, out Guid pguidCmdUI, out int pgrfCDW)
         {
@@ -48,80 +49,38 @@ namespace Gauge.VisualStudio
             var isGaugeProject = pvHier.ToProject().IsGaugeProject();
 
             if (!isGaugeProject)
-            {
                 return VSConstants.VS_E_UNSUPPORTEDFORMAT;
-            }
 
             if ((grfCreateDoc & (VSConstants.CEF_OPENFILE | VSConstants.CEF_SILENT)) == 0)
-            {
                 throw new ArgumentException("Only Open or Silent is valid");
-            }
 
             var pTextBuffer = GetTextBuffer(punkDocDataExisting);
             if (pTextBuffer == null)
-            {
                 return VSConstants.E_FAIL;
-            }
 
             var textBufferSite = pTextBuffer as IObjectWithSite;
             if (textBufferSite != null)
-            {
                 textBufferSite.SetSite(_serviceProvider);
-            }
 
             var clsidCodeWindow = typeof(VsCodeWindowClass).GUID;
             var iidCodeWindow = typeof(IVsCodeWindow).GUID;
-            var pCodeWindow = (IVsCodeWindow)_package.CreateInstance(ref clsidCodeWindow, ref iidCodeWindow, typeof(IVsCodeWindow));
+            var pCodeWindow =
+                (IVsCodeWindow) _package.CreateInstance(ref clsidCodeWindow, ref iidCodeWindow, typeof(IVsCodeWindow));
 
             if (pCodeWindow == null)
-            {
                 return VSConstants.E_FAIL;
-            }
 
             var bufferEventListener = new TextBufferEventListener(pTextBuffer);
             pCodeWindow.SetBuffer(pTextBuffer);
 
             if (!(punkDocDataExisting == IntPtr.Zero))
-            {
                 bufferEventListener.OnLoadCompleted(0);
-            }
 
             ppunkDocView = Marshal.GetIUnknownForObject(pCodeWindow);
             ppunkDocData = Marshal.GetIUnknownForObject(pTextBuffer);
             pguidCmdUI = VSConstants.GUID_TextEditorFactory;
             pbstrEditorCaption = string.Empty;
             return VSConstants.S_OK;
-        }
-
-        private IVsTextLines GetTextBuffer(IntPtr docDataExisting)
-        {
-            IVsTextLines textLines;
-            if (docDataExisting == IntPtr.Zero)
-            {
-                var textLinesType = typeof(IVsTextLines);
-                var riid = textLinesType.GUID;
-                var clsid = typeof(VsTextBufferClass).GUID;
-                textLines = _package.CreateInstance(ref clsid, ref riid, textLinesType) as IVsTextLines;
-                ((IObjectWithSite)textLines).SetSite(_serviceProvider);
-            }
-            else
-            {
-                var dataObject = Marshal.GetObjectForIUnknown(docDataExisting);
-                textLines = dataObject as IVsTextLines;
-                if (textLines == null)
-                {
-                    var textBufferProvider = dataObject as IVsTextBufferProvider;
-                    if (textBufferProvider != null)
-                    {
-                        textBufferProvider.GetTextBuffer(out textLines);
-                    }
-                }
-                if (textLines == null)
-                {
-                    throw Marshal.GetExceptionForHR(VSConstants.VS_E_INCOMPATIBLEDOCDATA);
-                }
-            }
-            return textLines;
         }
 
 
@@ -141,18 +100,43 @@ namespace Gauge.VisualStudio
             pbstrPhysicalView = null;
             if (rguidLogicalView.Equals(VSConstants.LOGVIEWID_Designer) ||
                 rguidLogicalView.Equals(VSConstants.LOGVIEWID_Primary))
-            {
                 return VSConstants.S_OK;
-            }
 
             return VSConstants.E_NOTIMPL;
         }
 
+        private IVsTextLines GetTextBuffer(IntPtr docDataExisting)
+        {
+            IVsTextLines textLines;
+            if (docDataExisting == IntPtr.Zero)
+            {
+                var textLinesType = typeof(IVsTextLines);
+                var riid = textLinesType.GUID;
+                var clsid = typeof(VsTextBufferClass).GUID;
+                textLines = _package.CreateInstance(ref clsid, ref riid, textLinesType) as IVsTextLines;
+                ((IObjectWithSite) textLines).SetSite(_serviceProvider);
+            }
+            else
+            {
+                var dataObject = Marshal.GetObjectForIUnknown(docDataExisting);
+                textLines = dataObject as IVsTextLines;
+                if (textLines == null)
+                {
+                    var textBufferProvider = dataObject as IVsTextBufferProvider;
+                    if (textBufferProvider != null)
+                        textBufferProvider.GetTextBuffer(out textLines);
+                }
+                if (textLines == null)
+                    throw Marshal.GetExceptionForHR(VSConstants.VS_E_INCOMPATIBLEDOCDATA);
+            }
+            return textLines;
+        }
+
         public class TextBufferEventListener : IVsTextBufferDataEvents
         {
-            private readonly IVsTextLines _textLines;
             private readonly IConnectionPoint _connectionPoint;
             private readonly uint _cookie;
+            private readonly IVsTextLines _textLines;
 
             public TextBufferEventListener(IVsTextLines textLines)
             {
@@ -170,7 +154,7 @@ namespace Gauge.VisualStudio
             public int OnLoadCompleted(int fReload)
             {
                 _connectionPoint.Unadvise(_cookie);
-                
+
                 var languageServiceId = typeof(GaugeLanguageInfo).GUID;
                 _textLines.SetLanguageServiceID(ref languageServiceId);
 

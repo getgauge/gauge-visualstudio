@@ -34,14 +34,13 @@ namespace Gauge.VisualStudio
         [TextViewRole(PredefinedTextViewRoles.Document)]
         internal sealed class VsTextViewCreationListener : IVsTextViewCreationListener
         {
-            [Import]
-            private IVsEditorAdaptersFactoryService _adaptersFactory;
+            [Import] private IVsEditorAdaptersFactoryService _adaptersFactory;
 
-            [Import]
-            private ICompletionBroker _completionBroker;
+            [Import] private ICompletionBroker _completionBroker;
 
             [Import]
             internal SVsServiceProvider ServiceProvider { get; set; }
+
             public void VsTextViewCreated(IVsTextView textViewAdapter)
             {
                 var view = _adaptersFactory.GetWpfTextView(textViewAdapter);

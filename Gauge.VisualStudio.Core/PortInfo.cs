@@ -22,8 +22,8 @@ namespace Gauge.VisualStudio.Core
             ApiV2Port = apiV2Port;
         }
 
-        public int ApiPort { get;private set; }
+        public int ApiPort { get; }
 
-        public int ApiV2Port { get;private set; }
+        public int ApiV2Port { get; }
     }
 }

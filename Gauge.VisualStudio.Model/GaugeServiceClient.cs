@@ -44,17 +44,12 @@ namespace Gauge.VisualStudio.Model
         public string GetFindRegex(EnvDTE.Project project, string input)
         {
             if (input.EndsWith(" <table>", StringComparison.Ordinal))
-            {
                 input = input.Remove(input.LastIndexOf(" <table>", StringComparison.Ordinal));
-            }
             var parsedValue = GetParsedStepValueFromInput(project, input);
             parsedValue = parsedValue.Replace("* ", "");
-            return string.Format(@"^(\*[ |\t]*|[ |\t]*\[Step\(""){0}\s*(((\r?\n\s*)+\|([\w ]+\|)+)|(<table>))?(""\)\])?\r?\n", parsedValue.Replace("{}", "((<|\")(?!<table>).+(>|\"))"));
-        }
-
-        public static long GenerateMessageId()
-        {
-            return DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
+            return string.Format(
+                @"^(\*[ |\t]*|[ |\t]*\[Step\(""){0}\s*(((\r?\n\s*)+\|([\w ]+\|)+)|(<table>))?(""\)\])?\r?\n",
+                parsedValue.Replace("{}", "((<|\")(?!<table>).+(>|\"))"));
         }
 
         public ProtoStepValue GetStepValueFromInput(EnvDTE.Project project, string input)
@@ -62,13 +57,13 @@ namespace Gauge.VisualStudio.Model
             try
             {
                 var gaugeApiConnection = _gaugeService.GetApiConnectionFor(project);
-                var stepsRequest = new GetStepValueRequest(){ StepText = input};
-                var apiMessage = new APIMessage()
-                    {
-                        MessageId = GenerateMessageId(),
-                        MessageType = APIMessage.Types.APIMessageType.GetStepValueRequest,
-                        StepValueRequest = stepsRequest
-                    };
+                var stepsRequest = new GetStepValueRequest {StepText = input};
+                var apiMessage = new APIMessage
+                {
+                    MessageId = GenerateMessageId(),
+                    MessageType = APIMessage.Types.APIMessageType.GetStepValueRequest,
+                    StepValueRequest = stepsRequest
+                };
 
                 var bytes = gaugeApiConnection.WriteAndReadApiMessage(apiMessage);
                 return bytes.StepValueResponse.StepValue;
@@ -85,7 +80,7 @@ namespace Gauge.VisualStudio.Model
             {
                 var gaugeApiConnection = _gaugeService.GetApiConnectionFor(project);
                 var stepsRequest = new GetAllStepsRequest();
-                var apiMessage = new APIMessage()
+                var apiMessage = new APIMessage
                 {
                     MessageId = GenerateMessageId(),
                     MessageType = APIMessage.Types.APIMessageType.GetAllStepsRequest,
@@ -94,7 +89,6 @@ namespace Gauge.VisualStudio.Model
 
                 var bytes = gaugeApiConnection.WriteAndReadApiMessage(apiMessage);
                 return bytes.AllStepsResponse.AllSteps;
-
             }
             catch (GaugeApiInitializationException)
             {
@@ -105,17 +99,22 @@ namespace Gauge.VisualStudio.Model
         public IEnumerable<ProtoSpec> GetSpecsFromGauge(IGaugeApiConnection apiConnection)
         {
             var specsRequest = new SpecsRequest();
-            var apiMessage = new APIMessage()
-                {
-                    MessageId = GenerateMessageId(),
-                    MessageType = APIMessage.Types.APIMessageType.SpecsRequest,
-                    SpecsRequest = specsRequest
-                };
+            var apiMessage = new APIMessage
+            {
+                MessageId = GenerateMessageId(),
+                MessageType = APIMessage.Types.APIMessageType.SpecsRequest,
+                SpecsRequest = specsRequest
+            };
 
             var bytes = apiConnection.WriteAndReadApiMessage(apiMessage);
 
             var specs = bytes.SpecsResponse.Details.Where(detail => detail.Spec != null).Select(detail => detail.Spec);
             return specs;
+        }
+
+        public static long GenerateMessageId()
+        {
+            return DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
         }
 
         public IEnumerable<ProtoSpec> GetSpecsFromGauge(int apiPort)

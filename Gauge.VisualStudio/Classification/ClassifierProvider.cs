@@ -21,14 +21,14 @@ namespace Gauge.VisualStudio.Classification
 {
     [Export(typeof(IClassifierProvider))]
     [ContentType(GaugeContentTypeDefinitions.GaugeContentType)]
-    class ClassifierProvider : IClassifierProvider
+    internal class ClassifierProvider : IClassifierProvider
     {
-        [Import]
-        IClassificationTypeRegistryService _classificationRegistry;
+        [Import] private IClassificationTypeRegistryService _classificationRegistry;
 
         public IClassifier GetClassifier(ITextBuffer buffer)
         {
-            return buffer.Properties.GetOrCreateSingletonProperty(() => new Classifier(buffer, _classificationRegistry));
+            return buffer.Properties.GetOrCreateSingletonProperty(() =>
+                new Classifier(buffer, _classificationRegistry));
         }
     }
 }

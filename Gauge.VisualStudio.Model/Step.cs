@@ -21,15 +21,9 @@ namespace Gauge.VisualStudio.Model
 {
     public class Step : IStep
     {
-        public ITextSnapshotLine ContainingLine { get; private set; }
-
-        public string Text { get; private set; }
-
-        public List<string> Parameters { get; private set; }
+        private readonly IGaugeServiceClient _gaugeServiceClient;
 
         private readonly EnvDTE.Project _project;
-
-        private readonly IGaugeServiceClient _gaugeServiceClient;
 
         public Step(EnvDTE.Project project, ITextSnapshotLine inputLine, IGaugeServiceClient gaugeServiceClient)
         {
@@ -45,23 +39,27 @@ namespace Gauge.VisualStudio.Model
             Parameters = stepValueFromInput.Parameters.ToList();
         }
 
-        public Step (EnvDTE.Project project, ITextSnapshotLine inputLine) : this(project, inputLine, new GaugeServiceClient())
+        public Step(EnvDTE.Project project, ITextSnapshotLine inputLine) : this(project, inputLine,
+            new GaugeServiceClient())
         {
         }
 
-        public bool HasInlineTable
-        {
-            get { return CheckForInlineTable(ContainingLine); }
-        }
+        public ITextSnapshotLine ContainingLine { get; }
+
+        public string Text { get; }
+
+        public List<string> Parameters { get; }
+
+        public bool HasInlineTable => CheckForInlineTable(ContainingLine);
 
         public IEnumerable<string> GetAll()
         {
             if (_project == null)
-            {
-                throw new InvalidOperationException("Cannot fetch steps when Project is not specified. Ensure that instance is not the Step singleton.");
-            }
+                throw new InvalidOperationException(
+                    "Cannot fetch steps when Project is not specified. Ensure that instance is not the Step singleton.");
             var implementedSteps = Project.Instance.GetAllStepsForCurrentProject().ToList();
-            var parsedImplementations = implementedSteps.Select(s => _gaugeServiceClient.GetParsedStepValueFromInput(_project, s));
+            var parsedImplementations =
+                implementedSteps.Select(s => _gaugeServiceClient.GetParsedStepValueFromInput(_project, s));
             var unimplementedSteps = _gaugeServiceClient.GetAllStepsFromGauge(_project)
                 .Where(s => !parsedImplementations.Contains(s.StepValue))
                 .Select(value => value.ParameterizedStepValue);
@@ -79,10 +77,8 @@ namespace Gauge.VisualStudio.Model
 
         private static bool CheckForInlineTable(ITextSnapshotLine line)
         {
-            if (line==null)
-            {
+            if (line == null)
                 return false;
-            }
             var nextLineText = NextLineText(line);
             return Parser.TableRegex.IsMatch(nextLineText);
         }
@@ -100,7 +96,9 @@ namespace Gauge.VisualStudio.Model
             {
                 return string.Empty;
             }
-            return nextLineText.Trim() == string.Empty && currentLine.LineNumber < currentLine.Snapshot.LineCount ? NextLineText(nextLine) : nextLineText;
+            return nextLineText.Trim() == string.Empty && currentLine.LineNumber < currentLine.Snapshot.LineCount
+                ? NextLineText(nextLine)
+                : nextLineText;
         }
     }
 }

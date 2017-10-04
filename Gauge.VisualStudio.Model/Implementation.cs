@@ -26,8 +26,9 @@ namespace Gauge.VisualStudio.Model
             try
             {
                 var gaugeServiceClient = new GaugeServiceClient();
-                return string.Compare(gaugeServiceClient.GetParsedStepValueFromInput(project, StepText), 
-                    gaugeServiceClient.GetParsedStepValueFromInput(project, givenText), StringComparison.Ordinal)==0;
+                return string.Compare(gaugeServiceClient.GetParsedStepValueFromInput(project, StepText),
+                           gaugeServiceClient.GetParsedStepValueFromInput(project, givenText),
+                           StringComparison.Ordinal) == 0;
             }
             catch
             {

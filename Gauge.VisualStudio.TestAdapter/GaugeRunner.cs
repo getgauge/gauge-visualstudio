@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
+using System.Diagnostics;
 using Gauge.VisualStudio.Core.Helpers;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
-using System;
-using Process = System.Diagnostics.Process;
 
 namespace Gauge.VisualStudio.TestAdapter
 {
@@ -33,7 +33,8 @@ namespace Gauge.VisualStudio.TestAdapter
             try
             {
                 var arguments = string.Format(@"--simple-console ""{0}:{1}""", testCase.Source, scenarioIdentifier);
-                frameworkHandle.SendMessage(TestMessageLevel.Informational, string.Format("Invoking : gauge.exe {0} [Working Dir: {1}]", arguments, projectRoot));
+                frameworkHandle.SendMessage(TestMessageLevel.Informational,
+                    string.Format("Invoking : gauge.exe {0} [Working Dir: {1}]", arguments, projectRoot));
                 var p = new Process
                 {
                     StartInfo =
@@ -44,22 +45,21 @@ namespace Gauge.VisualStudio.TestAdapter
                         CreateNoWindow = true,
                         FileName = "gauge.exe",
                         RedirectStandardError = true,
-                        Arguments = arguments,
+                        Arguments = arguments
                     }
                 };
 
                 var gaugeCustomBuildPath = testCase.GetPropertyValue(TestDiscoverer.GaugeCustomBuildPath, string.Empty);
 
                 if (!string.IsNullOrEmpty(gaugeCustomBuildPath))
-                {
                     p.StartInfo.EnvironmentVariables["gauge_custom_build_path"] = gaugeCustomBuildPath;
-                }
 
                 if (isBeingDebugged)
                 {
                     //Gauge CSharp runner will wait for a debugger to be attached, when it finds this env variable set.
                     p.StartInfo.EnvironmentVariables["DEBUGGING"] = "true";
-                    frameworkHandle.SendMessage(TestMessageLevel.Informational, string.Format("Debugging 'gauge.exe {0}'", arguments));
+                    frameworkHandle.SendMessage(TestMessageLevel.Informational,
+                        string.Format("Debugging 'gauge.exe {0}'", arguments));
                 }
 
                 p.Start();
@@ -67,7 +67,8 @@ namespace Gauge.VisualStudio.TestAdapter
                 if (isBeingDebugged)
                 {
                     DTEHelper.AttachToProcess(p.Id);
-                    frameworkHandle.SendMessage(TestMessageLevel.Informational, string.Format("Attaching to ProcessID {0}", p.Id));
+                    frameworkHandle.SendMessage(TestMessageLevel.Informational,
+                        string.Format("Attaching to ProcessID {0}", p.Id));
                 }
                 var output = p.StandardOutput.ReadToEnd();
                 var error = p.StandardError.ReadToEnd();

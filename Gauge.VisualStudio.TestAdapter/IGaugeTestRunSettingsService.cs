@@ -16,7 +16,7 @@ namespace Gauge.VisualStudio.TestAdapter
 {
     public interface IGaugeTestRunSettingsService
     {
-        void MapSettings(bool useExecutionAPI);
         GaugeTestRunSettings Settings { get; }
+        void MapSettings(bool useExecutionAPI);
     }
 }

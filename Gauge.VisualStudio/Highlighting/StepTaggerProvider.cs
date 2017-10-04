@@ -31,11 +31,14 @@ namespace Gauge.VisualStudio.Highlighting
     [TagType(typeof(DuplicateStepImplementationTag))]
     public class StepTaggerProvider : IViewTaggerProvider
     {
-        private readonly Dictionary<ITextView, UnimplementedStepTagger> _taggers = new Dictionary<ITextView, UnimplementedStepTagger>();
         private readonly Events2 _events2;
-        private CodeModelEvents _codeModelEvents;
-        private ProjectItemsEvents _projectItemsEvents;
-        private DocumentEvents _documentEvents;
+
+        private readonly Dictionary<ITextView, UnimplementedStepTagger> _taggers =
+            new Dictionary<ITextView, UnimplementedStepTagger>();
+
+        private readonly CodeModelEvents _codeModelEvents;
+        private readonly DocumentEvents _documentEvents;
+        private readonly ProjectItemsEvents _projectItemsEvents;
 
         public StepTaggerProvider()
         {
@@ -60,26 +63,21 @@ namespace Gauge.VisualStudio.Highlighting
         public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag
         {
             if (buffer == null || textView == null)
-            {
                 return null;
-            }
 
             if (buffer != textView.TextBuffer) return null;
-            
+
             if (!_taggers.ContainsKey(textView))
-            {
                 _taggers[textView] = new UnimplementedStepTagger(textView);
-            }
             return _taggers[textView] as ITagger<T>;
         }
 
         private void RefreshUsages()
         {
-            var unimplementedStepTaggers = _taggers.Where(unimplementedStepTagger => !unimplementedStepTagger.Key.IsClosed).Select(pair => pair.Value);
+            var unimplementedStepTaggers = _taggers
+                .Where(unimplementedStepTagger => !unimplementedStepTagger.Key.IsClosed).Select(pair => pair.Value);
             foreach (var unimplementedStepTagger in unimplementedStepTaggers)
-            {
                 unimplementedStepTagger.RaiseLayoutChanged();
-            }
         }
     }
 }

@@ -36,7 +36,7 @@ namespace Gauge.VisualStudio
         public void Register()
         {
             var mcs = _serviceProvider.GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
-            var menuCommandId = new CommandID(GuidList.GuidGaugeVsPackageCmdSet, (int)PkgCmdIdList.FormatCommand);
+            var menuCommandId = new CommandID(GuidList.GuidGaugeVsPackageCmdSet, (int) PkgCmdIdList.FormatCommand);
             var menuItem = new OleMenuCommand(MenuItemCallback, menuCommandId);
             menuItem.BeforeQueryStatus += MenuItemOnBeforeQueryStatus;
             mcs.AddCommand(menuItem);
@@ -57,7 +57,7 @@ namespace Gauge.VisualStudio
 
             if (!IsSingleProjectItemSelection(out hierarchy, out itemid)) return;
 
-            ((IVsProject)hierarchy).GetMkDocument(itemid, out itemFullPath);
+            ((IVsProject) hierarchy).GetMkDocument(itemid, out itemFullPath);
 
             if (!itemFullPath.IsGaugeSpecFile()) return;
 
@@ -74,7 +74,7 @@ namespace Gauge.VisualStudio
 
             if (!IsSingleProjectItemSelection(out hierarchy, out itemid)) return;
 
-            ((IVsProject)hierarchy).GetMkDocument(itemid, out itemFullPath);
+            ((IVsProject) hierarchy).GetMkDocument(itemid, out itemFullPath);
             var gaugeFile = new FileInfo(itemFullPath);
 
             var arguments = string.Format(@"--simple-console --format {0}", gaugeFile.Name);
@@ -88,7 +88,7 @@ namespace Gauge.VisualStudio
                     CreateNoWindow = true,
                     FileName = "gauge.exe",
                     RedirectStandardError = true,
-                    Arguments = arguments,
+                    Arguments = arguments
                 }
             };
             p.Start();
@@ -103,9 +103,7 @@ namespace Gauge.VisualStudio
             var monitorSelection = Package.GetGlobalService(typeof(SVsShellMonitorSelection)) as IVsMonitorSelection;
             var solution = Package.GetGlobalService(typeof(SVsSolution)) as IVsSolution;
             if (monitorSelection == null || solution == null)
-            {
                 return false;
-            }
 
             var hierarchyPtr = IntPtr.Zero;
             var selectionContainerPtr = IntPtr.Zero;
@@ -117,9 +115,7 @@ namespace Gauge.VisualStudio
                     out selectionContainerPtr);
 
                 if (ErrorHandler.Failed(hr) || hierarchyPtr == IntPtr.Zero || itemid == VSConstants.VSITEMID_NIL)
-                {
                     return false;
-                }
 
                 if (multiItemSelect != null) return false;
 
@@ -135,14 +131,10 @@ namespace Gauge.VisualStudio
             finally
             {
                 if (selectionContainerPtr != IntPtr.Zero)
-                {
                     Marshal.Release(selectionContainerPtr);
-                }
 
                 if (hierarchyPtr != IntPtr.Zero)
-                {
                     Marshal.Release(hierarchyPtr);
-                }
             }
         }
     }

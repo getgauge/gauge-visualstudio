@@ -21,6 +21,26 @@ namespace Gauge.VisualStudio.Core.Tests
     public class GaugeVersionTests
     {
         [Test]
+        [TestCase("0.1.2", "0.1.5", -1)]
+        [TestCase("0.1.2", "0.0.8", 1)]
+        [TestCase("0.1.2", "0.1.2", 0)]
+        [TestCase("0.1.2.nightly-2015-11-10", "0.1.2.nightly-2015-11-10", 0)]
+        [TestCase("0.1.2.nightly-2015-11-10", "0.1.2.nightly-2014-11-10", 1)]
+        [TestCase("0.1.2.nightly-2015-11-10", "0.1.1.nightly-2014-11-10", 1)]
+        [TestCase("0.1.2.nightly-2015-11-10", "0.1.1.nightly-2015-11-10", 1)]
+        [TestCase("0.1.2.nightly-2015-11-10", "0.1.3.nightly-2014-11-10", -1)]
+        [TestCase("0.1.2.nightly-2015-11-10", "0.1.2.nightly-2015-12-10", -1)]
+        [TestCase("0.1.2.nightly-2015-11-10", "0.1.3.nightly-2015-12-10", -1)]
+        [TestCase("0.1.2.nightly-2015-11-10", "0.1.1", 1)]
+        [TestCase("0.1.2.nightly-2015-11-10", "0.1.3", -1)]
+        public void ShouldCompareTwoGaugeVersions(string v1, string v2, int expected)
+        {
+            var actual = new GaugeVersion(v1).CompareTo(new GaugeVersion(v2));
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
         public void ShouldCreateVersionFromString()
         {
             var gaugeVersion = new GaugeVersion("0.1.2");
@@ -28,18 +48,6 @@ namespace Gauge.VisualStudio.Core.Tests
             Assert.AreEqual(0, gaugeVersion.Major);
             Assert.AreEqual(1, gaugeVersion.Minor);
             Assert.AreEqual(2, gaugeVersion.Patch);
-        }
-
-        [Test]
-        [TestCase("random_string")]
-        [TestCase("123")]
-        [TestCase("0..2")]
-        [TestCase("-121")]
-        public void ShouldThrowArgumentExceptionForInvalidString(string version)
-        {
-            var argumentException = Assert.Throws<ArgumentException>(() => new GaugeVersion(version));
-
-            Assert.AreEqual(string.Format("Invalid version specified : '{0}'", version), argumentException.Message);
         }
 
         [Test]
@@ -73,23 +81,15 @@ namespace Gauge.VisualStudio.Core.Tests
         }
 
         [Test]
-        [TestCase("0.1.2", "0.1.5", -1)]
-        [TestCase("0.1.2", "0.0.8", 1)]
-        [TestCase("0.1.2", "0.1.2", 0)]
-        [TestCase("0.1.2.nightly-2015-11-10", "0.1.2.nightly-2015-11-10", 0)]
-        [TestCase("0.1.2.nightly-2015-11-10", "0.1.2.nightly-2014-11-10", 1)]
-        [TestCase("0.1.2.nightly-2015-11-10", "0.1.1.nightly-2014-11-10", 1)]
-        [TestCase("0.1.2.nightly-2015-11-10", "0.1.1.nightly-2015-11-10", 1)]
-        [TestCase("0.1.2.nightly-2015-11-10", "0.1.3.nightly-2014-11-10", -1)]
-        [TestCase("0.1.2.nightly-2015-11-10", "0.1.2.nightly-2015-12-10", -1)]
-        [TestCase("0.1.2.nightly-2015-11-10", "0.1.3.nightly-2015-12-10", -1)]
-        [TestCase("0.1.2.nightly-2015-11-10", "0.1.1", 1)]
-        [TestCase("0.1.2.nightly-2015-11-10", "0.1.3", -1)]
-        public void ShouldCompareTwoGaugeVersions(string v1, string v2, int expected)
+        [TestCase("random_string")]
+        [TestCase("123")]
+        [TestCase("0..2")]
+        [TestCase("-121")]
+        public void ShouldThrowArgumentExceptionForInvalidString(string version)
         {
-            var actual = new GaugeVersion(v1).CompareTo(new GaugeVersion(v2));
+            var argumentException = Assert.Throws<ArgumentException>(() => new GaugeVersion(version));
 
-            Assert.AreEqual(expected, actual);
+            Assert.AreEqual(string.Format("Invalid version specified : '{0}'", version), argumentException.Message);
         }
     }
 }

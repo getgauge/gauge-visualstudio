@@ -29,7 +29,7 @@ namespace Gauge.VisualStudio.AutoComplete
         [Export(typeof(ICompletionSourceProvider))]
         [ContentType(GaugeContentTypeDefinitions.GaugeContentType)]
         [Name("gaugeCompletion")]
-        class GaugeCompletionSourceProvider : ICompletionSourceProvider
+        private class GaugeCompletionSourceProvider : ICompletionSourceProvider
         {
             [Import]
             internal ITextStructureNavigatorSelectorService NavigatorService { get; set; }
@@ -40,11 +40,11 @@ namespace Gauge.VisualStudio.AutoComplete
             }
         }
 
-        class GaugeCompletionSource : ICompletionSource
+        private class GaugeCompletionSource : ICompletionSource
         {
             private readonly ITextBuffer _buffer;
-            private bool _disposed;
             private readonly Concept _concept;
+            private bool _disposed;
 
             public GaugeCompletionSource(ITextBuffer buffer)
             {

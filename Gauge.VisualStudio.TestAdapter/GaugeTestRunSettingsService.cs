@@ -33,10 +33,10 @@ namespace Gauge.VisualStudio.TestAdapter
         {
             Name = GaugeTestRunSettings.SettingsName;
             Settings = new GaugeTestRunSettings();
-            Serializer = new XmlSerializer(typeof (GaugeTestRunSettings));
+            Serializer = new XmlSerializer(typeof(GaugeTestRunSettings));
         }
 
-        public XmlSerializer Serializer { get; private set; }
+        public XmlSerializer Serializer { get; }
 
         public void MapSettings(bool useExecutionAPI)
         {
@@ -45,7 +45,8 @@ namespace Gauge.VisualStudio.TestAdapter
 
         public GaugeTestRunSettings Settings { get; private set; }
 
-        public IXPathNavigable AddRunSettings(IXPathNavigable inputRunSettingDocument, IRunSettingsConfigurationInfo configurationInfo,
+        public IXPathNavigable AddRunSettings(IXPathNavigable inputRunSettingDocument,
+            IRunSettingsConfigurationInfo configurationInfo,
             ILogger log)
         {
             ValidateArg.NotNull(inputRunSettingDocument, "inputRunSettingDocument");
@@ -56,9 +57,7 @@ namespace Gauge.VisualStudio.TestAdapter
             if (navigator.MoveToChild("RunSettings", ""))
             {
                 if (navigator.MoveToChild(GaugeTestRunSettings.SettingsName, ""))
-                {
                     navigator.DeleteSelf();
-                }
 
                 navigator.AppendChild(SerializeGaugeSettings());
             }
@@ -67,22 +66,20 @@ namespace Gauge.VisualStudio.TestAdapter
             return navigator;
         }
 
-        public string Name { get; private set; }
+        public string Name { get; }
 
         public void Load(XmlReader reader)
         {
             ValidateArg.NotNull(reader, "reader");
 
             if (reader.Read() && reader.Name.Equals(GaugeTestRunSettings.SettingsName))
-            {
                 Settings = Serializer.Deserialize(reader) as GaugeTestRunSettings;
-            }
         }
 
         private string SerializeGaugeSettings()
         {
             var stringWriter = new StringWriter();
-            Serializer.Serialize(stringWriter, new GaugeTestRunSettings(){UseExecutionAPI = Settings.UseExecutionAPI});
+            Serializer.Serialize(stringWriter, new GaugeTestRunSettings {UseExecutionAPI = Settings.UseExecutionAPI});
             return stringWriter.ToString();
         }
     }

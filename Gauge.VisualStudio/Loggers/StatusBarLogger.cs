@@ -16,7 +16,7 @@ using System;
 
 namespace Gauge.VisualStudio.Loggers
 {
-    class StatusBarLogger
+    internal class StatusBarLogger
     {
         internal static void Log(string message)
         {

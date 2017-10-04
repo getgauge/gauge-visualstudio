@@ -25,8 +25,8 @@ namespace Gauge.VisualStudio.TestAdapter
     {
         public const string ExecutorUriString = "executor://gaugespecexecutor/v1";
         public static readonly Uri ExecutorUri = new Uri(ExecutorUriString);
-        private bool _cancelled;
         private readonly GaugeRunner _gaugeRunner = new GaugeRunner();
+        private bool _cancelled;
 
         public void RunTests(IEnumerable<TestCase> tests, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
@@ -41,8 +41,10 @@ namespace Gauge.VisualStudio.TestAdapter
 
         public void RunTests(IEnumerable<string> sources, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
-            var gaugeTestRunSettingsService = runContext.RunSettings.GetSettings(GaugeTestRunSettings.SettingsName) as IGaugeTestRunSettingsService;
-            var testCases = TestDiscoverer.GetSpecs(gaugeTestRunSettingsService.Settings, null, sources, frameworkHandle);
+            var gaugeTestRunSettingsService =
+                runContext.RunSettings.GetSettings(GaugeTestRunSettings.SettingsName) as IGaugeTestRunSettingsService;
+            var testCases =
+                TestDiscoverer.GetSpecs(gaugeTestRunSettingsService.Settings, null, sources, frameworkHandle);
             RunTests(testCases, runContext, frameworkHandle);
         }
 

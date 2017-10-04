@@ -20,7 +20,8 @@ namespace Gauge.VisualStudio.Highlighting
 {
     internal class DuplicateStepImplementationTag : AbstractGaugeErrorTag
     {
-        public DuplicateStepImplementationTag() : this(new ReadOnlyCollection<SmartTagActionSet>(new List<SmartTagActionSet>()))
+        public DuplicateStepImplementationTag() : this(
+            new ReadOnlyCollection<SmartTagActionSet>(new List<SmartTagActionSet>()))
         {
         }
 

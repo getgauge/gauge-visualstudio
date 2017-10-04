@@ -28,20 +28,19 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using VSLangProj;
 using CodeAttributeArgument = EnvDTE80.CodeAttributeArgument;
-using CodeNamespace = EnvDTE.CodeNamespace;
+using CodeNamespace = System.CodeDom.CodeNamespace;
 
 namespace Gauge.VisualStudio.Model
 {
     public class Project : IProject
     {
-        private readonly Events2 _events2;
-        private CodeModelEvents _codeModelEvents;
-        private List<Implementation> _implementations;
-        private DocumentEvents _documentEvents;
-        private ProjectItemsEvents _projectItemsEvents;
-        private readonly DTE _dte;
-
         private static readonly Lazy<IProject> LazyInstance = new Lazy<IProject>(() => new Project());
+        private readonly DTE _dte;
+        private readonly Events2 _events2;
+        private readonly CodeModelEvents _codeModelEvents;
+        private readonly DocumentEvents _documentEvents;
+        private List<Implementation> _implementations;
+        private readonly ProjectItemsEvents _projectItemsEvents;
 
         private Project()
         {
@@ -62,38 +61,81 @@ namespace Gauge.VisualStudio.Model
             _codeModelEvents.ElementDeleted += (parent, element) => RefreshImplementations(element.ProjectItem);
         }
 
-        public static IProject Instance
-        {
-            get { return LazyInstance.Value; }
-        }
-
-        public void RefreshImplementations(ProjectItem projectItem)
-        {
-            if (projectItem.ContainingProject.IsGaugeProject())
-            {
-                _implementations = GetGaugeImplementations(projectItem.ContainingProject);
-            }
-        }
+        public static IProject Instance => LazyInstance.Value;
 
         private IEnumerable<Implementation> Implementations
         {
             get
             {
-                if (_dte.ActiveDocument!=null)
-                {
-                    _implementations = _implementations ?? GetGaugeImplementations(_dte.ActiveDocument.ProjectItem.ContainingProject);
-                }
+                if (_dte.ActiveDocument != null)
+                    _implementations = _implementations ??
+                                       GetGaugeImplementations(_dte.ActiveDocument.ProjectItem.ContainingProject);
                 return _implementations;
             }
+        }
+
+        public void RefreshImplementations(ProjectItem projectItem)
+        {
+            if (projectItem.ContainingProject.IsGaugeProject())
+                _implementations = GetGaugeImplementations(projectItem.ContainingProject);
         }
 
         public void RefreshImplementationsForActiveProject()
         {
             var activeDocument = _dte.ActiveDocument;
             if (activeDocument != null)
-            {
                 _implementations = GetGaugeImplementations(activeDocument.ProjectItem.ContainingProject);
+        }
+
+        public Implementation GetStepImplementation(ITextSnapshotLine line)
+        {
+            if (Implementations == null)
+                return null;
+            try
+            {
+                var project = line.Snapshot.GetProject(_dte);
+                return project == null
+                    ? null
+                    : Implementations.FirstOrDefault(implementation =>
+                        implementation.ContainsImplememntationFor(project, Step.GetStepText(line)));
             }
+            catch (InvalidOperationException)
+            {
+                return null;
+            }
+        }
+
+
+        public IEnumerable<CodeElement> GetFunctionsForClass(CodeClass codeClass)
+        {
+            return GetCodeElementsFor(codeClass.Members, vsCMElement.vsCMElementFunction);
+        }
+
+        public CodeClass FindOrCreateClass(EnvDTE.Project project, string className)
+        {
+            return GetAllClasses(project, false).FirstOrDefault(element => element.Name == className) as CodeClass ??
+                   AddClass(className, project);
+        }
+
+        public bool HasDuplicateImplementation(ITextSnapshotLine line)
+        {
+            try
+            {
+                var project = line.Snapshot.GetProject(_dte);
+                return Implementations.Count(implementation =>
+                           implementation.ContainsImplememntationFor(project, Step.GetStepText(line))) > 1;
+            }
+            catch (InvalidOperationException)
+            {
+                return false;
+            }
+        }
+
+        public IEnumerable<string> GetAllStepsForCurrentProject()
+        {
+            return Implementations
+                .Where(implementation => implementation is StepImplementation)
+                .Select(implementation => implementation.StepText);
         }
 
         private List<Implementation> GetGaugeImplementations(EnvDTE.Project containingProject)
@@ -103,7 +145,8 @@ namespace Gauge.VisualStudio.Model
             var gaugeImplementations = new List<Implementation>();
             gaugeImplementations.AddRange(GetStepImplementations(allClasses));
 
-            gaugeImplementations.AddRange(new Concept(containingProject).GetAllConcepts().Select(concept => new ConceptImplementation(concept)));
+            gaugeImplementations.AddRange(new Concept(containingProject).GetAllConcepts()
+                .Select(concept => new ConceptImplementation(concept)));
 
             return gaugeImplementations;
         }
@@ -136,30 +179,8 @@ namespace Gauge.VisualStudio.Model
             return gaugeImplementations;
         }
 
-        public Implementation GetStepImplementation(ITextSnapshotLine line)
-        {
-            if (Implementations==null)
-            {
-                return null;
-            }
-            try
-            {
-                var project = line.Snapshot.GetProject(_dte);
-                return project == null ? null : Implementations.FirstOrDefault(implementation => implementation.ContainsImplememntationFor(project, Step.GetStepText(line)));
-            }
-            catch (InvalidOperationException)
-            {
-                return null;
-            }
-        }
-
-
-        public IEnumerable<CodeElement> GetFunctionsForClass(CodeClass codeClass)
-        {
-            return GetCodeElementsFor(codeClass.Members, vsCMElement.vsCMElementFunction);
-        }
-
-        public static IEnumerable<CodeElement> GetAllClasses(EnvDTE.Project containingProject, bool includeReferencedProjects = true)
+        public static IEnumerable<CodeElement> GetAllClasses(EnvDTE.Project containingProject,
+            bool includeReferencedProjects = true)
         {
             if (containingProject.CodeModel == null)
                 return Enumerable.Empty<CodeElement>();
@@ -174,26 +195,8 @@ namespace Gauge.VisualStudio.Model
             var codeElements = vsProject.References.Cast<Reference>()
                 .Where(reference => reference.SourceProject != null)
                 .SelectMany(reference => GetAllClasses(reference.SourceProject));
-            return GetCodeElementsFor(containingProject.CodeModel.CodeElements, vsCMElement.vsCMElementClass).Concat(codeElements);
-        }
-
-        public CodeClass FindOrCreateClass(EnvDTE.Project project, string className)
-        {
-            return GetAllClasses(project, false).FirstOrDefault(element => element.Name == className) as CodeClass ??
-                   AddClass(className, project);
-        }
-
-        public bool HasDuplicateImplementation(ITextSnapshotLine line)
-        {
-            try
-            {
-                var project = line.Snapshot.GetProject(_dte);
-                return Implementations.Count(implementation => implementation.ContainsImplememntationFor(project, Step.GetStepText(line))) > 1;
-            }
-            catch (InvalidOperationException)
-            {
-                return false;
-            }
+            return GetCodeElementsFor(containingProject.CodeModel.CodeElements, vsCMElement.vsCMElementClass)
+                .Concat(codeElements);
         }
 
         private static CodeClass AddClass(string className, EnvDTE.Project project)
@@ -201,10 +204,8 @@ namespace Gauge.VisualStudio.Model
             var codeDomProvider = CodeDomProvider.CreateProvider("CSharp");
 
             if (!codeDomProvider.IsValidIdentifier(className))
-            {
                 throw new ArgumentException(string.Format("Invalid Class Name: {0}", className));
-            }
-            
+
             var targetClass = codeDomProvider.CreateValidIdentifier(className);
 
 
@@ -218,20 +219,22 @@ namespace Gauge.VisualStudio.Model
                 targetNamespace = project.FullName;
             }
 
-            var codeNamespace = new System.CodeDom.CodeNamespace(targetNamespace);
+            var codeNamespace = new CodeNamespace(targetNamespace);
             codeNamespace.Imports.Add(new CodeNamespaceImport("System"));
             codeNamespace.Imports.Add(new CodeNamespaceImport("Gauge.CSharp.Lib"));
             codeNamespace.Imports.Add(new CodeNamespaceImport("Gauge.CSharp.Lib.Attribute"));
 
-            var codeTypeDeclaration = new CodeTypeDeclaration(targetClass) {IsClass = true, TypeAttributes = TypeAttributes.Public};
+            var codeTypeDeclaration =
+                new CodeTypeDeclaration(targetClass) {IsClass = true, TypeAttributes = TypeAttributes.Public};
             codeNamespace.Types.Add(codeTypeDeclaration);
 
             var codeCompileUnit = new CodeCompileUnit();
             codeCompileUnit.Namespaces.Add(codeNamespace);
-            var targetFileName = Path.Combine(Path.GetDirectoryName(project.FullName), string.Format("{0}.cs", targetClass));
+            var targetFileName = Path.Combine(Path.GetDirectoryName(project.FullName),
+                string.Format("{0}.cs", targetClass));
             using (var streamWriter = new StreamWriter(targetFileName))
             {
-                var options = new CodeGeneratorOptions { BracingStyle = "C"};
+                var options = new CodeGeneratorOptions {BracingStyle = "C"};
                 codeDomProvider.GenerateCodeFromCompileUnit(codeCompileUnit, streamWriter, options);
             }
 
@@ -240,7 +243,7 @@ namespace Gauge.VisualStudio.Model
             var classes = GetCodeElementsFor(file.FileCodeModel.CodeElements, vsCMElement.vsCMElementClass).ToList();
             return classes.First(element => element.Name == targetClass) as CodeClass;
         }
-        
+
         private static IEnumerable<CodeElement> GetCodeElementsFor(IEnumerable elements, vsCMElement type)
         {
             var codeElements = new List<CodeElement>();
@@ -248,42 +251,26 @@ namespace Gauge.VisualStudio.Model
             foreach (CodeElement elem in elements)
             {
                 if (elem.Kind == vsCMElement.vsCMElementNamespace)
-                {
-                    codeElements.AddRange(GetCodeElementsFor(((CodeNamespace)elem).Members, type));
-                }
+                    codeElements.AddRange(GetCodeElementsFor(((EnvDTE.CodeNamespace) elem).Members, type));
                 else if (elem.InfoLocation == vsCMInfoLocation.vsCMInfoLocationExternal)
-                {
                     continue;
-                }
                 else if (elem.IsCodeType)
-                {
-                    codeElements.AddRange(GetCodeElementsFor(((CodeType)elem).Members, type));
-                }
+                    codeElements.AddRange(GetCodeElementsFor(((CodeType) elem).Members, type));
                 if (elem.Kind == type)
                     codeElements.Add(elem);
             }
 
             return codeElements;
         }
-        
+
         public static void NavigateToFunction(CodeFunction function)
         {
-
             if (!function.ProjectItem.IsOpen)
-            {
                 function.ProjectItem.Open();
-            }
 
             var startPoint = function.GetStartPoint(vsCMPart.vsCMPartHeader);
             startPoint.TryToShow();
             startPoint.Parent.Selection.MoveToPoint(startPoint);
-        }
-
-        public IEnumerable<string> GetAllStepsForCurrentProject()
-        {
-            return Implementations
-                .Where(implementation => implementation is StepImplementation)
-                .Select(implementation => implementation.StepText);
         }
     }
 }

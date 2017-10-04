@@ -25,26 +25,19 @@ namespace Gauge.VisualStudio
         internal const string MarkdownFileExtension = ".md";
         internal const string ConceptFileExtension = ".cpt";
 
-        [Export]
-        [Name(GaugeContentType)]
-        [BaseDefinition("text")]
-        internal static ContentTypeDefinition GaugeContentTypeDefinition = null;
+        [Export] [Name(GaugeContentType)] [BaseDefinition("text")]
+        internal static ContentTypeDefinition GaugeContentTypeDefinition;
 
-        [Export(typeof(ClassificationTypeDefinition))]
-        [Name(GaugeContentType)]
-        [BaseDefinition("text")]
-        internal static ClassificationTypeDefinition GaugeClassificationTypeDefinition = null;
+        [Export(typeof(ClassificationTypeDefinition))] [Name(GaugeContentType)] [BaseDefinition("text")]
+        internal static ClassificationTypeDefinition GaugeClassificationTypeDefinition;
 
-        [Export]
-        [ContentType(GaugeContentType)]
-        internal static FileExtensionToContentTypeDefinition GaugeFileExtensionDefinition = null;
+        [Export] [ContentType(GaugeContentType)]
+        internal static FileExtensionToContentTypeDefinition GaugeFileExtensionDefinition;
 
-        [Export]
-        [ContentType(GaugeContentType)]
-        internal static FileExtensionToContentTypeDefinition GaugeMarkdownFileExtensionDefinition = null;
+        [Export] [ContentType(GaugeContentType)]
+        internal static FileExtensionToContentTypeDefinition GaugeMarkdownFileExtensionDefinition;
 
-        [Export]
-        [ContentType(GaugeContentType)]
-        internal static FileExtensionToContentTypeDefinition GaugeConceptFileExtensionDefinition = null;
+        [Export] [ContentType(GaugeContentType)]
+        internal static FileExtensionToContentTypeDefinition GaugeConceptFileExtensionDefinition;
     }
 }

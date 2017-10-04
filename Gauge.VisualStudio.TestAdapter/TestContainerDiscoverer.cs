@@ -27,23 +27,23 @@ using Microsoft.VisualStudio.TestWindow.Extensibility;
 
 namespace Gauge.VisualStudio.TestAdapter
 {
-    [Export(typeof (ITestContainerDiscoverer))]
+    [Export(typeof(ITestContainerDiscoverer))]
     public class TestContainerDiscoverer : ITestContainerDiscoverer
     {
-        private readonly IServiceProvider _serviceProvider;
-        private readonly DocumentEvents _documentEvents;
-        private readonly ProjectItemsEvents _solutionItemEvents;
         private readonly BuildEvents _buildEvents;
-        private ProjectItemsEvents _projectItemsEvents;
+        private readonly DocumentEvents _documentEvents;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly ProjectItemsEvents _solutionItemEvents;
+        private readonly ProjectItemsEvents _projectItemsEvents;
 
         [ImportingConstructor]
-        public TestContainerDiscoverer([Import(typeof (SVsServiceProvider))] IServiceProvider serviceProvider)
+        public TestContainerDiscoverer([Import(typeof(SVsServiceProvider))] IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
-            var dte = _serviceProvider.GetService(typeof (DTE)) as DTE;
+            var dte = _serviceProvider.GetService(typeof(DTE)) as DTE;
             _documentEvents = dte.Events.DocumentEvents;
             _solutionItemEvents = dte.Events.SolutionItemsEvents;
-            var events2 = (Events2)dte.Events;
+            var events2 = (Events2) dte.Events;
             _projectItemsEvents = events2.ProjectItemsEvents;
             _buildEvents = dte.Events.BuildEvents;
 
@@ -57,21 +57,13 @@ namespace Gauge.VisualStudio.TestAdapter
             _buildEvents.OnBuildDone += (scope, action) =>
             {
                 if (action == vsBuildAction.vsBuildActionBuild || action == vsBuildAction.vsBuildActionRebuildAll)
-                {
                     RaiseTestContainersUpdated();
-                }
             };
         }
 
-        public Uri ExecutorUri
-        {
-            get { return TestExecutor.ExecutorUri; }
-        }
+        public Uri ExecutorUri => TestExecutor.ExecutorUri;
 
-        public IEnumerable<ITestContainer> TestContainers
-        {
-            get { return GetTestContainers(); }
-        }
+        public IEnumerable<ITestContainer> TestContainers => GetTestContainers();
 
         public event EventHandler TestContainersUpdated;
 
@@ -89,28 +81,23 @@ namespace Gauge.VisualStudio.TestAdapter
 
         private void UpdateTestContainersIfGaugeSpecFile(ProjectItem projectItem)
         {
-            if (projectItem==null)
-            {
+            if (projectItem == null)
                 return;
-            }
             var projectItemName = projectItem.Name;
             if (projectItem.ContainingProject.IsGaugeProject() && IsGaugeFile(projectItemName))
-            {
                 RaiseTestContainersUpdated();
-            }
         }
 
         private static bool IsGaugeFile(string projectItemName)
         {
-            return projectItemName.EndsWith(".spec", StringComparison.Ordinal) || projectItemName.EndsWith(".cpt", StringComparison.Ordinal);
+            return projectItemName.EndsWith(".spec", StringComparison.Ordinal) ||
+                   projectItemName.EndsWith(".cpt", StringComparison.Ordinal);
         }
 
         private void RaiseTestContainersUpdated()
         {
             if (TestContainersUpdated != null)
-            {
                 TestContainersUpdated(this, EventArgs.Empty);
-            }
         }
     }
 }

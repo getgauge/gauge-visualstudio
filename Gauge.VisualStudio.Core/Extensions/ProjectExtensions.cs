@@ -22,7 +22,8 @@ namespace Gauge.VisualStudio.Core.Extensions
 {
     public static class ProjectExtensions
     {
-        private static readonly Regex ManifestExists = new Regex("\"Language\"\\s*:\\s*\"csharp\"", RegexOptions.Compiled | RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex ManifestExists = new Regex("\"Language\"\\s*:\\s*\"csharp\"",
+            RegexOptions.Compiled | RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         public static string SlugifiedName(this Project project)
         {
@@ -36,9 +37,7 @@ namespace Gauge.VisualStudio.Core.Extensions
                 var directoryName = Path.GetDirectoryName(project.FileName);
                 var manifestPath = Path.Combine(directoryName, "manifest.json");
                 if (!File.Exists(manifestPath))
-                {
                     return false;
-                }
 
                 var manifest = File.ReadAllText(manifestPath);
                 return ManifestExists.IsMatch(manifest);
@@ -52,7 +51,7 @@ namespace Gauge.VisualStudio.Core.Extensions
         public static Project ToProject(this IVsHierarchy hierarchy)
         {
             object objProj;
-            hierarchy.GetProperty(VSConstants.VSITEMID_ROOT, (int)__VSHPROPID.VSHPROPID_ExtObject, out objProj);
+            hierarchy.GetProperty(VSConstants.VSITEMID_ROOT, (int) __VSHPROPID.VSHPROPID_ExtObject, out objProj);
 
             return objProj as Project;
         }

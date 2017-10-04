@@ -24,8 +24,8 @@ namespace Gauge.VisualStudio.Model.Tests
     {
         private class InlineTableParamTests
         {
-            private IList<ITextSnapshotLine> _textSnapshotLines;
             private const string StepText = "Step that takes a table";
+            private IList<ITextSnapshotLine> _textSnapshotLines;
 
             [SetUp]
             public void Setup()

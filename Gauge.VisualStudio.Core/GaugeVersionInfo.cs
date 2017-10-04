@@ -19,10 +19,8 @@ namespace Gauge.VisualStudio.Core
     [DataContract]
     public class GaugeVersionInfo
     {
-        [DataMember]
-        public string version;
+        [DataMember] public GaugePlugin[] plugins;
 
-        [DataMember]
-        public GaugePlugin[] plugins;
+        [DataMember] public string version;
     }
 }

@@ -22,8 +22,8 @@ namespace Gauge.VisualStudio
     [Guid(GuidList.GuidGaugeLanguageInfoString)]
     internal class GaugeLanguageInfo : IVsLanguageInfo
     {
-        private readonly SVsServiceProvider _serviceProvider;
         internal const string LanguageName = GaugeContentTypeDefinitions.GaugeContentType;
+        public const int LanguageResourceId = 112;
 
         private static readonly string[] FileExtensions =
         {
@@ -31,7 +31,8 @@ namespace Gauge.VisualStudio
             GaugeContentTypeDefinitions.MarkdownFileExtension,
             GaugeContentTypeDefinitions.SpecFileExtension
         };
-        public const int LanguageResourceId = 112;
+
+        private readonly SVsServiceProvider _serviceProvider;
 
         public int GetLanguageName(out string bstrName)
         {

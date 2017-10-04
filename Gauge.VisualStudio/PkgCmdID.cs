@@ -14,8 +14,8 @@
 
 namespace Gauge.VisualStudio
 {
-    static class PkgCmdIdList
+    internal static class PkgCmdIdList
     {
         public const uint FormatCommand = 0x100;
-    };
+    }
 }

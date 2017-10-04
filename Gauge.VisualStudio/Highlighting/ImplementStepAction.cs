@@ -28,15 +28,13 @@ namespace Gauge.VisualStudio.Highlighting
 {
     internal class ImplementStepAction : ISmartTagAction
     {
-        private readonly SnapshotSpan _span;
-        private readonly UnimplementedStepTagger _unimplementedStepTagger;
-        private readonly ITextSnapshot _snapshot;
-        private readonly string _display;
-        private bool _enabled = true;
-        private readonly ITrackingSpan _trackingSpan;
-        private readonly IStep _step;
         private readonly IProject _project;
+        private readonly ITextSnapshot _snapshot;
+        private readonly SnapshotSpan _span;
+        private readonly IStep _step;
         private readonly StepImplementationGenerator _stepImplementationGenerator;
+        private readonly ITrackingSpan _trackingSpan;
+        private readonly UnimplementedStepTagger _unimplementedStepTagger;
 
         public ImplementStepAction(SnapshotSpan span, UnimplementedStepTagger unimplementedStepTagger, IProject project)
         {
@@ -45,8 +43,9 @@ namespace Gauge.VisualStudio.Highlighting
             _span = span;
             _unimplementedStepTagger = unimplementedStepTagger;
             _snapshot = _trackingSpan.TextBuffer.CurrentSnapshot;
-            _display = "Implement Step";
-            Icon = new BitmapImage(new Uri("pack://application:,,,/Gauge.VisualStudio;component/assets/glyphs/step.png"));
+            DisplayText = "Implement Step";
+            Icon = new BitmapImage(
+                new Uri("pack://application:,,,/Gauge.VisualStudio;component/assets/glyphs/step.png"));
             _project = project;
             var dteProject = span.Snapshot.GetProject(GaugePackage.DTE);
             var step = new Step(dteProject, span.Start.GetContainingLine());
@@ -61,39 +60,29 @@ namespace Gauge.VisualStudio.Highlighting
             selectedClass = classPicker.SelectedClass;
 
             var containingLine = _trackingSpan.GetStartPoint(_snapshot).GetContainingLine();
-            if (_project.GetStepImplementation(containingLine)!=null || selectedClass == null)
-            {
+            if (_project.GetStepImplementation(containingLine) != null || selectedClass == null)
                 return;
-            }
 
             CodeClass targetClass;
             CodeFunction implementationFunction;
-            var gotImplementation = _stepImplementationGenerator.TryGenerateMethodStub(selectedClass, containingLine, out targetClass,
+            var gotImplementation = _stepImplementationGenerator.TryGenerateMethodStub(selectedClass, containingLine,
+                out targetClass,
                 out implementationFunction);
-            
+
             if (!gotImplementation) return;
 
             _project.RefreshImplementations(targetClass.ProjectItem);
             Project.NavigateToFunction(implementationFunction);
             _unimplementedStepTagger.MarkTagImplemented(_span);
-            _enabled = false;
+            IsEnabled = false;
         }
 
-        public ReadOnlyCollection<SmartTagActionSet> ActionSets
-        {
-            get { return null; }
-        }
-        
-        public ImageSource Icon { get; private set; }
+        public ReadOnlyCollection<SmartTagActionSet> ActionSets => null;
 
-        public string DisplayText
-        {
-            get { return _display; }
-        }
+        public ImageSource Icon { get; }
 
-        public bool IsEnabled
-        {
-            get { return _enabled; }
-        }
+        public string DisplayText { get; }
+
+        public bool IsEnabled { get; private set; } = true;
     }
 }

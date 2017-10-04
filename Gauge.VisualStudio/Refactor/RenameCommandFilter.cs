@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Linq;
 using Gauge.Messages;
 using Gauge.VisualStudio.Core;
 using Gauge.VisualStudio.Model;
@@ -25,6 +24,7 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text.Editor;
 using IServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
+using Project = EnvDTE.Project;
 
 namespace Gauge.VisualStudio.Refactor
 {
@@ -65,9 +65,7 @@ namespace Gauge.VisualStudio.Refactor
                 var refactorDialog = new RefactorDialog(originalText);
                 var showModal = refactorDialog.ShowModal();
                 if (!showModal.HasValue || !showModal.Value)
-                {
                     return hresult;
-                }
 
                 var newText = refactorDialog.StepText;
                 var progressDialog = CreateProgressDialog();
@@ -75,9 +73,7 @@ namespace Gauge.VisualStudio.Refactor
                     string.Format("Original: {0}\nTo: {1}", originalText, newText), "Invoking Refactor action", null,
                     "Refactoring Step", false, 0, 4, 1);
                 if (startWaitDialog != VSConstants.S_OK)
-                {
                     return hresult;
-                }
 
                 var undoContext = GaugePackage.DTE.UndoContext;
                 undoContext.Open("GaugeRefactoring");
@@ -90,17 +86,11 @@ namespace Gauge.VisualStudio.Refactor
                     {
                         var errorMessage = string.Empty;
                         if (response.Error != null)
-                        {
                             errorMessage = string.Format("{0}\n", response.Error.Error);
-                        }
-                        if (response.PerformRefactoringResponse != null&&
+                        if (response.PerformRefactoringResponse != null &&
                             response.PerformRefactoringResponse.Errors.Count > 0)
-                        {
                             foreach (var error in response.PerformRefactoringResponse.Errors)
-                            {
                                 errorMessage = string.Format("{0}{1}\n", errorMessage, error);
-                            }
-                        }
                         GaugeService.Instance.DisplayGaugeNotStartedMessage(
                             "Refactoring failed.\nCheck Gauge output pane for details.",
                             string.Format("Failed to refactor {0} to {1}. Error:\n{2}", originalText, newText,
@@ -113,7 +103,7 @@ namespace Gauge.VisualStudio.Refactor
                     progressDialog.UpdateProgress(null, "Building Solution..", null, 3, 4, true, out cancel);
                     GaugePackage.DTE.ExecuteCommand("Build.BuildSolution");
                     progressDialog.UpdateProgress(null, "Refreshing Cache..", null, 3, 4, true, out cancel);
-                    Project.Instance.RefreshImplementationsForActiveProject();
+                    Model.Project.Instance.RefreshImplementationsForActiveProject();
                     GaugePackage.DTE.ExecuteCommand("File.SaveAll");
                     GaugePackage.DTE.ActiveDocument.Save();
                 }
@@ -129,20 +119,20 @@ namespace Gauge.VisualStudio.Refactor
             return hresult;
         }
 
-        private static APIMessage RefactorUsingGaugeDaemon(string newText, string originalText, EnvDTE.Project project)
+        private static APIMessage RefactorUsingGaugeDaemon(string newText, string originalText, Project project)
         {
-            var performRefactoringRequest = new PerformRefactoringRequest()
-                {
-                    NewStep = newText,
-                    OldStep = originalText
-                };
+            var performRefactoringRequest = new PerformRefactoringRequest
+            {
+                NewStep = newText,
+                OldStep = originalText
+            };
             var apiConnection = GaugeService.Instance.GetApiConnectionFor(project);
-            var apiMessage = new APIMessage()
-                {
-                    PerformRefactoringRequest = performRefactoringRequest,
-                    MessageType = APIMessage.Types.APIMessageType.PerformRefactoringRequest,
-                    MessageId = 7
-                };
+            var apiMessage = new APIMessage
+            {
+                PerformRefactoringRequest = performRefactoringRequest,
+                MessageType = APIMessage.Types.APIMessageType.PerformRefactoringRequest,
+                MessageId = 7
+            };
             var response = apiConnection.WriteAndReadApiMessage(apiMessage);
             return response;
         }
@@ -156,18 +146,16 @@ namespace Gauge.VisualStudio.Refactor
             {
                 var vsPersistDocData = runningDocumentTable.FindDocument(file) as IVsPersistDocData;
                 if (vsPersistDocData != null)
-                {
                     vsPersistDocData.ReloadDocData((uint) _VSRELOADDOCDATA.RDD_IgnoreNextFileChange);
-                }
             }
         }
 
         private static IVsThreadedWaitDialog2 CreateProgressDialog()
         {
             IVsThreadedWaitDialog2 dialog;
-            var oleServiceProvider = Package.GetGlobalService(typeof (IServiceProvider)) as IServiceProvider;
+            var oleServiceProvider = Package.GetGlobalService(typeof(IServiceProvider)) as IServiceProvider;
             var dialogFactory = new ServiceProvider(oleServiceProvider)
-                .GetService(typeof (SVsThreadedWaitDialogFactory)) as IVsThreadedWaitDialogFactory;
+                .GetService(typeof(SVsThreadedWaitDialogFactory)) as IVsThreadedWaitDialogFactory;
             dialogFactory.CreateInstance(out dialog);
             return dialog;
         }

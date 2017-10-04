@@ -21,6 +21,20 @@ namespace Gauge.VisualStudio.Model
 {
     public static class Parser
     {
+        public enum TokenType
+        {
+            Comment,
+            Specification,
+            Scenario,
+            Step,
+            Tag,
+            TagValue,
+            StaticParameter,
+            DynamicParameter,
+            TableParameter,
+            FileParameter
+        }
+
         internal const char DummyChar = '~';
 
         private static readonly Regex ScenarioHeadingRegex = new Regex(@"^\s*\#\#(?<heading>.+)[\n\r]+",
@@ -70,15 +84,15 @@ namespace Gauge.VisualStudio.Model
         public static IEnumerable<string> GetScenarios(string text)
         {
             var matches = ScenarioHeadingRegex.Matches(text);
-            foreach (var capture in from Match match in matches from Capture capture in match.Groups["heading"].Captures select capture)
-            {
+            foreach (var capture in from Match match in matches
+                from Capture capture in match.Groups["heading"].Captures
+                select capture)
                 yield return capture.Value.Trim();
-            }
             matches = ScenarioHeadingRegexAlt.Matches(text);
-            foreach (var capture in from Match match in matches from Capture capture in match.Groups["heading"].Captures select capture)
-            {
+            foreach (var capture in from Match match in matches
+                from Capture capture in match.Groups["heading"].Captures
+                select capture)
                 yield return capture.Value.Trim();
-            }
         }
 
         public static bool ParagraphContainsMultilineTokens(string text)
@@ -86,62 +100,26 @@ namespace Gauge.VisualStudio.Model
             return SpecHeadingRegexAlt.IsMatch(text) || ScenarioHeadingRegexAlt.IsMatch(text);
         }
 
-        public enum TokenType
-        {
-            Comment,
-            Specification, 
-            Scenario,
-            Step,
-            Tag,
-            TagValue,
-            StaticParameter,
-            DynamicParameter,
-            TableParameter,
-            FileParameter
-        }
-
-        public struct Token
-        {
-            public Token(TokenType type, Span span, string value)
-            {
-                TokenType = type; 
-                Span = span;
-                Value = value;
-            }
-
-            public TokenType TokenType;
-            public Span Span;
-            public string Value;
-        }
-
         private static IEnumerable<Token> ParseScenarios(string text)
         {
             // Multiple ifs? Somehow I feel this is more explicit than having complex regex.
             var matches = ScenarioHeadingRegex.Matches(text);
             foreach (Match match in matches)
-            {
                 yield return new Token(TokenType.Scenario, new Span(match.Index, match.Length), match.Value);
-            }
 
             matches = ScenarioHeadingRegexAlt.Matches(text);
             foreach (Match match in matches)
-            {
                 yield return new Token(TokenType.Scenario, new Span(match.Index, match.Length), match.Value);
-            }
         }
 
         private static IEnumerable<Token> ParseSpecs(string text)
         {
             var matches = SpecHeadingRegex.Matches(text);
             foreach (Match match in matches)
-            {
                 yield return new Token(TokenType.Specification, new Span(match.Index, match.Length), match.Value);
-            }
             matches = SpecHeadingRegexAlt.Matches(text);
             foreach (Match match in matches)
-            {
                 yield return new Token(TokenType.Specification, new Span(match.Index, match.Length), match.Value);
-            }
         }
 
         private static IEnumerable<Token> ParseSteps(string text)
@@ -179,10 +157,23 @@ namespace Gauge.VisualStudio.Model
             {
                 yield return new Token(TokenType.Tag, new Span(match.Index, match.Length), match.Value.Trim());
                 foreach (Capture capture in match.Groups["tag"].Captures)
-                {
-                    yield return new Token(TokenType.TagValue, new Span(capture.Index, capture.Length), capture.Value.Trim());
-                }
+                    yield return new Token(TokenType.TagValue, new Span(capture.Index, capture.Length),
+                        capture.Value.Trim());
             }
+        }
+
+        public struct Token
+        {
+            public Token(TokenType type, Span span, string value)
+            {
+                TokenType = type;
+                Span = span;
+                Value = value;
+            }
+
+            public TokenType TokenType;
+            public Span Span;
+            public string Value;
         }
     }
 }

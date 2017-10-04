@@ -16,7 +16,7 @@ using System;
 
 namespace Gauge.VisualStudio
 {
-    static class GuidList
+    internal static class GuidList
     {
         public const string GuidGaugeVsPackagePkgString = "309aa1cd-4dc1-43e9-9d19-85b21abf2520";
         public const string GuidGaugeVsPackageCmdSetString = "d09143fc-0d23-4d55-9fda-4d90e5da0c3f";
@@ -24,5 +24,5 @@ namespace Gauge.VisualStudio
         public const string GuidGaugeEditorFactorString = "9C342BFA-0307-48CD-AE27-5E5211004926";
 
         public static readonly Guid GuidGaugeVsPackageCmdSet = new Guid(GuidGaugeVsPackageCmdSetString);
-    };
+    }
 }

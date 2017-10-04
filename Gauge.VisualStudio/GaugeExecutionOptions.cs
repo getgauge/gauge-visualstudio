@@ -19,8 +19,7 @@ namespace Gauge.VisualStudio
 {
     public class GaugeExecutionOptions : DialogPage
     {
-        private bool _useExecutionApi = false;
-        public event PropertyChangedEventHandler PropertyChanged;
+        private bool _useExecutionApi;
 
         [Category("Gauge")]
         [DisplayName("Use Execution API")]
@@ -34,6 +33,8 @@ namespace Gauge.VisualStudio
                 OnPropertyChanged("UseExecutionAPI");
             }
         }
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public virtual void OnPropertyChanged(string propertyName)
         {

@@ -3,6 +3,7 @@ VSSDK.DTE
 VSSDK.IDE
 VSSDK.IDE.12
 VSSDK.Text
+Microsoft.Net.Compilers
 
 group Test
     FakeItEasy

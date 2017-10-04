@@ -20,11 +20,29 @@ namespace Gauge.VisualStudio.Core
 {
     public class GaugeProcess : IGaugeProcess
     {
-        private readonly Process _process;
-
         public GaugeProcess(ProcessStartInfo startInfo)
         {
-            _process = new Process {StartInfo = startInfo};
+            BaseProcess = new Process {StartInfo = startInfo};
+        }
+
+        public StreamReader StandardError => BaseProcess.StandardError;
+
+        public Process BaseProcess { get; }
+
+        public int Id => BaseProcess.Id;
+
+        public int ExitCode => BaseProcess.ExitCode;
+
+        public StreamReader StandardOutput => BaseProcess.StandardOutput;
+
+        public bool Start()
+        {
+            return BaseProcess.Start();
+        }
+
+        public void WaitForExit()
+        {
+            BaseProcess.WaitForExit();
         }
 
         public static IGaugeProcess ForVersion()
@@ -32,44 +50,10 @@ namespace Gauge.VisualStudio.Core
             return new GaugeProcess(GetStartInfoForVersion());
         }
 
-        public static IGaugeProcess ForDaemon(string workingDirectory, IEnumerable<KeyValuePair<string, string>> environmentVariables)
+        public static IGaugeProcess ForDaemon(string workingDirectory,
+            IEnumerable<KeyValuePair<string, string>> environmentVariables)
         {
             return new GaugeProcess(GetStartInfoForDaemon(workingDirectory, environmentVariables));
-        }
-
-        public StreamReader StandardError
-        {
-            get { return _process.StandardError; }
-        }
-
-        public Process BaseProcess
-        {
-            get { return _process; }
-        }
-
-        public int Id
-        {
-            get { return _process.Id; }
-        }
-
-        public int ExitCode
-        {
-            get { return _process.ExitCode; }
-        }
-
-        public StreamReader StandardOutput
-        {
-            get { return _process.StandardOutput; }
-        }
-
-        public bool Start()
-        {
-            return _process.Start();
-        }
-
-        public void WaitForExit()
-        {
-            _process.WaitForExit();
         }
 
         private static ProcessStartInfo GetStartInfoForVersion()
@@ -100,9 +84,7 @@ namespace Gauge.VisualStudio.Core
             };
 
             foreach (var environmentVariable in environmentVariables)
-            {
                 gaugeStartInfo.EnvironmentVariables[environmentVariable.Key] = environmentVariable.Value;
-            }
             return gaugeStartInfo;
         }
     }

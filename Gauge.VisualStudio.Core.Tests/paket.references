@@ -1,3 +1,5 @@
+Microsoft.Net.Compilers
+
 group Test
     FakeItEasy
     NUnit

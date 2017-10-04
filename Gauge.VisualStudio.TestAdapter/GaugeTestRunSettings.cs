@@ -25,7 +25,7 @@ namespace Gauge.VisualStudio.TestAdapter
     public class GaugeTestRunSettings : TestRunSettings
     {
         public const string SettingsName = "GaugeTestRunSettings";
-        
+
         private static readonly XmlSerializer Serializer = new XmlSerializer(typeof(GaugeTestRunSettings));
 
         public GaugeTestRunSettings(string name) : base(name)
@@ -39,7 +39,7 @@ namespace Gauge.VisualStudio.TestAdapter
 
         public bool UseExecutionAPI { get; set; }
 
-        public List<GaugeProjectProperties> ProjectsProperties { get; private set; }
+        public List<GaugeProjectProperties> ProjectsProperties { get; }
 
         public override XmlElement ToXml()
         {

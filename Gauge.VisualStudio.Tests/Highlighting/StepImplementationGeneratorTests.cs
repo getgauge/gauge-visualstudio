@@ -20,6 +20,7 @@ using Gauge.VisualStudio.Highlighting;
 using Gauge.VisualStudio.Model;
 using Microsoft.VisualStudio.Text;
 using NUnit.Framework;
+using Project = EnvDTE.Project;
 
 namespace Gauge.VisualStudio.Tests.Highlighting
 {
@@ -33,7 +34,7 @@ namespace Gauge.VisualStudio.Tests.Highlighting
 
         public void Setup(string stepText, string functionName, bool hasInlineTable, params string[] parameters)
         {
-            var vsProject = A.Fake<EnvDTE.Project>();
+            var vsProject = A.Fake<Project>();
             var project = A.Fake<IProject>();
             var step = A.Fake<IStep>();
             A.CallTo(() => step.Text).Returns(stepText);
@@ -55,18 +56,58 @@ namespace Gauge.VisualStudio.Tests.Highlighting
         }
 
         [Test]
-        public void ShouldGenerateImplementationWithSignature()
+        public void ShouldGenerateImplementationForInlineTable()
         {
-            const string stepText = "Do nothing";
+            const string stepText = "Do something with <table>";
             var stepLiteral = string.Format("\"{0}\"", stepText);
-            Setup(stepText, "DoNothing", false);
+            Setup(stepText, "DoSomethingWithTable", true, "table");
+
+            CodeClass targetClass;
+            CodeFunction impl;
+            _stepImplementationGenerator.TryGenerateMethodStub(SelectedClass, _textSnapshotLine, out targetClass,
+                out impl);
+            _functionCall.MustHaveHappened();
+
+            A.CallTo(() => impl.AddParameter("table", "Table", A<object>._)).MustHaveHappened();
+            A.CallTo(() => impl.AddAttribute("Step", stepLiteral, A<object>._)).MustHaveHappened();
+        }
+
+        [Test]
+        public void ShouldGenerateImplementationForMultipleSpecialParameters()
+        {
+            const string stepText = "Do something with a <file:foo.txt>, a <table:bar.csv> and <table>";
+            var stepLiteral = string.Format("\"{0}\"", stepText);
+            Setup(stepText, "DoSomethingWithAFilefootxtaTablebarcsvandTable", true, "file:foo.txt", "table:bar.csv",
+                "table");
+
+            CodeClass targetClass;
+            CodeFunction impl;
+            _stepImplementationGenerator.TryGenerateMethodStub(SelectedClass, _textSnapshotLine, out targetClass,
+                out impl);
+            _functionCall.MustHaveHappened();
+
+            A.CallTo(() => impl.AddParameter("table", "Table", A<object>._)).MustHaveHappened()
+                .Then(A.CallTo(() => impl.AddParameter("bar", "Table", A<object>._)).MustHaveHappened())
+                .Then(A.CallTo(() => impl.AddParameter("foo", vsCMTypeRef.vsCMTypeRefString, A<object>._))
+                    .MustHaveHappened())
+                .Then(A.CallTo(() => impl.AddAttribute("Step", stepLiteral, A<object>._)).MustHaveHappened());
+        }
+
+        [Test]
+        public void ShouldGenerateImplementationWithFileParameter()
+        {
+            const string stepText = "Do something with <file:foo.txt>";
+            var stepLiteral = string.Format("\"{0}\"", stepText);
+            Setup(stepText, "DoSomethingWithFilefootxt", false, "file:foo.txt");
             CodeClass targetClass;
             CodeFunction impl;
 
-            _stepImplementationGenerator.TryGenerateMethodStub(SelectedClass, _textSnapshotLine, out targetClass, out impl);
+            _stepImplementationGenerator.TryGenerateMethodStub(SelectedClass, _textSnapshotLine, out targetClass,
+                out impl);
 
             _functionCall.MustHaveHappened();
-            A.CallTo(() => impl.AddParameter(A<string>._, A<object>._, A<object>._)).MustHaveHappened(Repeated.Like(i => i == 0));
+            A.CallTo(() => impl.AddParameter("foo", vsCMTypeRef.vsCMTypeRefString, A<object>._))
+                .MustHaveHappened(Repeated.Like(i => i == 1));
             A.CallTo(() => impl.AddAttribute("Step", stepLiteral, A<object>._)).MustHaveHappened();
         }
 
@@ -79,26 +120,12 @@ namespace Gauge.VisualStudio.Tests.Highlighting
             CodeClass targetClass;
             CodeFunction impl;
 
-            _stepImplementationGenerator.TryGenerateMethodStub(SelectedClass, _textSnapshotLine, out targetClass, out impl);
+            _stepImplementationGenerator.TryGenerateMethodStub(SelectedClass, _textSnapshotLine, out targetClass,
+                out impl);
 
             _functionCall.MustHaveHappened();
-            A.CallTo(() => impl.AddParameter("something", vsCMTypeRef.vsCMTypeRefString, A<object>._)).MustHaveHappened(Repeated.Like(i => i == 1));
-            A.CallTo(() => impl.AddAttribute("Step", stepLiteral, A<object>._)).MustHaveHappened();
-        }
-
-        [Test]
-        public void ShouldGenerateImplementationWithFileParameter()
-        {
-            const string stepText = "Do something with <file:foo.txt>";
-            var stepLiteral = string.Format("\"{0}\"", stepText);
-            Setup(stepText, "DoSomethingWithFilefootxt", false,  "file:foo.txt");
-            CodeClass targetClass;
-            CodeFunction impl;
-
-            _stepImplementationGenerator.TryGenerateMethodStub(SelectedClass, _textSnapshotLine, out targetClass, out impl);
-
-            _functionCall.MustHaveHappened();
-            A.CallTo(() => impl.AddParameter("foo", vsCMTypeRef.vsCMTypeRefString, A<object>._)).MustHaveHappened(Repeated.Like(i => i == 1));
+            A.CallTo(() => impl.AddParameter("something", vsCMTypeRef.vsCMTypeRefString, A<object>._))
+                .MustHaveHappened(Repeated.Like(i => i == 1));
             A.CallTo(() => impl.AddAttribute("Step", stepLiteral, A<object>._)).MustHaveHappened();
         }
 
@@ -111,10 +138,29 @@ namespace Gauge.VisualStudio.Tests.Highlighting
             CodeClass targetClass;
             CodeFunction impl;
 
-            _stepImplementationGenerator.TryGenerateMethodStub(SelectedClass, _textSnapshotLine, out targetClass, out impl);
+            _stepImplementationGenerator.TryGenerateMethodStub(SelectedClass, _textSnapshotLine, out targetClass,
+                out impl);
 
             _functionCall.MustHaveHappened();
             A.CallTo(() => impl.AddParameter("foo", "Table", A<object>._)).MustHaveHappened(Repeated.Like(i => i == 1));
+            A.CallTo(() => impl.AddAttribute("Step", stepLiteral, A<object>._)).MustHaveHappened();
+        }
+
+        [Test]
+        public void ShouldGenerateImplementationWithSignature()
+        {
+            const string stepText = "Do nothing";
+            var stepLiteral = string.Format("\"{0}\"", stepText);
+            Setup(stepText, "DoNothing", false);
+            CodeClass targetClass;
+            CodeFunction impl;
+
+            _stepImplementationGenerator.TryGenerateMethodStub(SelectedClass, _textSnapshotLine, out targetClass,
+                out impl);
+
+            _functionCall.MustHaveHappened();
+            A.CallTo(() => impl.AddParameter(A<string>._, A<object>._, A<object>._))
+                .MustHaveHappened(Repeated.Like(i => i == 0));
             A.CallTo(() => impl.AddAttribute("Step", stepLiteral, A<object>._)).MustHaveHappened();
         }
 
@@ -124,48 +170,17 @@ namespace Gauge.VisualStudio.Tests.Highlighting
             const string stepText = "Do something with <something> and <another thing>";
             var stepLiteral = string.Format("\"{0}\"", stepText);
             Setup(stepText, "DoSomethingWithSomethingandAnotherThing", false, "something", "anotherthing");
-            
+
             CodeClass targetClass;
             CodeFunction impl;
-            _stepImplementationGenerator.TryGenerateMethodStub(SelectedClass, _textSnapshotLine, out targetClass, out impl);
+            _stepImplementationGenerator.TryGenerateMethodStub(SelectedClass, _textSnapshotLine, out targetClass,
+                out impl);
             _functionCall.MustHaveHappened();
 
-            A.CallTo(() => impl.AddParameter("anotherthing", vsCMTypeRef.vsCMTypeRefString, A<object>._)).MustHaveHappened()
-                .Then(A.CallTo(() => impl.AddParameter("something", vsCMTypeRef.vsCMTypeRefString, A<object>._)).MustHaveHappened())
-                .Then(A.CallTo(() => impl.AddAttribute("Step", stepLiteral, A<object>._)).MustHaveHappened());
-        }
-
-        [Test]
-        public void ShouldGenerateImplementationForInlineTable()
-        {
-            const string stepText = "Do something with <table>";
-            var stepLiteral = string.Format("\"{0}\"", stepText);
-            Setup(stepText, "DoSomethingWithTable", true, "table");
-            
-            CodeClass targetClass;
-            CodeFunction impl;
-            _stepImplementationGenerator.TryGenerateMethodStub(SelectedClass, _textSnapshotLine, out targetClass, out impl);
-                _functionCall.MustHaveHappened();
-
-                A.CallTo(() => impl.AddParameter("table", "Table", A<object>._)).MustHaveHappened();
-            A.CallTo(() => impl.AddAttribute("Step", stepLiteral, A<object>._)).MustHaveHappened();
-        }
-        
-        [Test]
-        public void ShouldGenerateImplementationForMultipleSpecialParameters()
-        {
-            const string stepText = "Do something with a <file:foo.txt>, a <table:bar.csv> and <table>";
-            var stepLiteral = string.Format("\"{0}\"", stepText);
-            Setup(stepText, "DoSomethingWithAFilefootxtaTablebarcsvandTable", true, "file:foo.txt", "table:bar.csv", "table");
-
-            CodeClass targetClass;
-            CodeFunction impl;
-            _stepImplementationGenerator.TryGenerateMethodStub(SelectedClass, _textSnapshotLine, out targetClass, out impl);
-            _functionCall.MustHaveHappened();
-
-            A.CallTo(() => impl.AddParameter("table", "Table", A<object>._)).MustHaveHappened()
-                .Then(A.CallTo(() => impl.AddParameter("bar", "Table", A<object>._)).MustHaveHappened())
-                .Then(A.CallTo(() => impl.AddParameter("foo", vsCMTypeRef.vsCMTypeRefString, A<object>._)).MustHaveHappened())
+            A.CallTo(() => impl.AddParameter("anotherthing", vsCMTypeRef.vsCMTypeRefString, A<object>._))
+                .MustHaveHappened()
+                .Then(A.CallTo(() => impl.AddParameter("something", vsCMTypeRef.vsCMTypeRefString, A<object>._))
+                    .MustHaveHappened())
                 .Then(A.CallTo(() => impl.AddAttribute("Step", stepLiteral, A<object>._)).MustHaveHappened());
         }
     }

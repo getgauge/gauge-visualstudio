@@ -37,22 +37,16 @@ namespace Gauge.VisualStudio.Model.Extensions
                 {
                     var import = codeElement as CodeImport;
                     if (import != null)
-                    {
                         yield return addUsingStatement(import);
-                    }
                 }
 
                 if (codeElement.Kind == vsCMElement.vsCMElementNamespace)
-                {
                     foreach (CodeElement childCodeElement in codeElement.Children)
                     {
                         var import = childCodeElement as CodeImport;
                         if (import != null)
-                        {
                             yield return addUsingStatement(import);
-                        }
                     }
-                }
             }
         }
 
@@ -66,9 +60,7 @@ namespace Gauge.VisualStudio.Model.Extensions
             var fileCodeModel2 = codeNamespace.ProjectItem.FileCodeModel as FileCodeModel2;
 
             if (fileCodeModel2 != null)
-            {
                 fileCodeModel2.AddImport(usingStatement);
-            }
         }
     }
 }

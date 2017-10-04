@@ -23,16 +23,15 @@ using Microsoft.VisualStudio.Utilities;
 
 namespace Gauge.VisualStudio
 {
-
     [Export(typeof(IClassifierProvider))]
     [Order(Before = "default")]
     [ContentType(GaugeContentTypeDefinitions.GaugeContentType)]
     internal class GaugeClassifierProvider : IClassifierProvider
     {
-        [Import(typeof(SVsServiceProvider))]
-        internal IServiceProvider ServiceProvider = null;
+        public static readonly Dictionary<string, Dictionary<string, TextPoint>> ConceptDictionary =
+            new Dictionary<string, Dictionary<string, TextPoint>>();
 
-        public static readonly Dictionary<string, Dictionary<string, TextPoint>> ConceptDictionary = new Dictionary<string, Dictionary<string, TextPoint>>();
+        [Import(typeof(SVsServiceProvider))] internal IServiceProvider ServiceProvider;
 
         public IClassifier GetClassifier(ITextBuffer buffer)
         {

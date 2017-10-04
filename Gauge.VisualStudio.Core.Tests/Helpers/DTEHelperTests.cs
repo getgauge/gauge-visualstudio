@@ -21,27 +21,15 @@ namespace Gauge.VisualStudio.Core.Tests.Helpers
     public class DTEHelperTests
     {
         [Test]
-        public void NullValueShouldBeInvalidProcessName()
-        {
-            Assert.IsFalse(DTEHelper.IsVisualStudioProcessName(null, default(int)));
-        }
-
-        [Test]
-        public void ProcessNameWithoutPortShouldBeInvalid()
-        {
-            Assert.IsFalse(DTEHelper.IsVisualStudioProcessName("!VisualStudio.DTE.12.0:", default(int)));
-        }
-
-        [Test]
         public void NonVisualStudioProcessNameShouldBeInvalid()
         {
             Assert.IsFalse(DTEHelper.IsVisualStudioProcessName("!Random.DTE.12.0:", default(int)));
         }
-    
+
         [Test]
-        public void ProcessNameWithoutVersionShouldBeInvalid()
+        public void NullValueShouldBeInvalidProcessName()
         {
-            Assert.IsFalse(DTEHelper.IsVisualStudioProcessName("!VisualStudio.DTE.:", default(int)));
+            Assert.IsFalse(DTEHelper.IsVisualStudioProcessName(null, default(int)));
         }
 
         [Test]
@@ -54,6 +42,18 @@ namespace Gauge.VisualStudio.Core.Tests.Helpers
         public void ProcessNameForVS2015ShouldBeValid()
         {
             Assert.True(DTEHelper.IsVisualStudioProcessName("!VisualStudio.DTE.14.0:1234", default(int)));
+        }
+
+        [Test]
+        public void ProcessNameWithoutPortShouldBeInvalid()
+        {
+            Assert.IsFalse(DTEHelper.IsVisualStudioProcessName("!VisualStudio.DTE.12.0:", default(int)));
+        }
+
+        [Test]
+        public void ProcessNameWithoutVersionShouldBeInvalid()
+        {
+            Assert.IsFalse(DTEHelper.IsVisualStudioProcessName("!VisualStudio.DTE.:", default(int)));
         }
     }
 }
