@@ -183,7 +183,7 @@ namespace Gauge.VisualStudio.Core
                 return;
 
             var message = $"This plugin works with Gauge {MinGaugeVersion} or above." + 
-                $"You have Gauge {installedGaugeVersion.version} installed." + 
+                $" You have Gauge {installedGaugeVersion.version} installed." + 
                 " Please update your Gauge installation.\n" +
                 " Run 'gauge version' from your command prompt for installation information.";
 

@@ -42,6 +42,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Exceptions\GaugeApiInitializationExceptionTests.cs" />
+    <Compile Include="Exceptions\GaugeExceptionTests.cs" />
     <Compile Include="Extensions\StringExtensionTests.cs" />
     <Compile Include="GaugeServiceTests.cs" />
     <Compile Include="GaugeVersionTests.cs" />

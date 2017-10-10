@@ -25,5 +25,17 @@ namespace Gauge.VisualStudio.Core.Exceptions
         {
             Data.Add("ErrorCode", ErrorCode);
         }
+
+        public override string ToString()
+        {
+            var errorString = base.ToString();
+            foreach (var dataKey in Data.Keys)
+            {
+                errorString += $"{dataKey} : {Data[dataKey]}; ";
+            }
+
+            errorString += $"Refer https://info.getgauge.io/{ErrorCode} for more details.";
+            return errorString;
+        }
     }
 }

@@ -70,7 +70,7 @@ namespace Gauge.VisualStudio.Core.Tests
             var curGaugeMinVersion = GaugeService.MinGaugeVersion;
             var expectedMessage = "This plugin works with Gauge " + curGaugeMinVersion +
                                   " or above. You have Gauge 0.6.2 installed. Please update your Gauge installation.\n" +
-                                  " Run gauge -v from your command prompt for installation information.";
+                                  " Run 'gauge version' from your command prompt for installation information.";
 
             var gaugeProcess = A.Fake<IGaugeProcess>();
             A.CallTo(() => gaugeProcess.Start()).Returns(true);

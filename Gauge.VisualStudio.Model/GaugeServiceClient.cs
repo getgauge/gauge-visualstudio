@@ -47,9 +47,9 @@ namespace Gauge.VisualStudio.Model
                 input = input.Remove(input.LastIndexOf(" <table>", StringComparison.Ordinal));
             var parsedValue = GetParsedStepValueFromInput(project, input);
             parsedValue = parsedValue.Replace("* ", "");
-            return string.Format(
-                @"^(\*[ |\t]*|[ |\t]*\[Step\(""){0}\s*(((\r?\n\s*)+\|([\w ]+\|)+)|(<table>))?(""\)\])?\r?\n",
-                parsedValue.Replace("{}", "((<|\")(?!<table>).+(>|\"))"));
+            return $@"^(\*[ |\t]*|[ |\t]*\[Step\(""){
+                    parsedValue.Replace("{}", "((<|\")(?!<table>).+(>|\"))")
+                }\s*(((\r?\n\s*)+\|([\w ]+\|)+)|(<table>))?(""\)\])?\r?\n";
         }
 
         public ProtoStepValue GetStepValueFromInput(EnvDTE.Project project, string input)
@@ -70,7 +70,7 @@ namespace Gauge.VisualStudio.Model
             }
             catch (GaugeApiInitializationException ex)
             {
-                GaugeService.Instance.DisplayGaugeNotStartedMessage(GaugeDisplayErrorLevel.Error,
+                _gaugeService.DisplayGaugeNotStartedMessage(GaugeDisplayErrorLevel.Error,
                     "Unable to launch Gauge Daemon. Check Output Window for details", $"STDOUT:\n{ex.Data["STDOUT"]}\nSTDERR:\n{ex.Data["STDERR"]}");
 
                 return default(ProtoStepValue);
@@ -95,7 +95,7 @@ namespace Gauge.VisualStudio.Model
             }
             catch (GaugeApiInitializationException ex)
             {
-                GaugeService.Instance.DisplayGaugeNotStartedMessage(GaugeDisplayErrorLevel.Error,
+                _gaugeService.DisplayGaugeNotStartedMessage(GaugeDisplayErrorLevel.Error,
                     "Unable to launch Gauge Daemon. Check Output Window for details", $"STDOUT:\n{ex.Data["STDOUT"]}\nSTDERR:\n{ex.Data["STDERR"]}");
                 return Enumerable.Empty<ProtoStepValue>();
             }
