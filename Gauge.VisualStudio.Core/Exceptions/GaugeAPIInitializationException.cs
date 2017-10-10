@@ -17,12 +17,16 @@ using System;
 namespace Gauge.VisualStudio.Core.Exceptions
 {
     [Serializable]
-    public class GaugeApiInitializationException : Exception
+    public sealed class GaugeApiInitializationException : GaugeExceptionBase
     {
-        private const string ErrorMessage = "Failed to initialize Gauge API";
+        private const string ErrorMessage = "Failed to initialize Gauge API. Inspect ex.Data[\"STDOUT\"] and ex.Data[\"STDERR\"].";
 
-        public GaugeApiInitializationException() : base(ErrorMessage)
+        public GaugeApiInitializationException(string stdout, string stderr) : base(ErrorMessage)
         {
+            Data.Add("STDOUT", stdout);
+            Data.Add("STDERR", stderr);
         }
+
+        protected override string ErrorCode => "GAUGE-VS-001";
     }
 }

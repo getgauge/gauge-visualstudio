@@ -17,10 +17,12 @@ using System;
 namespace Gauge.VisualStudio.Core.Exceptions
 {
     [Serializable]
-    public class ConventionViolationException : Exception
+    public class ConventionViolationException : GaugeExceptionBase
     {
         public ConventionViolationException(string message) : base(message)
         {
         }
+
+        protected override string ErrorCode => "GAUGE-VS-002";
     }
 }

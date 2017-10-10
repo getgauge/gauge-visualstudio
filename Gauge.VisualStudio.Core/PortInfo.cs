@@ -16,14 +16,11 @@ namespace Gauge.VisualStudio.Core
 {
     internal class PortInfo
     {
-        public PortInfo(int apiPort, int apiV2Port)
+        public PortInfo(int apiPort)
         {
             ApiPort = apiPort;
-            ApiV2Port = apiV2Port;
         }
 
         public int ApiPort { get; }
-
-        public int ApiV2Port { get; }
     }
 }

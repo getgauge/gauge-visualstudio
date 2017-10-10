@@ -57,7 +57,9 @@ namespace Gauge.VisualStudio.TestAdapter
             _buildEvents.OnBuildDone += (scope, action) =>
             {
                 if (action == vsBuildAction.vsBuildActionBuild || action == vsBuildAction.vsBuildActionRebuildAll)
-                    RaiseTestContainersUpdated();
+                {
+                    TestContainersUpdated?.Invoke(this, EventArgs.Empty);
+                }
             };
         }
 
@@ -85,19 +87,15 @@ namespace Gauge.VisualStudio.TestAdapter
                 return;
             var projectItemName = projectItem.Name;
             if (projectItem.ContainingProject.IsGaugeProject() && IsGaugeFile(projectItemName))
-                RaiseTestContainersUpdated();
+            {
+                TestContainersUpdated?.Invoke(this, EventArgs.Empty);
+            }
         }
 
         private static bool IsGaugeFile(string projectItemName)
         {
             return projectItemName.EndsWith(".spec", StringComparison.Ordinal) ||
                    projectItemName.EndsWith(".cpt", StringComparison.Ordinal);
-        }
-
-        private void RaiseTestContainersUpdated()
-        {
-            if (TestContainersUpdated != null)
-                TestContainersUpdated(this, EventArgs.Empty);
         }
     }
 }

@@ -68,8 +68,11 @@ namespace Gauge.VisualStudio.Model
                 var bytes = gaugeApiConnection.WriteAndReadApiMessage(apiMessage);
                 return bytes.StepValueResponse.StepValue;
             }
-            catch (GaugeApiInitializationException)
+            catch (GaugeApiInitializationException ex)
             {
+                GaugeService.Instance.DisplayGaugeNotStartedMessage(GaugeDisplayErrorLevel.Error,
+                    "Unable to launch Gauge Daemon. Check Output Window for details", $"STDOUT:\n{ex.Data["STDOUT"]}\nSTDERR:\n{ex.Data["STDERR"]}");
+
                 return default(ProtoStepValue);
             }
         }
@@ -90,8 +93,10 @@ namespace Gauge.VisualStudio.Model
                 var bytes = gaugeApiConnection.WriteAndReadApiMessage(apiMessage);
                 return bytes.AllStepsResponse.AllSteps;
             }
-            catch (GaugeApiInitializationException)
+            catch (GaugeApiInitializationException ex)
             {
+                GaugeService.Instance.DisplayGaugeNotStartedMessage(GaugeDisplayErrorLevel.Error,
+                    "Unable to launch Gauge Daemon. Check Output Window for details", $"STDOUT:\n{ex.Data["STDOUT"]}\nSTDERR:\n{ex.Data["STDERR"]}");
                 return Enumerable.Empty<ProtoStepValue>();
             }
         }

@@ -17,12 +17,14 @@ using System;
 namespace Gauge.VisualStudio.Core.Exceptions
 {
     [Serializable]
-    public class GaugeVersionIncompatibleException : Exception
+    public class GaugeVersionIncompatibleException : GaugeExceptionBase
     {
         public GaugeVersionIncompatibleException(string error)
             : base("Incompatible Gauge Version installed.")
         {
             Data.Add("GaugeError", error);
         }
+
+        protected override string ErrorCode => "GAUGE-VS-003";
     }
 }

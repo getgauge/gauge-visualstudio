@@ -58,8 +58,10 @@ namespace Gauge.VisualStudio.Model
                     LineNumber = info.LineNumber
                 });
             }
-            catch (GaugeApiInitializationException)
+            catch (GaugeApiInitializationException ex)
             {
+                GaugeService.Instance.DisplayGaugeNotStartedMessage(GaugeDisplayErrorLevel.Error,
+                    "Unable to launch Gauge Daemon. Check Output Window for details", $"STDOUT:\n{ex.Data["STDOUT"]}\nSTDERR:\n{ex.Data["STDERR"]}");
                 return Enumerable.Empty<Concept>();
             }
         }

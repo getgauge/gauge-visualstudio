@@ -30,7 +30,6 @@ namespace Gauge.VisualStudio.Core
         GaugeVersionInfo GetInstalledGaugeVersion(IGaugeProcess gaugeProcess = null);
         void AssertCompatibility(IGaugeProcess gaugeProcess = null);
 
-        void DisplayGaugeNotStartedMessage(string dialogMessage, string errorMessageFormat,
-            GaugeDisplayErrorLevel errorLevel, params object[] args);
+        void DisplayGaugeNotStartedMessage(GaugeDisplayErrorLevel errorLevel, string dialogMessage, string errorMessageFormat, params object[] args);
     }
 }
