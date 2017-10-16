@@ -44,7 +44,7 @@ namespace Gauge.VisualStudio.Core
 
         private static readonly Dictionary<string, Process> ChildProcesses = new Dictionary<string, Process>();
 
-        private static readonly Dictionary<string, PortInfo> PortsInfo = new Dictionary<string, PortInfo>();
+        private static readonly Dictionary<string, int> ApiPorts = new Dictionary<string, int>();
 
         private static readonly List<Project> GaugeProjects = new List<Project>();
         public static readonly GaugeVersion MinGaugeVersion = new GaugeVersion("0.8.0");
@@ -96,8 +96,8 @@ namespace Gauge.VisualStudio.Core
                 catch
                 {
                 }
-            if (PortsInfo.ContainsKey(slugifiedName))
-                PortsInfo.Remove(slugifiedName);
+            if (ApiPorts.ContainsKey(slugifiedName))
+                ApiPorts.Remove(slugifiedName);
 
             GaugeProjects.Remove(
                 GaugeProjects.Find(project => string.CompareOrdinal(project.SlugifiedName(), slugifiedName) == 0));
@@ -110,10 +110,10 @@ namespace Gauge.VisualStudio.Core
 
         public List<GaugeProjectProperties> GetPropertiesForAllGaugeProjects()
         {
-            return GaugeProjects.Where(project => PortsInfo.ContainsKey(project.SlugifiedName()))
+            return GaugeProjects.Where(project => ApiPorts.ContainsKey(project.SlugifiedName()))
                 .Select(project => new GaugeProjectProperties
                 {
-                    ApiPort = PortsInfo[project.SlugifiedName()].ApiPort,
+                    ApiPort = ApiPorts[project.SlugifiedName()],
                     BuildOutputPath = GetValidProjectOutputPath(project),
                     ProjectRoot = GetProjectRoot(project),
                     DaemonProcessId = ChildProcesses[project.SlugifiedName()].Id
@@ -234,13 +234,13 @@ namespace Gauge.VisualStudio.Core
                     null));
                 var projectOutputPath = GetValidProjectOutputPath(gaugeProject);
 
-                var portInfo = new PortInfo(GetOpenPort(1000, 2000));
-                OutputPaneLogger.Debug("Opening Gauge Daemon for Project : {0},  at port: {1}", gaugeProject.Name, portInfo.ApiPort);
+                var port = GetOpenPort(1000, 2000);
+                OutputPaneLogger.Debug("Opening Gauge Daemon for Project : {0},  at port: {1}", gaugeProject.Name, port);
 
-                PortsInfo.Add(slugifiedName, portInfo);
+                ApiPorts.Add(slugifiedName, port);
                 var environmentVariables = new Dictionary<string, string>
                 {
-                    {"GAUGE_API_PORT", portInfo.ApiPort.ToString(CultureInfo.InvariantCulture)},
+                    {"GAUGE_API_PORT", port.ToString(CultureInfo.InvariantCulture)},
                     {"gauge_custom_build_path", projectOutputPath}
                 };
                 var gaugeProcess = GaugeProcess.ForDaemon(GetProjectRoot(gaugeProject), environmentVariables);
@@ -252,7 +252,7 @@ namespace Gauge.VisualStudio.Core
 
                     ChildProcesses.Add(slugifiedName, gaugeProcess.BaseProcess);
                     OutputPaneLogger.Debug("Opening Gauge Daemon with PID: {0}", gaugeProcess.Id);
-                    var tcpClientWrapper = new TcpClientWrapper(portInfo.ApiPort);
+                    var tcpClientWrapper = new TcpClientWrapper(port);
                     WaitForColdStart(tcpClientWrapper);
                     OutputPaneLogger.Debug("PID: {0} ready, waiting for messages..", gaugeProcess.Id);
                     return new GaugeApiConnection(tcpClientWrapper);
