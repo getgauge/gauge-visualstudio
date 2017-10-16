@@ -90,10 +90,7 @@ namespace Gauge.VisualStudio.Model.Tests
 
             var gaugeService = A.Fake<IGaugeService>();
             var project = A.Fake<EnvDTE.Project>();
-            var gaugeApiConnection = A.Fake<IGaugeApiConnection>();
-            A.CallTo(() => gaugeApiConnection.WriteAndReadApiMessage(A<APIMessage>._))
-                .Throws(new GaugeApiInitializationException("", ""));
-            A.CallTo(() => gaugeService.GetApiConnectionFor(project)).Returns(gaugeApiConnection);
+            A.CallTo(() => gaugeService.GetApiConnectionFor(project)).Returns(null);
             var gaugeServiceClient = new GaugeServiceClient(gaugeService);
 
             var actual = gaugeServiceClient.GetParsedStepValueFromInput(project, input);
