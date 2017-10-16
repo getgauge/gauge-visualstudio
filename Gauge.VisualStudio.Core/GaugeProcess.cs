@@ -68,7 +68,7 @@ namespace Gauge.VisualStudio.Core
                 UseShellExecute = false,
                 FileName = "gauge.exe",
                 CreateNoWindow = true,
-                Arguments = "--version --machine-readable",
+                Arguments = "version --machine-readable",
                 RedirectStandardError = true,
                 RedirectStandardOutput = true
             };
@@ -83,7 +83,7 @@ namespace Gauge.VisualStudio.Core
                 UseShellExecute = false,
                 FileName = "gauge.exe",
                 CreateNoWindow = true,
-                Arguments = "--daemonize",
+                Arguments = "daemon",
                 RedirectStandardError = true,
                 RedirectStandardOutput = true
             };

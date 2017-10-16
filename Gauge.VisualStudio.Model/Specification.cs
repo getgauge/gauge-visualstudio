@@ -17,7 +17,6 @@ using System.Linq;
 using Gauge.Messages;
 using Gauge.VisualStudio.Core;
 using Gauge.VisualStudio.Core.Exceptions;
-using Gauge.VisualStudio.Core.Loggers;
 
 namespace Gauge.VisualStudio.Model
 {
