@@ -46,7 +46,7 @@ namespace Gauge.VisualStudio.Core
         private static readonly Dictionary<string, int> ApiPorts = new Dictionary<string, int>();
 
         private static readonly List<Project> GaugeProjects = new List<Project>();
-        public static readonly GaugeVersion MinGaugeVersion = new GaugeVersion("0.8.0");
+        public static readonly GaugeVersion MinGaugeVersion = new GaugeVersion("0.9.0");
 
         private GaugeService()
         {
