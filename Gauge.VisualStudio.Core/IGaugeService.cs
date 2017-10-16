@@ -21,7 +21,6 @@ namespace Gauge.VisualStudio.Core
 {
     public interface IGaugeService
     {
-        void RegisterGaugeProject(Project project);
         IEnumerable<IGaugeApiConnection> GetAllApiConnections();
         IGaugeApiConnection GetApiConnectionFor(Project project);
         void KillChildProcess(string slugifiedName);
@@ -31,5 +30,6 @@ namespace Gauge.VisualStudio.Core
         void AssertCompatibility(IGaugeProcess gaugeProcess = null);
 
         void DisplayGaugeNotStartedMessage(GaugeDisplayErrorLevel errorLevel, string dialogMessage, string errorMessageFormat, params object[] args);
+        void RegisterGaugeProject(Project project, int minPortRange, int maxPortRange);
     }
 }

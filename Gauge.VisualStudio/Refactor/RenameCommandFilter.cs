@@ -125,6 +125,15 @@ namespace Gauge.VisualStudio.Refactor
                 OldStep = originalText
             };
             var apiConnection = GaugeService.Instance.GetApiConnectionFor(project);
+            if (apiConnection == null)
+            {
+                return new APIMessage
+                {
+                    MessageId = 7,
+                    MessageType = APIMessage.Types.APIMessageType.ErrorResponse,
+                    Error = new ErrorResponse { Error = "Gauge API Not Started"}
+                };
+            }
             var apiMessage = new APIMessage
             {
                 PerformRefactoringRequest = performRefactoringRequest,

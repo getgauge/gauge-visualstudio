@@ -15,29 +15,30 @@
 using System;
 using Gauge.VisualStudio.Core;
 using Gauge.VisualStudio.Core.Extensions;
+using Gauge.VisualStudio.Core.Loggers;
 using Gauge.VisualStudio.Loggers;
 using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
 namespace Gauge.VisualStudio
 {
     public sealed class SolutionsEventListener : IVsSolutionEvents, IDisposable
     {
+        private readonly GaugeDaemonOptions _gaugeDaemonOptions;
         private bool _disposed;
         private IVsSolution _solution;
         private uint _solutionCookie;
 
-        public SolutionsEventListener()
+        public SolutionsEventListener(GaugeDaemonOptions gaugeDaemonOptions, IServiceProvider serviceProvider)
         {
-            _solution = Package.GetGlobalService(typeof(SVsSolution)) as IVsSolution;
+            _gaugeDaemonOptions = gaugeDaemonOptions;
+            _solution = serviceProvider.GetService(typeof(SVsSolution)) as IVsSolution;
             ErrorHandler.ThrowOnFailure(_solution.AdviseSolutionEvents(this, out _solutionCookie));
         }
 
         public void Dispose()
         {
             Dispose(true);
-
             GC.SuppressFinalize(this);
         }
 
@@ -51,10 +52,18 @@ namespace Gauge.VisualStudio
             if (GaugeService.Instance.ContainsApiConnectionFor(slugifiedName))
                 return VSConstants.S_OK;
 
+            try
+            {
+                StatusBarLogger.Log($"Initializing Gauge daemon for Project: {project.Name}");
+                GaugeService.Instance.RegisterGaugeProject(project, _gaugeDaemonOptions.MinPortRange,
+                    _gaugeDaemonOptions.MaxPortRange);
+            }
+            catch (Exception ex)
+            {
+                OutputPaneLogger.Error($"Failed to start Gauge Daemon: {ex}");
+                return VSConstants.S_FALSE;
+            }
 
-            GaugeService.Instance.RegisterGaugeProject(project);
-
-            StatusBarLogger.Log("Gauge Project detected, build solution to keep test explorer updated.");
             return VSConstants.S_OK;
         }
 

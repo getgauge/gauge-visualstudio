@@ -27,7 +27,6 @@ using Gauge.VisualStudio.Core.Exceptions;
 using Gauge.VisualStudio.Core.Extensions;
 using Gauge.VisualStudio.Core.Helpers;
 using Gauge.VisualStudio.Core.Loggers;
-using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Process = System.Diagnostics.Process;
@@ -55,11 +54,6 @@ namespace Gauge.VisualStudio.Core
 
         public static IGaugeService Instance => LazyInstance.Value;
 
-        public void RegisterGaugeProject(Project project)
-        {
-            GaugeProjects.Add(project);
-        }
-
         public IEnumerable<IGaugeApiConnection> GetAllApiConnections()
         {
             return GaugeProjects.Select(GetApiConnectionFor);
@@ -68,11 +62,7 @@ namespace Gauge.VisualStudio.Core
         public IGaugeApiConnection GetApiConnectionFor(Project project)
         {
             IGaugeApiConnection apiConnection;
-            if (ApiConnections.TryGetValue(project.SlugifiedName(), out apiConnection))
-                return apiConnection;
-            apiConnection = StartGaugeAsDaemon(project);
-            if (apiConnection != null)
-                ApiConnections.Add(project.SlugifiedName(), apiConnection);
+            ApiConnections.TryGetValue(project.SlugifiedName(), out apiConnection);
             return apiConnection;
         }
 
@@ -81,8 +71,8 @@ namespace Gauge.VisualStudio.Core
             if (ApiConnections.ContainsKey(slugifiedName))
                 try
                 {
-                    ApiConnections[slugifiedName].Dispose();
                     ApiConnections.Remove(slugifiedName);
+                    ApiConnections[slugifiedName].Dispose();
                 }
                 catch
                 {
@@ -90,8 +80,8 @@ namespace Gauge.VisualStudio.Core
             if (ChildProcesses.ContainsKey(slugifiedName))
                 try
                 {
-                    ChildProcesses[slugifiedName].Kill();
                     ChildProcesses.Remove(slugifiedName);
+                    ChildProcesses[slugifiedName].Kill();
                 }
                 catch
                 {
@@ -141,7 +131,8 @@ namespace Gauge.VisualStudio.Core
             }
         }
 
-        public void DisplayGaugeNotStartedMessage(GaugeDisplayErrorLevel errorLevel, string dialogMessage, string errorMessageFormat, params object[] args)
+        public void DisplayGaugeNotStartedMessage(GaugeDisplayErrorLevel errorLevel, string dialogMessage,
+            string errorMessageFormat, params object[] args)
         {
             var uiShell = (IVsUIShell) Package.GetGlobalService(typeof(IVsUIShell));
             var clsId = Guid.Empty;
@@ -175,6 +166,14 @@ namespace Gauge.VisualStudio.Core
             );
         }
 
+        public void RegisterGaugeProject(Project project, int minPortRange, int maxPortRange)
+        {
+            var apiConnection = StartGaugeAsDaemon(project, minPortRange, maxPortRange);
+            if (apiConnection != null)
+                ApiConnections.Add(project.SlugifiedName(), apiConnection);
+            GaugeProjects.Add(project);
+        }
+
         public void AssertCompatibility(IGaugeProcess gaugeProcess = null)
         {
             var installedGaugeVersion = GetInstalledGaugeVersion(gaugeProcess);
@@ -182,10 +181,10 @@ namespace Gauge.VisualStudio.Core
             if (new GaugeVersion(installedGaugeVersion.version).CompareTo(MinGaugeVersion) >= 0)
                 return;
 
-            var message = $"This plugin works with Gauge {MinGaugeVersion} or above." + 
-                $" You have Gauge {installedGaugeVersion.version} installed." + 
-                " Please update your Gauge installation.\n" +
-                " Run 'gauge version' from your command prompt for installation information.";
+            var message = $"This plugin works with Gauge {MinGaugeVersion} or above." +
+                          $" You have Gauge {installedGaugeVersion.version} installed." +
+                          " Please update your Gauge installation.\n" +
+                          " Run 'gauge version' from your command prompt for installation information.";
 
             throw new GaugeVersionIncompatibleException(message);
         }
@@ -215,7 +214,7 @@ namespace Gauge.VisualStudio.Core
             return string.Join(Environment.NewLine, lines);
         }
 
-        private IGaugeApiConnection StartGaugeAsDaemon(Project gaugeProject)
+        private IGaugeApiConnection StartGaugeAsDaemon(Project gaugeProject, int minPortRange, int maxPortRange)
         {
             var slugifiedName = gaugeProject.SlugifiedName();
             if (ChildProcesses.ContainsKey(slugifiedName))
@@ -223,52 +222,31 @@ namespace Gauge.VisualStudio.Core
                     KillChildProcess(slugifiedName);
                 else
                     return ApiConnections[slugifiedName];
-            var waitDialog = (IVsThreadedWaitDialog) Package.GetGlobalService(typeof(SVsThreadedWaitDialog));
-            try
+            var projectOutputPath = GetValidProjectOutputPath(gaugeProject);
+
+            var port = GetOpenPort(minPortRange, maxPortRange);
+            OutputPaneLogger.Debug("Opening Gauge Daemon for Project : {0},  at port: {1}", gaugeProject.Name, port);
+
+            ApiPorts.Add(slugifiedName, port);
+            var environmentVariables = new Dictionary<string, string>
             {
-                ErrorHandler.ThrowOnFailure(waitDialog.StartWaitDialog("Initializing Gauge Project",
-                    $"Initializing Gauge daemon for Project: {gaugeProject.Name}",
-                    null,
-                    0,
-                    null,
-                    null));
-                var projectOutputPath = GetValidProjectOutputPath(gaugeProject);
+                {"GAUGE_API_PORT", port.ToString(CultureInfo.InvariantCulture)},
+                {"gauge_custom_build_path", projectOutputPath}
+            };
+            var gaugeProcess = GaugeProcess.ForDaemon(GetProjectRoot(gaugeProject), environmentVariables);
 
-                var port = GetOpenPort(1000, 2000);
-                OutputPaneLogger.Debug("Opening Gauge Daemon for Project : {0},  at port: {1}", gaugeProject.Name, port);
+            if (!gaugeProcess.Start())
+                throw new GaugeApiInitializationException(gaugeProcess.StandardOutput.ReadToEnd(),
+                    gaugeProcess.StandardError.ReadToEnd());
 
-                ApiPorts.Add(slugifiedName, port);
-                var environmentVariables = new Dictionary<string, string>
-                {
-                    {"GAUGE_API_PORT", port.ToString(CultureInfo.InvariantCulture)},
-                    {"gauge_custom_build_path", projectOutputPath}
-                };
-                var gaugeProcess = GaugeProcess.ForDaemon(GetProjectRoot(gaugeProject), environmentVariables);
+            gaugeProcess.Exited += (s, e) => OutputPaneLogger.Debug($"PID {gaugeProcess.Id} has exited.");
 
-                try
-                {
-                    if (!gaugeProcess.Start())
-                        throw new GaugeApiInitializationException(gaugeProcess.StandardOutput.ReadToEnd(), gaugeProcess.StandardError.ReadToEnd());
-
-                    ChildProcesses.Add(slugifiedName, gaugeProcess.BaseProcess);
-                    OutputPaneLogger.Debug("Opening Gauge Daemon with PID: {0}", gaugeProcess.Id);
-                    var tcpClientWrapper = new TcpClientWrapper(port);
-                    WaitForColdStart(tcpClientWrapper);
-                    OutputPaneLogger.Debug("PID: {0} ready, waiting for messages..", gaugeProcess.Id);
-                    return new GaugeApiConnection(tcpClientWrapper);
-                }
-                catch (Exception ex)
-                {
-                    var errorMessage = $"Failed to start Gauge Daemon: {ex}";
-                    DisplayGaugeNotStartedMessage(GaugeDisplayErrorLevel.Error, "Unable to launch Gauge Daemon. Check Output Window for details", errorMessage);
-                    return null;
-                }
-            }
-            finally
-            {
-                var cancelled = 0;
-                waitDialog?.EndWaitDialog(ref cancelled);
-            }
+            ChildProcesses.Add(slugifiedName, gaugeProcess.BaseProcess);
+            OutputPaneLogger.Debug("Opening Gauge Daemon with PID: {0}", gaugeProcess.Id);
+            var tcpClientWrapper = new TcpClientWrapper(port);
+            WaitForColdStart(tcpClientWrapper);
+            OutputPaneLogger.Debug("PID: {0} ready, waiting for messages..", gaugeProcess.Id);
+            return new GaugeApiConnection(tcpClientWrapper);
         }
 
         private static string GetProjectRoot(Project gaugeProject)
@@ -318,7 +296,8 @@ namespace Gauge.VisualStudio.Core
                 OutputPaneLogger.Error(
                     "Unable to retrieve Project Output path for Project : {0}. Not starting Gauge Daemon",
                     gaugeProject.Name);
-                throw new GaugeApiInitializationException("", $"Unable to retrieve Project Output path for Project : {gaugeProject.Name}");
+                throw new GaugeApiInitializationException("",
+                    $"Unable to retrieve Project Output path for Project : {gaugeProject.Name}");
             }
 
             if (Directory.Exists(projectOutputPath))
