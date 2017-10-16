@@ -83,7 +83,7 @@
     <Compile Include="GaugeLanguageInfo.cs" />
     <Compile Include="GaugeContentTypeDefinitions.cs" />
     <Compile Include="GaugeClassifierProvider.cs" />
-    <Compile Include="GaugeExecutionOptions.cs">
+    <Compile Include="GaugeDaemonOptions.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="GotoDefn\GotoDefnCommandFilter.cs" />

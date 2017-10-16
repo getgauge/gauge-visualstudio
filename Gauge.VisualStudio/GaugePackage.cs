@@ -13,17 +13,14 @@
 // limitations under the License.
 
 using System;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using EnvDTE;
-using EnvDTE80;
 using Gauge.VisualStudio.Core;
 using Gauge.VisualStudio.Core.Exceptions;
-using Gauge.VisualStudio.TestAdapter;
+using Gauge.VisualStudio.Core.Loggers;
 using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
@@ -44,29 +41,12 @@ namespace Gauge.VisualStudio
         DefaultToInsertSpaces = true,
         EnableLineNumbers = true,
         RequestStockColors = true)]
-    [ProvideOptionPage(typeof(GaugeExecutionOptions), "Gauge", "Test Execution", 0, 0, true)]
+    [ProvideOptionPage(typeof(GaugeDaemonOptions), "Gauge", "API Options", 0, 0, true)]
     public class GaugePackage : Package, IDisposable
     {
         private bool _disposed;
-        private Events2 _DTEEvents;
         private FormatMenuCommand _formatMenuCommand;
         private SolutionsEventListener _solutionsEventListener;
-
-        private IComponentModel componentModel;
-
-        public IComponentModel ComponentModel
-        {
-            get
-            {
-                if (componentModel == null)
-                    componentModel = (IComponentModel) GetGlobalService(typeof(SComponentModel));
-                return componentModel;
-            }
-        }
-
-        public IGaugeTestRunSettingsService settingsService { get; private set; }
-
-        public GaugeExecutionOptions Options { get; private set; }
 
         public static DTE DTE { get; private set; }
 
@@ -83,12 +63,14 @@ namespace Gauge.VisualStudio
             {
                 GaugeService.Instance.AssertCompatibility();
             }
-            catch (GaugeVersionIncompatibleException)
+            catch (GaugeVersionIncompatibleException ex)
             {
+                OutputPaneLogger.Error(ex.Message);
                 return;
             }
-            catch (GaugeVersionNotFoundException)
+            catch (GaugeVersionNotFoundException ex)
             {
+                OutputPaneLogger.Error(ex.Message);
                 return;
             }
 
@@ -102,18 +84,9 @@ namespace Gauge.VisualStudio
 
             RegisterEditorFactory(new GaugeEditorFactory(this));
 
-            _solutionsEventListener = new SolutionsEventListener();
+            var options = GetDialogPage(typeof(GaugeDaemonOptions)) as GaugeDaemonOptions;
+            _solutionsEventListener = new SolutionsEventListener(options, this);
 
-            Options = GetDialogPage(typeof(GaugeExecutionOptions)) as GaugeExecutionOptions;
-            Options.PropertyChanged += SettingsPropertyChanged;
-
-            settingsService = ComponentModel.GetService<IGaugeTestRunSettingsService>();
-            settingsService.MapSettings(Options.UseExecutionAPI);
-        }
-
-        private void SettingsPropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            settingsService.MapSettings(Options.UseExecutionAPI);
         }
 
         protected override void Dispose(bool disposing)
@@ -121,8 +94,8 @@ namespace Gauge.VisualStudio
             if (_disposed)
                 return;
 
-            if (disposing && _solutionsEventListener != null)
-                _solutionsEventListener.Dispose();
+            if (disposing)
+                _solutionsEventListener?.Dispose();
 
             _disposed = true;
             base.Dispose(disposing);

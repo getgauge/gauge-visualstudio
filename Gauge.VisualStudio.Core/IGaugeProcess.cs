@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using System.Diagnostics;
 using System.IO;
 
@@ -26,5 +27,6 @@ namespace Gauge.VisualStudio.Core
         int Id { get; }
         bool Start();
         void WaitForExit();
+        event EventHandler Exited;
     }
 }

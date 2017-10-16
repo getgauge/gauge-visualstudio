@@ -18,7 +18,6 @@ using System.Linq;
 using Gauge.CSharp.Core;
 using Gauge.Messages;
 using Gauge.VisualStudio.Core;
-using Gauge.VisualStudio.Core.Exceptions;
 
 namespace Gauge.VisualStudio.Model
 {
@@ -54,51 +53,37 @@ namespace Gauge.VisualStudio.Model
 
         public ProtoStepValue GetStepValueFromInput(EnvDTE.Project project, string input)
         {
-            try
-            {
-                var gaugeApiConnection = _gaugeService.GetApiConnectionFor(project);
-                var stepsRequest = new GetStepValueRequest {StepText = input};
-                var apiMessage = new APIMessage
-                {
-                    MessageId = GenerateMessageId(),
-                    MessageType = APIMessage.Types.APIMessageType.GetStepValueRequest,
-                    StepValueRequest = stepsRequest
-                };
-
-                var bytes = gaugeApiConnection.WriteAndReadApiMessage(apiMessage);
-                return bytes.StepValueResponse.StepValue;
-            }
-            catch (GaugeApiInitializationException ex)
-            {
-                _gaugeService.DisplayGaugeNotStartedMessage(GaugeDisplayErrorLevel.Error,
-                    "Unable to launch Gauge Daemon. Check Output Window for details", $"STDOUT:\n{ex.Data["STDOUT"]}\nSTDERR:\n{ex.Data["STDERR"]}");
-
+            var gaugeApiConnection = _gaugeService.GetApiConnectionFor(project);
+            if (gaugeApiConnection == null)
                 return default(ProtoStepValue);
-            }
+            var stepsRequest = new GetStepValueRequest {StepText = input};
+            var apiMessage = new APIMessage
+            {
+                MessageId = GenerateMessageId(),
+                MessageType = APIMessage.Types.APIMessageType.GetStepValueRequest,
+                StepValueRequest = stepsRequest
+            };
+
+            var bytes = gaugeApiConnection.WriteAndReadApiMessage(apiMessage);
+            return bytes.StepValueResponse.StepValue;
         }
 
         public IEnumerable<ProtoStepValue> GetAllStepsFromGauge(EnvDTE.Project project)
         {
-            try
-            {
-                var gaugeApiConnection = _gaugeService.GetApiConnectionFor(project);
-                var stepsRequest = new GetAllStepsRequest();
-                var apiMessage = new APIMessage
-                {
-                    MessageId = GenerateMessageId(),
-                    MessageType = APIMessage.Types.APIMessageType.GetAllStepsRequest,
-                    AllStepsRequest = stepsRequest
-                };
+            var gaugeApiConnection = _gaugeService.GetApiConnectionFor(project);
 
-                var bytes = gaugeApiConnection.WriteAndReadApiMessage(apiMessage);
-                return bytes.AllStepsResponse.AllSteps;
-            }
-            catch (GaugeApiInitializationException ex)
-            {
-                _gaugeService.DisplayGaugeNotStartedMessage(GaugeDisplayErrorLevel.Error,
-                    "Unable to launch Gauge Daemon. Check Output Window for details", $"STDOUT:\n{ex.Data["STDOUT"]}\nSTDERR:\n{ex.Data["STDERR"]}");
+            if (gaugeApiConnection == null)
                 return Enumerable.Empty<ProtoStepValue>();
-            }
+            var stepsRequest = new GetAllStepsRequest();
+            var apiMessage = new APIMessage
+            {
+                MessageId = GenerateMessageId(),
+                MessageType = APIMessage.Types.APIMessageType.GetAllStepsRequest,
+                AllStepsRequest = stepsRequest
+            };
+
+            var bytes = gaugeApiConnection.WriteAndReadApiMessage(apiMessage);
+            return bytes.AllStepsResponse.AllSteps;
         }
 
         public IEnumerable<ProtoSpec> GetSpecsFromGauge(IGaugeApiConnection apiConnection)

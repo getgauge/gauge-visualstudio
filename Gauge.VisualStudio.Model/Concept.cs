@@ -17,7 +17,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Gauge.Messages;
 using Gauge.VisualStudio.Core;
-using Gauge.VisualStudio.Core.Exceptions;
+using Gauge.VisualStudio.Core.Loggers;
 
 namespace Gauge.VisualStudio.Model
 {
@@ -37,33 +37,32 @@ namespace Gauge.VisualStudio.Model
         public IEnumerable<Concept> GetAllConcepts()
         {
             if (_project == null)
-                return Enumerable.Empty<Concept>();
-            try
             {
-                var gaugeApiConnection = GaugeService.Instance.GetApiConnectionFor(_project);
-                var conceptsRequest = new GetAllConceptsRequest();
-                var apiMessage = new APIMessage
-                {
-                    MessageId = GenerateMessageId(),
-                    MessageType = APIMessage.Types.APIMessageType.GetAllConceptsRequest,
-                    AllConceptsRequest = conceptsRequest
-                };
-
-                var bytes = gaugeApiConnection.WriteAndReadApiMessage(apiMessage);
-
-                return bytes.AllConceptsResponse.Concepts.Select(info => new Concept(_project)
-                {
-                    StepValue = info.StepValue.ParameterizedStepValue,
-                    FilePath = info.Filepath,
-                    LineNumber = info.LineNumber
-                });
-            }
-            catch (GaugeApiInitializationException ex)
-            {
-                GaugeService.Instance.DisplayGaugeNotStartedMessage(GaugeDisplayErrorLevel.Error,
-                    "Unable to launch Gauge Daemon. Check Output Window for details", $"STDOUT:\n{ex.Data["STDOUT"]}\nSTDERR:\n{ex.Data["STDERR"]}");
+                OutputPaneLogger.Error("Error occurred GetAllConcepts: _project is null");
                 return Enumerable.Empty<Concept>();
             }
+            var gaugeApiConnection = GaugeService.Instance.GetApiConnectionFor(_project);
+            if (gaugeApiConnection == null)
+            {
+                OutputPaneLogger.Error("Error occurred GetAllConcepts: apiConnection is null");
+                return Enumerable.Empty<Concept>();
+            }
+            var conceptsRequest = new GetAllConceptsRequest();
+            var apiMessage = new APIMessage
+            {
+                MessageId = GenerateMessageId(),
+                MessageType = APIMessage.Types.APIMessageType.GetAllConceptsRequest,
+                AllConceptsRequest = conceptsRequest
+            };
+
+            var bytes = gaugeApiConnection.WriteAndReadApiMessage(apiMessage);
+
+            return bytes.AllConceptsResponse.Concepts.Select(info => new Concept(_project)
+            {
+                StepValue = info.StepValue.ParameterizedStepValue,
+                FilePath = info.Filepath,
+                LineNumber = info.LineNumber
+            });
         }
 
         private static long GenerateMessageId()

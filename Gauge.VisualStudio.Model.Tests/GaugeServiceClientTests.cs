@@ -135,7 +135,7 @@ namespace Gauge.VisualStudio.Model.Tests
         }
 
         [Test]
-        [TestCaseSource("MatchTestCases")]
+        [TestCaseSource(nameof(MatchTestCases))]
         public void ShouldLocateReferencesUsingRegex(string input, string parsedInput, string match)
         {
             var gaugeService = A.Fake<IGaugeService>();
@@ -148,7 +148,7 @@ namespace Gauge.VisualStudio.Model.Tests
         }
 
         [Test]
-        [TestCaseSource("MatchNegativeTestCases")]
+        [TestCaseSource(nameof(MatchNegativeTestCases))]
         public void ShouldNotLocateFalseMatchesUsingRegex(string input, string parsedInput, string match)
         {
             var gaugeService = A.Fake<IGaugeService>();
