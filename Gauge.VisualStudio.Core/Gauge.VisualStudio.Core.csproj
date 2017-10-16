@@ -86,7 +86,6 @@
     <Compile Include="IGaugeProcess.cs" />
     <Compile Include="IGaugeService.cs" />
     <Compile Include="Loggers\OutputPaneLogger.cs" />
-    <Compile Include="PortInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
