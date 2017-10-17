@@ -235,11 +235,13 @@ namespace Gauge.VisualStudio.Core
             };
             var gaugeProcess = GaugeProcess.ForDaemon(GetProjectRoot(gaugeProject), environmentVariables);
 
+            gaugeProcess.Exited += (s, e) =>
+                OutputPaneLogger.Error(
+                    $"PID {gaugeProcess.Id} has exited with exit code {gaugeProcess.ExitCode}.\nSTDOUT:\n{gaugeProcess.StandardOutput.ReadToEnd()}\nSTDERR\n{gaugeProcess.StandardError.ReadToEnd()}");
+
             if (!gaugeProcess.Start())
                 throw new GaugeApiInitializationException(gaugeProcess.StandardOutput.ReadToEnd(),
                     gaugeProcess.StandardError.ReadToEnd());
-
-            gaugeProcess.Exited += (s, e) => OutputPaneLogger.Debug($"PID {gaugeProcess.Id} has exited.");
 
             ChildProcesses.Add(slugifiedName, gaugeProcess.BaseProcess);
             OutputPaneLogger.Debug("Opening Gauge Daemon with PID: {0}", gaugeProcess.Id);
