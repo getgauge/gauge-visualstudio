@@ -38,8 +38,10 @@ namespace Gauge.VisualStudio.Core
 
         public bool Start()
         {
+            BaseProcess.EnableRaisingEvents = true;
             if (Exited != null)
                 BaseProcess.Exited += Exited;
+
             return BaseProcess.Start();
         }
 
