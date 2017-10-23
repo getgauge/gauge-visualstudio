@@ -14,6 +14,7 @@
 
 using System;
 using System.Diagnostics;
+using Gauge.VisualStudio.Core;
 using Gauge.VisualStudio.Core.Helpers;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
@@ -27,48 +28,23 @@ namespace Gauge.VisualStudio.TestAdapter
         {
             var result = new TestResult(testCase);
             frameworkHandle.RecordStart(testCase);
-            frameworkHandle.SendMessage(TestMessageLevel.Informational, string.Format("Executing Test: {0}", testCase));
+            frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Executing Test: {testCase}");
             var projectRoot = testCase.GetPropertyValue(TestDiscoverer.GaugeProjectRoot, string.Empty);
             var scenarioIdentifier = testCase.GetPropertyValue(TestDiscoverer.ScenarioIdentifier, -1);
             try
             {
-                var arguments = string.Format(@"--simple-console ""{0}:{1}""", testCase.Source, scenarioIdentifier);
-                frameworkHandle.SendMessage(TestMessageLevel.Informational,
-                    string.Format("Invoking : gauge.exe {0} [Working Dir: {1}]", arguments, projectRoot));
-                var p = new Process
-                {
-                    StartInfo =
-                    {
-                        WorkingDirectory = projectRoot,
-                        UseShellExecute = false,
-                        RedirectStandardOutput = true,
-                        CreateNoWindow = true,
-                        FileName = "gauge.exe",
-                        RedirectStandardError = true,
-                        Arguments = arguments
-                    }
-                };
 
                 var gaugeCustomBuildPath = testCase.GetPropertyValue(TestDiscoverer.GaugeCustomBuildPath, string.Empty);
-
-                if (!string.IsNullOrEmpty(gaugeCustomBuildPath))
-                    p.StartInfo.EnvironmentVariables["gauge_custom_build_path"] = gaugeCustomBuildPath;
-
-                if (isBeingDebugged)
-                {
-                    //Gauge CSharp runner will wait for a debugger to be attached, when it finds this env variable set.
-                    p.StartInfo.EnvironmentVariables["DEBUGGING"] = "true";
-                    frameworkHandle.SendMessage(TestMessageLevel.Informational,
-                        string.Format("Debugging 'gauge.exe {0}'", arguments));
-                }
-
+                var p = GaugeProcess.ForExecution(projectRoot, testCase.Source, scenarioIdentifier, gaugeCustomBuildPath, isBeingDebugged);
+                frameworkHandle.SendMessage(TestMessageLevel.Informational,
+                    $"Invoking : gauge.exe {p}");
                 p.Start();
 
                 if (isBeingDebugged)
                 {
                     DTEHelper.AttachToProcess(p.Id);
                     frameworkHandle.SendMessage(TestMessageLevel.Informational,
-                        string.Format("Attaching to ProcessID {0}", p.Id));
+                        $"Attaching to ProcessID {p.Id}");
                 }
                 var output = p.StandardOutput.ReadToEnd();
                 var error = p.StandardError.ReadToEnd();

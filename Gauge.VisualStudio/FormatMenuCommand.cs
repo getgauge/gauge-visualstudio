@@ -17,6 +17,7 @@ using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using Gauge.VisualStudio.Core;
 using Gauge.VisualStudio.Core.Extensions;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
@@ -77,20 +78,7 @@ namespace Gauge.VisualStudio
             ((IVsProject) hierarchy).GetMkDocument(itemid, out itemFullPath);
             var gaugeFile = new FileInfo(itemFullPath);
 
-            var arguments = string.Format(@"--simple-console --format {0}", gaugeFile.Name);
-            var p = new Process
-            {
-                StartInfo =
-                {
-                    WorkingDirectory = gaugeFile.Directory.ToString(),
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    CreateNoWindow = true,
-                    FileName = "gauge.exe",
-                    RedirectStandardError = true,
-                    Arguments = arguments
-                }
-            };
+            var p = GaugeProcess.ForFormat(gaugeFile.DirectoryName, gaugeFile.Name);
             p.Start();
             p.WaitForExit();
         }

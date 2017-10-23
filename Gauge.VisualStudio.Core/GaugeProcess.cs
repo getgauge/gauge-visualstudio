@@ -94,5 +94,48 @@ namespace Gauge.VisualStudio.Core
                 gaugeStartInfo.EnvironmentVariables[environmentVariable.Key] = environmentVariable.Value;
             return gaugeStartInfo;
         }
+
+        public static IGaugeProcess ForFormat(string gaugeFileDirectoryName, string gaugeFileName)
+        {
+            return new GaugeProcess(new ProcessStartInfo
+                {
+                    WorkingDirectory = gaugeFileDirectoryName,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    CreateNoWindow = true,
+                    FileName = "gauge.exe",
+                    RedirectStandardError = true,
+                    Arguments = $@"format {gaugeFileName} --simple-console"
+                });
+        }
+
+        public static IGaugeProcess ForExecution(string projectRoot, string testCaseSource, int scenarioIdentifier, string gaugeCustomBuildPath, bool isBeingDebugged)
+        {
+            var processStartInfo = new ProcessStartInfo
+            {
+                WorkingDirectory = projectRoot,
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true,
+                FileName = "gauge.exe",
+                RedirectStandardError = true,
+                Arguments = $@"run ""{testCaseSource}:{scenarioIdentifier}"" --simple-console "
+            };
+            if (!string.IsNullOrEmpty(gaugeCustomBuildPath))
+                processStartInfo.EnvironmentVariables["gauge_custom_build_path"] = gaugeCustomBuildPath;
+
+            if (isBeingDebugged)
+            {
+                //Gauge CSharp runner will wait for a debugger to be attached, when it finds this env variable set.
+                processStartInfo.EnvironmentVariables["DEBUGGING"] = "true";
+            }
+
+            return new GaugeProcess(processStartInfo);
+        }
+
+        public override string ToString()
+        {
+            return $"gauge.exe : {BaseProcess.StartInfo}";
+        }
     }
 }
