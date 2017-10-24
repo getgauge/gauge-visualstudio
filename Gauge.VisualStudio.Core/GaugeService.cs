@@ -46,7 +46,7 @@ namespace Gauge.VisualStudio.Core
         private static readonly Dictionary<string, int> ApiPorts = new Dictionary<string, int>();
 
         private static readonly List<Project> GaugeProjects = new List<Project>();
-        public static readonly GaugeVersion MinGaugeVersion = new GaugeVersion("0.9.0");
+        public static readonly GaugeVersion MinGaugeVersion = new GaugeVersion("0.9.4");
 
         private GaugeService()
         {
@@ -227,7 +227,6 @@ namespace Gauge.VisualStudio.Core
             var port = GetOpenPort(minPortRange, maxPortRange);
             OutputPaneLogger.Debug("Opening Gauge Daemon for Project : {0},  at port: {1}", gaugeProject.Name, port);
 
-            ApiPorts.Add(slugifiedName, port);
             var environmentVariables = new Dictionary<string, string>
             {
                 {"GAUGE_API_PORT", port.ToString(CultureInfo.InvariantCulture)},
@@ -243,10 +242,11 @@ namespace Gauge.VisualStudio.Core
                 throw new GaugeApiInitializationException(gaugeProcess.StandardOutput.ReadToEnd(),
                     gaugeProcess.StandardError.ReadToEnd());
 
-            ChildProcesses.Add(slugifiedName, gaugeProcess.BaseProcess);
             OutputPaneLogger.Debug("Opening Gauge Daemon with PID: {0}", gaugeProcess.Id);
             var tcpClientWrapper = new TcpClientWrapper(port);
             WaitForColdStart(tcpClientWrapper);
+            ApiPorts.Add(slugifiedName, port);
+            ChildProcesses.Add(slugifiedName, gaugeProcess.BaseProcess);
             OutputPaneLogger.Debug("PID: {0} ready, waiting for messages..", gaugeProcess.Id);
             return new GaugeApiConnection(tcpClientWrapper);
         }
