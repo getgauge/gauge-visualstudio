@@ -78,7 +78,7 @@
     <Compile Include="Classification\Formats.cs" />
     <Compile Include="Classification\Types.cs" />
     <Compile Include="CommandController.cs" />
-    <Compile Include="FormatMenuCommand.cs" />
+    <Compile Include="Format\FormatCommandFilter.cs" />
     <Compile Include="GaugeEditorFactory.cs" />
     <Compile Include="GaugeLanguageInfo.cs" />
     <Compile Include="GaugeContentTypeDefinitions.cs" />
@@ -96,7 +96,6 @@
     <Compile Include="Highlighting\UnimplementedStepTag.cs" />
     <Compile Include="Highlighting\UnimplementedStepTagger.cs" />
     <Compile Include="Loggers\StatusBarLogger.cs" />
-    <Compile Include="PkgCmdID.cs" />
     <Compile Include="Refactor\RenameCommandFilter.cs" />
     <Compile Include="References\FindReferencesCommandFilter.cs" />
     <Compile Include="Resources.Designer.cs">
@@ -114,12 +113,6 @@
     <Compile Include="UI\ClassPicker.xaml.cs">
       <DependentUpon>ClassPicker.xaml</DependentUpon>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <VSCTCompile Include="GaugePackageVS.vsct">
-      <resourcename>Menus.ctmenu</resourcename>
-      <SubType>Designer</SubType>
-    </VSCTCompile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources.resx">
@@ -155,7 +148,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Resource Include="Resources\Images.png" />
     <Content Include="Resources\Package.ico" />
   </ItemGroup>
   <ItemGroup>

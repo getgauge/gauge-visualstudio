@@ -14,6 +14,7 @@
 
 using System.ComponentModel.Composition;
 using Gauge.VisualStudio.AutoComplete;
+using Gauge.VisualStudio.Format;
 using Gauge.VisualStudio.GotoDefn;
 using Gauge.VisualStudio.Refactor;
 using Gauge.VisualStudio.References;
@@ -62,6 +63,10 @@ namespace Gauge.VisualStudio
                 var findReferencesCommandFilter = new FindReferencesCommandFilter(view);
                 textViewAdapter.AddCommandFilter(findReferencesCommandFilter, out next);
                 findReferencesCommandFilter.Next = next;
+
+                var formatCommandFilter = new FormatCommandFilter(view);
+                textViewAdapter.AddCommandFilter(formatCommandFilter, out next);
+                formatCommandFilter.Next = next;
             }
         }
     }
