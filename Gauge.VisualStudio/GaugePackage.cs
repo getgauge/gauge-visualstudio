@@ -30,7 +30,6 @@ namespace Gauge.VisualStudio
     [InstalledProductRegistration("#110", "#112", "1.0", IconResourceID = 400)]
     [Guid(GuidList.GuidGaugeVsPackagePkgString)]
     [ProvideAutoLoad(UIContextGuids80.SolutionExists)]
-    [ProvideMenuResource("Menus.ctmenu", 1)]
     [ProvideEditorFactory(typeof(GaugeEditorFactory), 112)]
     [ProvideEditorLogicalView(typeof(GaugeEditorFactory), VSConstants.LOGVIEWID.TextView_string)]
     [ProvideEditorExtension(typeof(GaugeEditorFactory), GaugeContentTypeDefinitions.SpecFileExtension, 32)]
@@ -45,7 +44,6 @@ namespace Gauge.VisualStudio
     public class GaugePackage : Package, IDisposable
     {
         private bool _disposed;
-        private FormatMenuCommand _formatMenuCommand;
         private SolutionsEventListener _solutionsEventListener;
 
         public static DTE DTE { get; private set; }
@@ -77,16 +75,9 @@ namespace Gauge.VisualStudio
             base.Initialize();
 
             DTE = (DTE) GetService(typeof(DTE));
-
-            // Add our command handlers for menu (commands must exist in the .vsct file)
-            _formatMenuCommand = new FormatMenuCommand(this);
-            _formatMenuCommand.Register();
-
             RegisterEditorFactory(new GaugeEditorFactory(this));
-
             var options = GetDialogPage(typeof(GaugeDaemonOptions)) as GaugeDaemonOptions;
             _solutionsEventListener = new SolutionsEventListener(options, this);
-
         }
 
         protected override void Dispose(bool disposing)
