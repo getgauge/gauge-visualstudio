@@ -54,18 +54,7 @@ namespace Gauge.VisualStudio.Core
 
         public static IGaugeProcess ForVersion()
         {
-            return new GaugeProcess(GetStartInfoForVersion());
-        }
-
-        public static IGaugeProcess ForDaemon(string workingDirectory,
-            IEnumerable<KeyValuePair<string, string>> environmentVariables)
-        {
-            return new GaugeProcess(GetStartInfoForDaemon(workingDirectory, environmentVariables));
-        }
-
-        private static ProcessStartInfo GetStartInfoForVersion()
-        {
-            return new ProcessStartInfo
+            return new GaugeProcess(new ProcessStartInfo
             {
                 UseShellExecute = false,
                 FileName = "gauge.exe",
@@ -73,10 +62,10 @@ namespace Gauge.VisualStudio.Core
                 Arguments = "version --machine-readable",
                 RedirectStandardError = true,
                 RedirectStandardOutput = true
-            };
+            });
         }
 
-        private static ProcessStartInfo GetStartInfoForDaemon(string workingDirectory,
+        public static IGaugeProcess ForDaemon(string workingDirectory,
             IEnumerable<KeyValuePair<string, string>> environmentVariables)
         {
             var gaugeStartInfo = new ProcessStartInfo
@@ -92,7 +81,7 @@ namespace Gauge.VisualStudio.Core
 
             foreach (var environmentVariable in environmentVariables)
                 gaugeStartInfo.EnvironmentVariables[environmentVariable.Key] = environmentVariable.Value;
-            return gaugeStartInfo;
+            return new GaugeProcess(gaugeStartInfo);
         }
 
         public static IGaugeProcess ForFormat(string gaugeFileDirectoryName, string gaugeFileName)
@@ -105,7 +94,7 @@ namespace Gauge.VisualStudio.Core
                     CreateNoWindow = true,
                     FileName = "gauge.exe",
                     RedirectStandardError = true,
-                    Arguments = $@"format {gaugeFileName} --simple-console"
+                    Arguments = $@"format {gaugeFileName}"
                 });
         }
 
