@@ -14,11 +14,11 @@
 
 using System;
 using System.ComponentModel.Design;
-using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using Gauge.VisualStudio.Core;
 using Gauge.VisualStudio.Core.Extensions;
+using Gauge.VisualStudio.Core.Loggers;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -81,6 +81,10 @@ namespace Gauge.VisualStudio
             var p = GaugeProcess.ForFormat(gaugeFile.DirectoryName, gaugeFile.Name);
             p.Start();
             p.WaitForExit();
+            if (p.ExitCode!=0)
+            {
+                OutputPaneLogger.Error($"gauge format {gaugeFile.Name}\nSTDOUT:\n{p.StandardOutput.ReadToEnd()}\nSTDERR:\n{p.StandardError.ReadToEnd()}\n");
+            }
         }
 
         private static bool IsSingleProjectItemSelection(out IVsHierarchy hierarchy, out uint itemid)
@@ -98,7 +102,7 @@ namespace Gauge.VisualStudio
 
             try
             {
-                IVsMultiItemSelect multiItemSelect = null;
+                IVsMultiItemSelect multiItemSelect;
                 var hr = monitorSelection.GetCurrentSelection(out hierarchyPtr, out itemid, out multiItemSelect,
                     out selectionContainerPtr);
 
