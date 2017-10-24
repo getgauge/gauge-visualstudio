@@ -34,7 +34,7 @@ namespace Gauge.VisualStudio
     [ProvideEditorFactory(typeof(GaugeEditorFactory), 112)]
     [ProvideEditorLogicalView(typeof(GaugeEditorFactory), VSConstants.LOGVIEWID.TextView_string)]
     [ProvideEditorExtension(typeof(GaugeEditorFactory), GaugeContentTypeDefinitions.SpecFileExtension, 32)]
-    [ProvideEditorExtension(typeof(GaugeEditorFactory), GaugeContentTypeDefinitions.ConceptFileExtension, 32)]
+    [ProvideEditorExtension(typeof(GaugeEditorFactory), GaugeContentTypeDefinitions.ConceptFileExtension, 64)]
     [ProvideEditorExtension(typeof(GaugeEditorFactory), GaugeContentTypeDefinitions.MarkdownFileExtension, 32)]
     [ProvideLanguageService(typeof(GaugeLanguageInfo), GaugeLanguageInfo.LanguageName,
         GaugeLanguageInfo.LanguageResourceId,
