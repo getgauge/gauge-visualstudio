@@ -25,6 +25,6 @@ namespace Gauge.VisualStudio.Core.Exceptions
             Data.Add("GaugeError", error);
         }
 
-        protected override string ErrorCode => "GAUGE-VS-003";
+        protected override string ErrorCode => "GAUGE-VS-002";
     }
 }

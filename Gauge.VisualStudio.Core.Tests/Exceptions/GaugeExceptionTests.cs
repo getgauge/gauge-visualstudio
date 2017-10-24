@@ -23,9 +23,8 @@ namespace Gauge.VisualStudio.Core.Tests.Exceptions
     {
         private static object[] _exceptions =
         {
-            new object[] { typeof(ConventionViolationException), "GAUGE-VS-002"},
-            new object[] { typeof(GaugeVersionIncompatibleException), "GAUGE-VS-003"},
-            new object[] { typeof(GaugeVersionNotFoundException), "GAUGE-VS-004"},
+            new object[] { typeof(GaugeVersionIncompatibleException), "GAUGE-VS-002"},
+            new object[] { typeof(GaugeVersionNotFoundException), "GAUGE-VS-003"},
         };
 
         [Test]

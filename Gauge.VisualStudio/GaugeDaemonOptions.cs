@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System.ComponentModel;
-using Gauge.VisualStudio.Core;
 using Microsoft.VisualStudio.Shell;
 
 namespace Gauge.VisualStudio
@@ -30,12 +29,12 @@ namespace Gauge.VisualStudio
         }
 
         [Category("API Options")]
-        [DisplayName("MinPortRange Port Number")]
+        [DisplayName("Min Port Number")]
         [Description("Minimum Port range that Gauge-VisualStudio should use to communicate with Gauge's API")]
         public int MinPortRange { get; set; }
 
         [Category("API Options")]
-        [DisplayName("MaxPortRange Port Number")]
+        [DisplayName("Max Port Number")]
         [Description("Maximum Port range that Gauge-VisualStudio should use to communicate with Gauge's API")]
         public int MaxPortRange { get; set; }
 

@@ -17,6 +17,7 @@ using System.Linq;
 using Gauge.Messages;
 using Gauge.VisualStudio.Core;
 using Gauge.VisualStudio.Core.Exceptions;
+using Gauge.VisualStudio.Core.Loggers;
 
 namespace Gauge.VisualStudio.Model
 {
@@ -30,12 +31,12 @@ namespace Gauge.VisualStudio.Model
             }
             catch (GaugeVersionIncompatibleException ex)
             {
-                GaugeService.Instance.DisplayGaugeNotStartedMessage(GaugeDisplayErrorLevel.Error, "Unable to launch Gauge Daemon. Check Output Window for details", ex.Data["GaugeError"].ToString());
+                OutputPaneLogger.Error("Unable to launch Gauge Daemon. Check Output Window for details", ex.Data["GaugeError"].ToString());
                 return Enumerable.Empty<string>();
             }
             catch (GaugeVersionNotFoundException ex)
             {
-                GaugeService.Instance.DisplayGaugeNotStartedMessage(GaugeDisplayErrorLevel.Error, "Unable to launch Gauge Daemon. Check Output Window for details", ex.Data["GaugeError"].ToString());
+                OutputPaneLogger.Error("Unable to launch Gauge Daemon. Check Output Window for details", ex.Data["GaugeError"].ToString());
                 return Enumerable.Empty<string>();
             }
 
@@ -50,8 +51,7 @@ namespace Gauge.VisualStudio.Model
             }
             catch (GaugeApiInitializationException ex)
             {
-                GaugeService.Instance.DisplayGaugeNotStartedMessage(GaugeDisplayErrorLevel.Error,
-                    "Unable to launch Gauge Daemon. Check Output Window for details", $"STDOUT:\n{ex.Data["STDOUT"]}\nSTDERR:\n{ex.Data["STDERR"]}");
+                OutputPaneLogger.Error("Unable to launch Gauge Daemon. Check Output Window for details", $"STDOUT:\n{ex.Data["STDOUT"]}\nSTDERR:\n{ex.Data["STDERR"]}");
                 return Enumerable.Empty<string>();
             }
         }

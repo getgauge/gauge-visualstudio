@@ -19,7 +19,7 @@ namespace Gauge.VisualStudio.Core.Exceptions
     [Serializable]
     public sealed class GaugeApiInitializationException : GaugeExceptionBase
     {
-        private const string ErrorMessage = "Failed to initialize Gauge API. Inspect ex.Data[\"STDOUT\"] and ex.Data[\"STDERR\"].";
+        private const string ErrorMessage = "Failed to initialize Gauge API.";
 
         public GaugeApiInitializationException(string stdout, string stderr) : base(ErrorMessage)
         {
