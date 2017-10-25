@@ -62,7 +62,7 @@ namespace Gauge.VisualStudio.Core
 
         public void BeginOutputReadLine()
         {
-            BaseProcess.BeginErrorReadLine();
+            BaseProcess.BeginOutputReadLine();
         }
 
         public static IGaugeProcess ForVersion()
