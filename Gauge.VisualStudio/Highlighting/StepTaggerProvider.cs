@@ -17,6 +17,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using EnvDTE;
 using EnvDTE80;
+using Gauge.VisualStudio.Core.Extensions;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
@@ -57,7 +58,13 @@ namespace Gauge.VisualStudio.Highlighting
             _projectItemsEvents.ItemRemoved += item => RefreshUsages();
             _projectItemsEvents.ItemRenamed += (item, name) => RefreshUsages();
 
-            _documentEvents.DocumentSaved += document => RefreshUsages();
+            _documentEvents.DocumentSaved += document =>
+            {
+                if (document.IsGaugeConceptFile())
+                {
+                    RefreshUsages();
+                }
+            };
         }
 
         public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag

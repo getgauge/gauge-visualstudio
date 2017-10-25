@@ -25,9 +25,19 @@ namespace Gauge.VisualStudio.Core.Extensions
             return document.FullName.IsGaugeSpecFile();
         }
 
+        public static bool IsGaugeConceptFile(this Document document)
+        {
+            return document.FullName.IsGaugeConceptFile();
+        }
+
         public static bool IsGaugeSpecFile(this string filePath)
         {
-            return File.Exists(filePath) && new[] {".spec", ".cpt", ".md"}.Any(filePath.EndsWith);
+            return File.Exists(filePath) && new[] {".spec", ".md"}.Any(filePath.EndsWith);
+        }
+
+        public static bool IsGaugeConceptFile(this string filePath)
+        {
+            return File.Exists(filePath) && new[] {".cpt"}.Any(filePath.EndsWith);
         }
     }
 }
