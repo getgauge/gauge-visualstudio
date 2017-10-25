@@ -16,7 +16,6 @@ using System;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
 namespace Gauge.VisualStudio.TestAdapter
 {
@@ -25,18 +24,12 @@ namespace Gauge.VisualStudio.TestAdapter
     {
         public const string ExecutorUriString = "executor://gaugespecexecutor/v1";
         public static readonly Uri ExecutorUri = new Uri(ExecutorUriString);
-        private readonly GaugeRunner _gaugeRunner = new GaugeRunner();
-        private bool _cancelled;
+        private IGaugeRunner _gaugeRunner;
 
         public void RunTests(IEnumerable<TestCase> tests, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
-            frameworkHandle.SendMessage(TestMessageLevel.Informational, "invoking gauge.exe for test run.");
-            _cancelled = false;
-            foreach (var testCase in tests)
-            {
-                if (_cancelled) break;
-                _gaugeRunner.Run(testCase, runContext.IsBeingDebugged, frameworkHandle);
-            }
+            _gaugeRunner = new GaugeRunner(tests, runContext.IsBeingDebugged, frameworkHandle);
+            _gaugeRunner.Run();
         }
 
         public void RunTests(IEnumerable<string> sources, IRunContext runContext, IFrameworkHandle frameworkHandle)
@@ -50,7 +43,7 @@ namespace Gauge.VisualStudio.TestAdapter
 
         public void Cancel()
         {
-            _cancelled = true;
+            _gaugeRunner?.Cancel();
         }
     }
 }
