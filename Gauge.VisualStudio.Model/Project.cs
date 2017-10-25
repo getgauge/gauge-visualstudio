@@ -52,7 +52,13 @@ namespace Gauge.VisualStudio.Model
 
             _projectItemsEvents = _events2.ProjectItemsEvents;
             _documentEvents = _events2.DocumentEvents;
-            _documentEvents.DocumentSaved += document => RefreshImplementations(document.ProjectItem);
+            _documentEvents.DocumentSaved += document =>
+            {
+                if (document.IsGaugeConceptFile())
+                {
+                    RefreshImplementations(document.ProjectItem);
+                }
+            };
             _projectItemsEvents.ItemAdded += RefreshImplementations;
             _projectItemsEvents.ItemRemoved += RefreshImplementations;
             _projectItemsEvents.ItemRenamed += (item, name) => RefreshImplementations(item);

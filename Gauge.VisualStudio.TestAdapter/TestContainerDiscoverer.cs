@@ -30,37 +30,20 @@ namespace Gauge.VisualStudio.TestAdapter
     [Export(typeof(ITestContainerDiscoverer))]
     public class TestContainerDiscoverer : ITestContainerDiscoverer
     {
-        private readonly BuildEvents _buildEvents;
-        private readonly DocumentEvents _documentEvents;
-        private readonly IServiceProvider _serviceProvider;
-        private readonly ProjectItemsEvents _solutionItemEvents;
         private readonly ProjectItemsEvents _projectItemsEvents;
+        private readonly IServiceProvider _serviceProvider;
 
         [ImportingConstructor]
         public TestContainerDiscoverer([Import(typeof(SVsServiceProvider))] IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
             var dte = _serviceProvider.GetService(typeof(DTE)) as DTE;
-            _documentEvents = dte.Events.DocumentEvents;
-            _solutionItemEvents = dte.Events.SolutionItemsEvents;
             var events2 = (Events2) dte.Events;
             _projectItemsEvents = events2.ProjectItemsEvents;
-            _buildEvents = dte.Events.BuildEvents;
 
             _projectItemsEvents.ItemAdded += UpdateTestContainersIfGaugeSpecFile;
-            _solutionItemEvents.ItemAdded += UpdateTestContainersIfGaugeSpecFile;
-            _solutionItemEvents.ItemRemoved += UpdateTestContainersIfGaugeSpecFile;
             _projectItemsEvents.ItemRemoved += UpdateTestContainersIfGaugeSpecFile;
-            _solutionItemEvents.ItemRenamed += (item, s) => UpdateTestContainersIfGaugeSpecFile(item);
             _projectItemsEvents.ItemRenamed += (item, s) => UpdateTestContainersIfGaugeSpecFile(item);
-            _documentEvents.DocumentSaved += document => UpdateTestContainersIfGaugeSpecFile(document.ProjectItem);
-            _buildEvents.OnBuildDone += (scope, action) =>
-            {
-                if (action == vsBuildAction.vsBuildActionBuild || action == vsBuildAction.vsBuildActionRebuildAll)
-                {
-                    TestContainersUpdated?.Invoke(this, EventArgs.Empty);
-                }
-            };
         }
 
         public Uri ExecutorUri => TestExecutor.ExecutorUri;
@@ -83,19 +66,11 @@ namespace Gauge.VisualStudio.TestAdapter
 
         private void UpdateTestContainersIfGaugeSpecFile(ProjectItem projectItem)
         {
-            if (projectItem == null)
+            if (projectItem?.ContainingProject == null || projectItem.Document == null)
                 return;
-            var projectItemName = projectItem.Name;
-            if (projectItem.ContainingProject.IsGaugeProject() && IsGaugeFile(projectItemName))
-            {
+            if (projectItem.ContainingProject.IsGaugeProject() 
+                && projectItem.Name.IsGaugeSpecFile())
                 TestContainersUpdated?.Invoke(this, EventArgs.Empty);
-            }
-        }
-
-        private static bool IsGaugeFile(string projectItemName)
-        {
-            return projectItemName.EndsWith(".spec", StringComparison.Ordinal) ||
-                   projectItemName.EndsWith(".cpt", StringComparison.Ordinal);
         }
     }
 }
