@@ -23,7 +23,7 @@ This should setup a new Gauge project, and add the required meta data for Gauge 
 Alternately, you can create a Gauge project from command-line as:
 ````
 mkdir <project_name>
-gauge --init csharp
+gauge init csharp
 ````
 This creates `<project_name>.sln` file which can be opened with Visual Studio.
 
