@@ -37,7 +37,7 @@ namespace Gauge.VisualStudio.TestAdapter
         private readonly IGaugeProcess _gaugeProcess;
         private List<TestCase> _pendingTests;
 
-        public GaugeRunner(IEnumerable<TestCase> tests, bool isBeingDebugged, IFrameworkHandle frameworkHandle)
+        public GaugeRunner(IEnumerable<TestCase> tests, bool isBeingDebugged, bool isParallelRun, IFrameworkHandle frameworkHandle)
         {
             _tests = tests.ToList();
             _pendingTests = _tests;
@@ -55,7 +55,7 @@ namespace Gauge.VisualStudio.TestAdapter
                 scenarios.Add($"{testCase.Source}:{scenarioIdentifier}");
             }
 
-            _gaugeProcess = GaugeProcess.ForExecution(projectRoot, scenarios, gaugeCustomBuildPath, _isBeingDebugged);
+            _gaugeProcess = GaugeProcess.ForExecution(projectRoot, scenarios, gaugeCustomBuildPath, _isBeingDebugged, isParallelRun);
             _gaugeProcess.OutputDataReceived += OnOutputDataReceived;
         }
 

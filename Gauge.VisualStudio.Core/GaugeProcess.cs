@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 
 namespace Gauge.VisualStudio.Core
 {
@@ -112,8 +113,11 @@ namespace Gauge.VisualStudio.Core
         }
 
         public static IGaugeProcess ForExecution(string projectRoot, List<string> scenarios,
-            string gaugeCustomBuildPath, bool isBeingDebugged)
+            string gaugeCustomBuildPath, bool isBeingDebugged, bool isParallelRun)
         {
+            var arguments = $@"run {string.Join(" ", scenarios)} --machine-readable";
+            if (isParallelRun)
+                arguments = $"{arguments} --parallel";
             var processStartInfo = new ProcessStartInfo
             {
                 WorkingDirectory = projectRoot,
@@ -122,7 +126,7 @@ namespace Gauge.VisualStudio.Core
                 CreateNoWindow = true,
                 FileName = "gauge.exe",
                 RedirectStandardError = true,
-                Arguments = $@"run {string.Join(" ", scenarios)} --machine-readable "
+                Arguments = arguments
             };
             if (!string.IsNullOrEmpty(gaugeCustomBuildPath))
                 processStartInfo.EnvironmentVariables["gauge_custom_build_path"] = gaugeCustomBuildPath;
@@ -135,8 +139,13 @@ namespace Gauge.VisualStudio.Core
 
         public override string ToString()
         {
+            var environmentVariables = BaseProcess.StartInfo.EnvironmentVariables.Keys.Cast<string>()
+                .Aggregate(string.Empty,
+                    (current, environmentVariable) =>
+                        $"{current} {environmentVariable}:{BaseProcess.StartInfo.EnvironmentVariables[environmentVariable]}");
+
             return
-                $"gauge.exe - Arguments:{BaseProcess.StartInfo.Arguments}; ENV - {BaseProcess.StartInfo.EnvironmentVariables}";
+                $"gauge.exe - Arguments:{BaseProcess.StartInfo.Arguments}; ENV - {environmentVariables}";
         }
     }
 }

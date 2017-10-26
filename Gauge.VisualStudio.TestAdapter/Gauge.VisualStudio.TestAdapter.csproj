@@ -156,7 +156,7 @@
     <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v4.6'">
       <ItemGroup>
         <Reference Include="Microsoft.VisualStudio.TestPlatform.ObjectModel">
-          <HintPath>..\packages\Microsoft.TestPlatform.ObjectModel\lib\net35\Microsoft.VisualStudio.TestPlatform.ObjectModel.dll</HintPath>
+          <HintPath>..\packages\Microsoft.VisualStudio.TestPlatform.ObjectModel\lib\net20\Microsoft.VisualStudio.TestPlatform.ObjectModel.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>
