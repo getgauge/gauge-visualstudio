@@ -38,14 +38,8 @@ namespace Gauge.VisualStudio.TestAdapter
         public static readonly TestProperty GaugeProjectRoot = TestProperty.Register("TestCase.GaugeProjectRoot",
             "GAUGE_PROJECT_ROOT value set in Gauge.", typeof(string), typeof(TestCase));
 
-        public static readonly TestProperty ScenarioIdentifier = TestProperty.Register("TestCase.ScenarioIdentifier",
-            "Scenario identifier in a given spec.", typeof(int), typeof(TestCase));
-
         public static readonly TestProperty DaemonProcessId = TestProperty.Register("TestCase.DaemonProcessId",
             "PID of the corresponding daemon process.", typeof(int), typeof(TestCase));
-
-        public static readonly TestProperty TestCaseType = TestProperty.Register("TestCase.Type",
-            "Type of the testcase object. Can be [hook, scenario].", typeof(string), typeof(TestCase));
 
         public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext,
             IMessageLogger logger,
@@ -85,15 +79,13 @@ namespace Gauge.VisualStudio.TestAdapter
                             return;
 
                         logger.SendMessage(TestMessageLevel.Informational, $"Adding test cases from : {spec.FileName}");
-                        var scenarioIndex = 0;
                         var scenarios = spec.Items.Where(item => item.Scenario != null).Select(item => item.Scenario);
 
                         foreach (var scenario in scenarios)
                         {
-                            var testCase = CreateTestCase(logger, spec, scenario, properties, scenarioIndex);
+                            var testCase = CreateTestCase(logger, spec, scenario, properties);
                             testCases.Add(testCase);
                             discoverySink?.SendTestCase(testCase);
-                            scenarioIndex++;
                         }
                     });
                 });
@@ -106,20 +98,18 @@ namespace Gauge.VisualStudio.TestAdapter
         }
 
         private static TestCase CreateTestCase(IMessageLogger logger, ProtoSpec spec, ProtoScenario scenario,
-            GaugeProjectProperties properties, int scenarioIndex)
+            GaugeProjectProperties properties)
         {
-            var testCaseName = $"{spec.SpecHeading}.{scenario.ScenarioHeading}";
-            var testCase = new TestCase(testCaseName, TestExecutor.ExecutorUri, spec.FileName)
-                {CodeFilePath = spec.FileName, DisplayName = scenario.ScenarioHeading};
+            var testCase = new TestCase(scenario.ScenarioHeading, TestExecutor.ExecutorUri, spec.SpecHeading)
+            {
+                CodeFilePath = spec.FileName,
+                DisplayName = scenario.ScenarioHeading,
+                LineNumber = (int) scenario.Span.Start
+            };
 
-            var scenarioIdentifier = GetScenarioIdentifier(scenarioIndex, scenario);
-            testCase.LineNumber = scenarioIdentifier;
-
-            testCase.SetPropertyValue(ScenarioIdentifier, scenarioIdentifier);
             testCase.SetPropertyValue(GaugeCustomBuildPath, properties.BuildOutputPath);
             testCase.SetPropertyValue(GaugeProjectRoot, properties.ProjectRoot);
             testCase.SetPropertyValue(DaemonProcessId, properties.DaemonProcessId);
-            testCase.SetPropertyValue(TestCaseType, "scenario");
 
             logger.SendMessage(TestMessageLevel.Informational, $"Discovered scenario: {testCase.DisplayName}");
 
@@ -128,11 +118,6 @@ namespace Gauge.VisualStudio.TestAdapter
             foreach (var tag in scenario.Tags.Union(spec.Tags))
                 testCase.Traits.Add("Tag", tag);
             return testCase;
-        }
-
-        private static int GetScenarioIdentifier(int scenarioIndex, ProtoScenario scenario)
-        {
-            return scenario.Span != null ? (int) scenario.Span.Start : scenarioIndex;
         }
     }
 }
