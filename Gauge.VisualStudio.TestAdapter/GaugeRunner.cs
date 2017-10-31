@@ -39,7 +39,9 @@ namespace Gauge.VisualStudio.TestAdapter
 
         public GaugeRunner(IEnumerable<TestCase> tests, bool isBeingDebugged, bool isParallelRun, IFrameworkHandle frameworkHandle)
         {
-            _tests = tests.ToList();
+            _tests = tests.GroupBy(t => t.Source)
+                .SelectMany(spec => spec.OrderBy(t => t.LineNumber))
+                .ToList();
             _pendingTests = _tests;
             _isBeingDebugged = isBeingDebugged;
             _frameworkHandle = frameworkHandle;
