@@ -13,7 +13,12 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Runtime.Serialization.Json;
+using System.Text;
 using Gauge.VisualStudio.Core;
 using Gauge.VisualStudio.Core.Helpers;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
@@ -22,55 +27,127 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
 namespace Gauge.VisualStudio.TestAdapter
 {
-    public class GaugeRunner
+    public class GaugeRunner : IGaugeRunner
     {
-        public void Run(TestCase testCase, bool isBeingDebugged, IFrameworkHandle frameworkHandle)
+        private const string ScenarioEndEvent = "scenarioEnd";
+        private const string ErrorEvent = "error";
+        private readonly IFrameworkHandle _frameworkHandle;
+        private readonly bool _isBeingDebugged;
+        private readonly List<TestCase> _tests;
+        private readonly IGaugeProcess _gaugeProcess;
+        private readonly List<TestCase> _pendingTests;
+
+        public GaugeRunner(IEnumerable<TestCase> tests, bool isBeingDebugged, bool isParallelRun, IFrameworkHandle frameworkHandle)
         {
-            var result = new TestResult(testCase);
-            frameworkHandle.RecordStart(testCase);
-            frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Executing Test: {testCase}");
-            var projectRoot = testCase.GetPropertyValue(TestDiscoverer.GaugeProjectRoot, string.Empty);
-            var scenarioIdentifier = testCase.GetPropertyValue(TestDiscoverer.ScenarioIdentifier, -1);
+            _tests = tests.ToList();
+            _pendingTests = _tests;
+            _isBeingDebugged = isBeingDebugged;
+            _frameworkHandle = frameworkHandle;
+            var projectRoot = _tests.First().GetPropertyValue(TestDiscoverer.GaugeProjectRoot, string.Empty);
+            var gaugeCustomBuildPath =
+                _tests.First().GetPropertyValue(TestDiscoverer.GaugeCustomBuildPath, string.Empty); var scenarios = new List<string>();
+            foreach (var testCase in _tests)
+            {
+                _frameworkHandle.RecordStart(testCase);
+                _frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Executing Test: {testCase}");
+
+                scenarios.Add($"{testCase.Source}:{testCase.LineNumber}");
+            }
+
+            _gaugeProcess = GaugeProcess.ForExecution(projectRoot, scenarios, gaugeCustomBuildPath, _isBeingDebugged, isParallelRun);
+            _gaugeProcess.OutputDataReceived += OnOutputDataReceived;
+        }
+
+        public void Run()
+        {
             try
             {
+                _frameworkHandle.SendMessage(TestMessageLevel.Informational,
+                    $"Invoking : {_gaugeProcess}");
+                _gaugeProcess.Start();
+                _gaugeProcess.BeginOutputReadLine();
 
-                var gaugeCustomBuildPath = testCase.GetPropertyValue(TestDiscoverer.GaugeCustomBuildPath, string.Empty);
-                var p = GaugeProcess.ForExecution(projectRoot, testCase.Source, scenarioIdentifier, gaugeCustomBuildPath, isBeingDebugged);
-                frameworkHandle.SendMessage(TestMessageLevel.Informational,
-                    $"Invoking : gauge.exe {p}");
-                p.Start();
-
-                if (isBeingDebugged)
+                if (_isBeingDebugged)
                 {
-                    DTEHelper.AttachToProcess(p.Id);
-                    frameworkHandle.SendMessage(TestMessageLevel.Informational,
-                        $"Attaching to ProcessID {p.Id}");
+                    DTEHelper.AttachToProcess(_gaugeProcess.Id);
+                    _frameworkHandle.SendMessage(TestMessageLevel.Informational,
+                        $"Attaching to ProcessID {_gaugeProcess.Id}");
                 }
-                var output = p.StandardOutput.ReadToEnd();
-                var error = p.StandardError.ReadToEnd();
-
-                p.WaitForExit();
-
-                result.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, output));
-
-                if (p.ExitCode == 0)
-                {
-                    result.Outcome = TestOutcome.Passed;
-                }
-                else
-                {
-                    result.ErrorMessage = error;
-                    result.Messages.Add(new TestResultMessage(TestResultMessage.StandardErrorCategory, error));
-                    result.Outcome = TestOutcome.Failed;
-                }
+                _gaugeProcess.WaitForExit();
             }
             catch (Exception ex)
             {
-                result.Outcome = TestOutcome.Failed;
-                result.ErrorMessage = string.Format("{0}\n{1}", ex.Message, ex.StackTrace);
+                foreach (var testCase in _tests)
+                {
+                    var result = new TestResult(testCase)
+                    {
+                        Outcome = TestOutcome.None,
+                        ErrorMessage = $"{ex.Message}\n{ex.StackTrace}"
+                    };
+                    _frameworkHandle.RecordResult(result);
+                    _frameworkHandle.RecordEnd(testCase, result.Outcome);
+                    _pendingTests.Remove(testCase);
+                }
             }
-            frameworkHandle.RecordResult(result);
-            frameworkHandle.RecordEnd(testCase, result.Outcome);
+        }
+
+        public void Cancel()
+        {
+            _gaugeProcess.Kill();
+            foreach (var pendingTest in _pendingTests)
+            {
+                _frameworkHandle.RecordEnd(pendingTest, TestOutcome.None);
+            }
+        }
+
+        private void OnOutputDataReceived(object sender, DataReceivedEventArgs args)
+        {
+            var serializer = new DataContractJsonSerializer(typeof(TestExecutionEvent));
+            if (args?.Data == null || !args.Data.Trim().StartsWith("{"))
+                return;
+            using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(args.Data)))
+            {
+                var e = (TestExecutionEvent) serializer.ReadObject(ms);
+                if (e.EventType == ErrorEvent)
+                {
+                    foreach (var test in _tests)
+                    {
+                        var result = new TestResult(test) {Outcome = TestOutcome.None};
+                        foreach (var testExecutionError in e.Result.Errors)
+                            result.Messages.Add(new TestResultMessage(TestResultMessage.StandardErrorCategory,
+                                $"{testExecutionError.Text}\n{testExecutionError.StackTrace}"));
+                        _frameworkHandle.RecordResult(result);
+                        _frameworkHandle.RecordEnd(test, result.Outcome);
+                    }
+                    return;
+                }
+                if (e.EventType != ScenarioEndEvent)
+                    return;
+                var targetTestCase = _tests.FirstOrDefault(t => $"{t.Source}:{t.LineNumber}" == e.Id);
+                if (targetTestCase == null)
+                    return;
+                var testResult = new TestResult(targetTestCase) {Outcome = ParseOutcome(e.Result.Status)};
+                if (!string.IsNullOrEmpty(e.Result.Stdout))
+                    testResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, e.Result.Stdout));
+                _frameworkHandle.RecordResult(testResult);
+                _frameworkHandle.RecordEnd(targetTestCase, testResult.Outcome);
+                _pendingTests.Remove(targetTestCase);
+            }
+        }
+
+        private static TestOutcome ParseOutcome(string resStatus)
+        {
+            switch (resStatus)
+            {
+                case "pass":
+                    return TestOutcome.Passed;
+                case "fail":
+                    return TestOutcome.Failed;
+                case "skip":
+                    return TestOutcome.Skipped;
+                default:
+                    return TestOutcome.None;
+            }
         }
     }
 }

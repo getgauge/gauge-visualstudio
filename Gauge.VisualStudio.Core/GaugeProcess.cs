@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 
 namespace Gauge.VisualStudio.Core
 {
@@ -41,7 +42,8 @@ namespace Gauge.VisualStudio.Core
             BaseProcess.EnableRaisingEvents = true;
             if (Exited != null)
                 BaseProcess.Exited += Exited;
-
+            if (OutputDataReceived != null)
+                BaseProcess.OutputDataReceived += OutputDataReceived;
             return BaseProcess.Start();
         }
 
@@ -51,6 +53,18 @@ namespace Gauge.VisualStudio.Core
         }
 
         public event EventHandler Exited;
+
+        public void Kill()
+        {
+            BaseProcess.Kill();
+        }
+
+        public event DataReceivedEventHandler OutputDataReceived;
+
+        public void BeginOutputReadLine()
+        {
+            BaseProcess.BeginOutputReadLine();
+        }
 
         public static IGaugeProcess ForVersion()
         {
@@ -87,19 +101,23 @@ namespace Gauge.VisualStudio.Core
         public static IGaugeProcess ForFormat(string gaugeFileDirectoryName, string gaugeFileName)
         {
             return new GaugeProcess(new ProcessStartInfo
-                {
-                    WorkingDirectory = gaugeFileDirectoryName,
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    CreateNoWindow = true,
-                    FileName = "gauge.exe",
-                    RedirectStandardError = true,
-                    Arguments = $@"format {gaugeFileName}"
-                });
+            {
+                WorkingDirectory = gaugeFileDirectoryName,
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true,
+                FileName = "gauge.exe",
+                RedirectStandardError = true,
+                Arguments = $@"format {gaugeFileName}"
+            });
         }
 
-        public static IGaugeProcess ForExecution(string projectRoot, string testCaseSource, int scenarioIdentifier, string gaugeCustomBuildPath, bool isBeingDebugged)
+        public static IGaugeProcess ForExecution(string projectRoot, List<string> scenarios,
+            string gaugeCustomBuildPath, bool isBeingDebugged, bool isParallelRun)
         {
+            var arguments = $@"run {string.Join(" ", scenarios)} --machine-readable";
+            if (isParallelRun)
+                arguments = $"{arguments} --parallel";
             var processStartInfo = new ProcessStartInfo
             {
                 WorkingDirectory = projectRoot,
@@ -108,23 +126,26 @@ namespace Gauge.VisualStudio.Core
                 CreateNoWindow = true,
                 FileName = "gauge.exe",
                 RedirectStandardError = true,
-                Arguments = $@"run ""{testCaseSource}:{scenarioIdentifier}"" --simple-console "
+                Arguments = arguments
             };
             if (!string.IsNullOrEmpty(gaugeCustomBuildPath))
                 processStartInfo.EnvironmentVariables["gauge_custom_build_path"] = gaugeCustomBuildPath;
 
             if (isBeingDebugged)
-            {
-                //Gauge CSharp runner will wait for a debugger to be attached, when it finds this env variable set.
                 processStartInfo.EnvironmentVariables["DEBUGGING"] = "true";
-            }
 
             return new GaugeProcess(processStartInfo);
         }
 
         public override string ToString()
         {
-            return $"gauge.exe : {BaseProcess.StartInfo}";
+            var environmentVariables = BaseProcess.StartInfo.EnvironmentVariables.Keys.Cast<string>()
+                .Aggregate(string.Empty,
+                    (current, environmentVariable) =>
+                        $"{current} {environmentVariable}:{BaseProcess.StartInfo.EnvironmentVariables[environmentVariable]}");
+
+            return
+                $"gauge.exe - Arguments:{BaseProcess.StartInfo.Arguments}; ENV - {environmentVariables}";
         }
     }
 }

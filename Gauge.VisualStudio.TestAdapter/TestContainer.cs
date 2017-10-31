@@ -25,10 +25,10 @@ namespace Gauge.VisualStudio.TestAdapter
     {
         private DateTime _timestamp;
 
-        public TestContainer(ITestContainerDiscoverer testContainerDiscoverer, string s, DateTime timestamp)
+        public TestContainer(ITestContainerDiscoverer testContainerDiscoverer, string source, DateTime timestamp)
         {
             Discoverer = testContainerDiscoverer;
-            Source = s;
+            Source = source;
             _timestamp = timestamp;
         }
 

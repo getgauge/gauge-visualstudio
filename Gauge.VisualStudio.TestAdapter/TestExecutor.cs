@@ -25,18 +25,29 @@ namespace Gauge.VisualStudio.TestAdapter
     {
         public const string ExecutorUriString = "executor://gaugespecexecutor/v1";
         public static readonly Uri ExecutorUri = new Uri(ExecutorUriString);
-        private readonly GaugeRunner _gaugeRunner = new GaugeRunner();
-        private bool _cancelled;
+        private IGaugeRunner _gaugeRunner;
 
         public void RunTests(IEnumerable<TestCase> tests, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
-            frameworkHandle.SendMessage(TestMessageLevel.Informational, "invoking gauge.exe for test run.");
-            _cancelled = false;
-            foreach (var testCase in tests)
+            dynamic runConfiguration =
+                runContext.RunSettings.GetSettings(Constants.RunConfigurationSettingsName);
+
+            // "Run tests in parallel" option from the UI sets MaxCpuCount in RunConfiguration
+            // By default the MaxCpuCount=0, which is ambiguous with default(int)
+            // Use MaxCpuCountSet property to determine if user initiated the test run in parallel.
+            // Ref: https://blogs.msdn.microsoft.com/devops/2016/10/10/parallel-test-execution/
+            bool isParallelRun = runConfiguration !=null && runConfiguration.Settings.MaxCpuCountSet;
+            if (isParallelRun && runContext.IsBeingDebugged)
             {
-                if (_cancelled) break;
-                _gaugeRunner.Run(testCase, runContext.IsBeingDebugged, frameworkHandle);
+                frameworkHandle.SendMessage(TestMessageLevel.Error, "Cannot debug specs in parallel, disable parallel run to debug specs.");
+                foreach (var testCase in tests)
+                {
+                    frameworkHandle.RecordEnd(testCase, TestOutcome.None);
+                }
+                return;
             }
+            _gaugeRunner = new GaugeRunner(tests, runContext.IsBeingDebugged, isParallelRun, frameworkHandle);
+            _gaugeRunner.Run();
         }
 
         public void RunTests(IEnumerable<string> sources, IRunContext runContext, IFrameworkHandle frameworkHandle)
@@ -50,7 +61,7 @@ namespace Gauge.VisualStudio.TestAdapter
 
         public void Cancel()
         {
-            _cancelled = true;
+            _gaugeRunner?.Cancel();
         }
     }
 }
