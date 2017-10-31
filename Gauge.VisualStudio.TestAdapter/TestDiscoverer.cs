@@ -100,7 +100,7 @@ namespace Gauge.VisualStudio.TestAdapter
         private static TestCase CreateTestCase(IMessageLogger logger, ProtoSpec spec, ProtoScenario scenario,
             GaugeProjectProperties properties)
         {
-            var testCase = new TestCase(scenario.ScenarioHeading, TestExecutor.ExecutorUri, spec.SpecHeading)
+            var testCase = new TestCase(scenario.ScenarioHeading, TestExecutor.ExecutorUri, spec.FileName)
             {
                 CodeFilePath = spec.FileName,
                 DisplayName = scenario.ScenarioHeading,
