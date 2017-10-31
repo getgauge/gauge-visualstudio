@@ -63,13 +63,11 @@ namespace Gauge.VisualStudio
             }
             catch (GaugeVersionIncompatibleException ex)
             {
-                OutputPaneLogger.Error(ex.Message);
-                return;
+                throw new InvalidOperationException($"{ex.Message}\n{ex.Data["GaugeError"].ToString()}");
             }
             catch (GaugeVersionNotFoundException ex)
             {
-                OutputPaneLogger.Error(ex.Message);
-                return;
+                throw new InvalidOperationException($"{ex.Message}\n{ex.Data["GaugeError"].ToString()}");
             }
 
             base.Initialize();

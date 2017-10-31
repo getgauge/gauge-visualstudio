@@ -20,7 +20,7 @@ namespace Gauge.VisualStudio.Core.Exceptions
     public class GaugeVersionIncompatibleException : GaugeExceptionBase
     {
         public GaugeVersionIncompatibleException(string error)
-            : base("Incompatible Gauge Version installed.")
+            : base($"Incompatible Gauge Version installed. Minimum version of Gauge required:{GaugeService.MinGaugeVersion}")
         {
             Data.Add("GaugeError", error);
         }

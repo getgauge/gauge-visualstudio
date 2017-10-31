@@ -20,7 +20,6 @@ using System.Threading.Tasks;
 using EnvDTE;
 using EnvDTE80;
 using Gauge.VisualStudio.Core.Extensions;
-using Gauge.VisualStudio.Core.Loggers;
 using Gauge.VisualStudio.Model;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.TestWindow.Extensibility;
@@ -58,7 +57,6 @@ namespace Gauge.VisualStudio.TestAdapter
             var specs = Specification.GetAllSpecsFromGauge();
             Parallel.ForEach(specs, s =>
             {
-                OutputPaneLogger.Debug("Adding TestContainer: {0}", s);
                 testContainers.Add(new TestContainer(this, s, DateTime.Now));
             });
             return testContainers;
