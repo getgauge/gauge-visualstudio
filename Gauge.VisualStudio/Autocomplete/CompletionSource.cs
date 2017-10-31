@@ -60,7 +60,9 @@ namespace Gauge.VisualStudio.AutoComplete
                 var snapshot = _buffer.CurrentSnapshot;
                 var snapshotPoint = session.GetTriggerPoint(snapshot);
                 if (!snapshotPoint.HasValue) return;
-                var step = new Step(snapshot.GetProject(GaugePackage.DTE), snapshotPoint.Value.GetContainingLine());
+                var project = snapshot.GetProject(GaugePackage.DTE);
+                if (project == null) return;
+                var step = new Step(project, snapshotPoint.Value.GetContainingLine());
                 completionSets.Add(new GaugeCompletionSet(snapshotPoint.Value, step, _concept));
             }
 
