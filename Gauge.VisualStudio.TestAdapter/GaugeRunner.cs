@@ -131,6 +131,13 @@ namespace Gauge.VisualStudio.TestAdapter
                 var testResult = new TestResult(targetTestCase) {Outcome = ParseOutcome(e.Result.Status)};
                 if (!string.IsNullOrEmpty(e.Result.Stdout))
                     testResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, e.Result.Stdout));
+                if (e.Result.Errors!=null && e.Result.Errors.Length>0)
+                {
+                    foreach (var error in e.Result.Errors)
+                    {
+                        testResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardErrorCategory, error.ToString()));
+                    }
+                }
                 _frameworkHandle.RecordResult(testResult);
                 _frameworkHandle.RecordEnd(targetTestCase, testResult.Outcome);
                 _pendingTests.Remove(targetTestCase);

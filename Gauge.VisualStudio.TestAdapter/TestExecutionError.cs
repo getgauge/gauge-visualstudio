@@ -29,9 +29,14 @@ namespace Gauge.VisualStudio.TestAdapter
         public string Message { get; set; }
 
         [DataMember(Name = "lineNo")]
-        public int LineNo { get; set; }
+        public string LineNo { get; set; }
 
         [DataMember(Name = "stackTrace")]
         public string StackTrace { get; set; }
+
+        public override string ToString()
+        {
+            return $"{Text} => {Message}\n at {Filename}:{LineNo}\nStacktrace:\n{StackTrace}";
+        }
     }
 }
