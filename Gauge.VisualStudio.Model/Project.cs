@@ -24,6 +24,7 @@ using EnvDTE;
 using EnvDTE80;
 using Gauge.VisualStudio.Core.Extensions;
 using Gauge.VisualStudio.Model.Extensions;
+using Microsoft.Internal.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using VSLangProj;
@@ -34,16 +35,22 @@ namespace Gauge.VisualStudio.Model
 {
     public class Project : IProject
     {
-        private static readonly Lazy<IProject> LazyInstance = new Lazy<IProject>(() => new Project());
         private readonly DTE _dte;
         private readonly Events2 _events2;
         private readonly CodeModelEvents _codeModelEvents;
         private readonly DocumentEvents _documentEvents;
         private List<Implementation> _implementations;
         private readonly ProjectItemsEvents _projectItemsEvents;
+        private static EnvDTE.Project _vsProject;
 
-        private Project()
+        public Project(EnvDTE.Project vsProject)
         {
+            Validate.IsNotNull(vsProject, "vsProject");
+            if (!vsProject.IsGaugeProject())
+            {
+                throw new ArgumentException($"Expected {vsProject.Name} to be a Gauge vsProject.");
+            }
+            _vsProject = vsProject;
             _dte = Package.GetGlobalService(typeof(DTE)) as DTE;
             if (_events2 != null) return;
 
@@ -56,41 +63,29 @@ namespace Gauge.VisualStudio.Model
             {
                 if (document.IsGaugeConceptFile())
                 {
-                    RefreshImplementations(document.ProjectItem);
+                    RefreshImplementations();
                 }
             };
-            _projectItemsEvents.ItemAdded += RefreshImplementations;
-            _projectItemsEvents.ItemRemoved += RefreshImplementations;
-            _projectItemsEvents.ItemRenamed += (item, name) => RefreshImplementations(item);
-            _codeModelEvents.ElementAdded += element => RefreshImplementations(element.ProjectItem);
-            _codeModelEvents.ElementChanged += (element, change) => RefreshImplementations(element.ProjectItem);
-            _codeModelEvents.ElementDeleted += (parent, element) => RefreshImplementations(element.ProjectItem);
+            _projectItemsEvents.ItemAdded += projectItem => RefreshImplementations();
+            _projectItemsEvents.ItemRemoved += projectItem => RefreshImplementations();
+            _projectItemsEvents.ItemRenamed += (item, name) => RefreshImplementations();
+            _codeModelEvents.ElementAdded += element => RefreshImplementations();
+            _codeModelEvents.ElementChanged += (element, change) => RefreshImplementations();
+            _codeModelEvents.ElementDeleted += (parent, element) => RefreshImplementations();
         }
-
-        public static IProject Instance => LazyInstance.Value;
 
         private IEnumerable<Implementation> Implementations
         {
             get
             {
-                if (_dte.ActiveDocument != null)
-                    _implementations = _implementations ??
-                                       GetGaugeImplementations(_dte.ActiveDocument.ProjectItem.ContainingProject);
+                _implementations = _implementations ?? GetGaugeImplementations(_vsProject);
                 return _implementations;
             }
         }
 
-        public void RefreshImplementations(ProjectItem projectItem)
+        public void RefreshImplementations()
         {
-            if (projectItem.ContainingProject.IsGaugeProject())
-                _implementations = GetGaugeImplementations(projectItem.ContainingProject);
-        }
-
-        public void RefreshImplementationsForActiveProject()
-        {
-            var activeDocument = _dte.ActiveDocument;
-            if (activeDocument != null)
-                _implementations = GetGaugeImplementations(activeDocument.ProjectItem.ContainingProject);
+                _implementations = GetGaugeImplementations(_vsProject);
         }
 
         public Implementation GetStepImplementation(ITextSnapshotLine line)
@@ -117,10 +112,10 @@ namespace Gauge.VisualStudio.Model
             return GetCodeElementsFor(codeClass.Members, vsCMElement.vsCMElementFunction);
         }
 
-        public CodeClass FindOrCreateClass(EnvDTE.Project project, string className)
+        public CodeClass FindOrCreateClass(string className)
         {
-            return GetAllClasses(project, false).FirstOrDefault(element => element.Name == className) as CodeClass ??
-                   AddClass(className, project);
+            return GetAllClasses(_vsProject, false).FirstOrDefault(element => element.Name == className) as CodeClass ??
+                   AddClass(className, _vsProject);
         }
 
         public bool HasDuplicateImplementation(ITextSnapshotLine line)
@@ -143,6 +138,8 @@ namespace Gauge.VisualStudio.Model
                 .Where(implementation => implementation is StepImplementation)
                 .Select(implementation => implementation.StepText);
         }
+
+        public EnvDTE.Project VsProject => _vsProject;
 
         private List<Implementation> GetGaugeImplementations(EnvDTE.Project containingProject)
         {
@@ -185,7 +182,7 @@ namespace Gauge.VisualStudio.Model
             return gaugeImplementations;
         }
 
-        public static IEnumerable<CodeElement> GetAllClasses(EnvDTE.Project containingProject,
+        public IEnumerable<CodeElement> GetAllClasses(EnvDTE.Project containingProject,
             bool includeReferencedProjects = true)
         {
             if (containingProject.CodeModel == null)
@@ -237,7 +234,7 @@ namespace Gauge.VisualStudio.Model
             var codeCompileUnit = new CodeCompileUnit();
             codeCompileUnit.Namespaces.Add(codeNamespace);
             var targetFileName = Path.Combine(Path.GetDirectoryName(project.FullName),
-                string.Format("{0}.cs", targetClass));
+                $"{targetClass}.cs");
             using (var streamWriter = new StreamWriter(targetFileName))
             {
                 var options = new CodeGeneratorOptions {BracingStyle = "C"};

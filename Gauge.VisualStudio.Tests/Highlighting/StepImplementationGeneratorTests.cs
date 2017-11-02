@@ -40,6 +40,7 @@ namespace Gauge.VisualStudio.Tests.Highlighting
             A.CallTo(() => step.Text).Returns(stepText);
             A.CallTo(() => step.Parameters).Returns(new List<string>(parameters));
             A.CallTo(() => step.HasInlineTable).Returns(hasInlineTable);
+            A.CallTo(() => project.VsProject).Returns(vsProject);
 
             _textSnapshotLine = A.Fake<ITextSnapshotLine>();
             A.CallTo(() => _textSnapshotLine.GetText()).Returns(stepText);
@@ -50,16 +51,16 @@ namespace Gauge.VisualStudio.Tests.Highlighting
                 vsCMAccess.vsCMAccessPublic, A<object>._));
             var codeFunction = A.Fake<CodeFunction>();
             _functionCall.Returns(codeFunction);
-            A.CallTo(() => project.FindOrCreateClass(vsProject, SelectedClass)).Returns(codeClass);
+            A.CallTo(() => project.FindOrCreateClass(SelectedClass)).Returns(codeClass);
 
-            _stepImplementationGenerator = new StepImplementationGenerator(vsProject, project, step);
+            _stepImplementationGenerator = new StepImplementationGenerator(project, step);
         }
 
         [Test]
         public void ShouldGenerateImplementationForInlineTable()
         {
             const string stepText = "Do something with <table>";
-            var stepLiteral = string.Format("\"{0}\"", stepText);
+            var stepLiteral = $"\"{stepText}\"";
             Setup(stepText, "DoSomethingWithTable", true, "table");
 
             CodeClass targetClass;
@@ -76,7 +77,7 @@ namespace Gauge.VisualStudio.Tests.Highlighting
         public void ShouldGenerateImplementationForMultipleSpecialParameters()
         {
             const string stepText = "Do something with a <file:foo.txt>, a <table:bar.csv> and <table>";
-            var stepLiteral = string.Format("\"{0}\"", stepText);
+            var stepLiteral = $"\"{stepText}\"";
             Setup(stepText, "DoSomethingWithAFilefootxtaTablebarcsvandTable", true, "file:foo.txt", "table:bar.csv",
                 "table");
 
@@ -97,7 +98,7 @@ namespace Gauge.VisualStudio.Tests.Highlighting
         public void ShouldGenerateImplementationWithFileParameter()
         {
             const string stepText = "Do something with <file:foo.txt>";
-            var stepLiteral = string.Format("\"{0}\"", stepText);
+            var stepLiteral = $"\"{stepText}\"";
             Setup(stepText, "DoSomethingWithFilefootxt", false, "file:foo.txt");
             CodeClass targetClass;
             CodeFunction impl;
@@ -115,7 +116,7 @@ namespace Gauge.VisualStudio.Tests.Highlighting
         public void ShouldGenerateImplementationWithParameters()
         {
             const string stepText = "Do <something>";
-            var stepLiteral = string.Format("\"{0}\"", stepText);
+            var stepLiteral = $"\"{stepText}\"";
             Setup(stepText, "DoSomething", false, "something");
             CodeClass targetClass;
             CodeFunction impl;
@@ -133,7 +134,7 @@ namespace Gauge.VisualStudio.Tests.Highlighting
         public void ShouldGenerateImplementationWithRefTableParameter()
         {
             const string stepText = "Do something with <table:foo.csv>";
-            var stepLiteral = string.Format("\"{0}\"", stepText);
+            var stepLiteral = $"\"{stepText}\"";
             Setup(stepText, "DoSomethingWithTablefoocsv", false, "table:foo.csv");
             CodeClass targetClass;
             CodeFunction impl;
@@ -150,7 +151,7 @@ namespace Gauge.VisualStudio.Tests.Highlighting
         public void ShouldGenerateImplementationWithSignature()
         {
             const string stepText = "Do nothing";
-            var stepLiteral = string.Format("\"{0}\"", stepText);
+            var stepLiteral = $"\"{stepText}\"";
             Setup(stepText, "DoNothing", false);
             CodeClass targetClass;
             CodeFunction impl;
@@ -168,7 +169,7 @@ namespace Gauge.VisualStudio.Tests.Highlighting
         public void ShouldGenerateImplementationWithTheRightOrder()
         {
             const string stepText = "Do something with <something> and <another thing>";
-            var stepLiteral = string.Format("\"{0}\"", stepText);
+            var stepLiteral = $"\"{stepText}\"";
             Setup(stepText, "DoSomethingWithSomethingandAnotherThing", false, "something", "anotherthing");
 
             CodeClass targetClass;

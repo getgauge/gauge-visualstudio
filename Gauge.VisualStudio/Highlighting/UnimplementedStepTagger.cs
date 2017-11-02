@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Gauge.VisualStudio.Core.Extensions;
 using Gauge.VisualStudio.Model;
+using Gauge.VisualStudio.Model.Extensions;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
@@ -34,7 +35,7 @@ namespace Gauge.VisualStudio.Highlighting
             _textView = textView;
             _textView.LayoutChanged += OnLayoutChanged;
             _textView.Caret.PositionChanged += OnCaretMove;
-            _project = Project.Instance;
+            _project = new Project(textView.TextSnapshot.GetProject(GaugePackage.DTE));
         }
 
         public void Dispose()
@@ -103,7 +104,7 @@ namespace Gauge.VisualStudio.Highlighting
 
         internal void MarkTagImplemented(SnapshotSpan span)
         {
-            TagsChanged(this, new SnapshotSpanEventArgs(span));
+            TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(span));
         }
 
         private ReadOnlyCollection<SmartTagActionSet> GetSmartTagActions(SnapshotSpan span)
@@ -116,7 +117,7 @@ namespace Gauge.VisualStudio.Highlighting
         public void RaiseLayoutChanged()
         {
             var length = _textView.TextSnapshot.Length;
-            TagsChanged(this,
+            TagsChanged?.Invoke(this,
                 new SnapshotSpanEventArgs(new SnapshotSpan(new SnapshotPoint(_textView.TextSnapshot, 0), length)));
         }
     }

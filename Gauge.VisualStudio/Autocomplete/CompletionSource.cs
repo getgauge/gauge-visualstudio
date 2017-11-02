@@ -15,12 +15,14 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using EnvDTE;
 using Gauge.VisualStudio.Model;
 using Gauge.VisualStudio.Model.Extensions;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.Utilities;
+using Project = Gauge.VisualStudio.Model.Project;
 
 namespace Gauge.VisualStudio.AutoComplete
 {
@@ -45,10 +47,13 @@ namespace Gauge.VisualStudio.AutoComplete
             private readonly ITextBuffer _buffer;
             private readonly Concept _concept;
             private bool _disposed;
+            private IProject _project;
 
             public GaugeCompletionSource(ITextBuffer buffer)
             {
-                _concept = new Concept(buffer.CurrentSnapshot.GetProject(GaugePackage.DTE));
+                var vsProject = buffer.CurrentSnapshot.GetProject(GaugePackage.DTE);
+                _project = new Project(vsProject);
+                _concept = new Concept(vsProject);
                 _buffer = buffer;
             }
 
@@ -60,9 +65,7 @@ namespace Gauge.VisualStudio.AutoComplete
                 var snapshot = _buffer.CurrentSnapshot;
                 var snapshotPoint = session.GetTriggerPoint(snapshot);
                 if (!snapshotPoint.HasValue) return;
-                var project = snapshot.GetProject(GaugePackage.DTE);
-                if (project == null) return;
-                var step = new Step(project, snapshotPoint.Value.GetContainingLine());
+                var step = new Step(_project, snapshotPoint.Value.GetContainingLine());
                 completionSets.Add(new GaugeCompletionSet(snapshotPoint.Value, step, _concept));
             }
 

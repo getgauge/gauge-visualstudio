@@ -24,7 +24,6 @@ using Gauge.VisualStudio.Loggers;
 using Gauge.VisualStudio.Model;
 using Gauge.VisualStudio.Model.Extensions;
 using Microsoft.VisualStudio.Text;
-using Project = EnvDTE.Project;
 
 namespace Gauge.VisualStudio.Highlighting
 {
@@ -32,11 +31,9 @@ namespace Gauge.VisualStudio.Highlighting
     {
         private readonly IProject _project;
         private readonly IStep _step;
-        private readonly Project _vsProject;
 
-        public StepImplementationGenerator(Project vsProject, IProject project, IStep step)
+        public StepImplementationGenerator(IProject project, IStep step)
         {
-            _vsProject = vsProject;
             _step = step;
             _project = project;
         }
@@ -48,7 +45,7 @@ namespace Gauge.VisualStudio.Highlighting
             implementationFunction = null;
             try
             {
-                targetClass = _project.FindOrCreateClass(_vsProject, selectedClass);
+                targetClass = _project.FindOrCreateClass(selectedClass);
             }
             catch (ArgumentException ex)
             {

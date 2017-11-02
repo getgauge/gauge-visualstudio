@@ -14,17 +14,26 @@
 
 using System;
 using Gauge.VisualStudio.Model;
+using Gauge.VisualStudio.Model.Extensions;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text.Editor;
 
 namespace Gauge.VisualStudio.GotoDefn
 {
     internal sealed class GotoDefnCommandFilter : IOleCommandTarget
     {
-        public GotoDefnCommandFilter(IWpfTextView textView)
+        private readonly SVsServiceProvider _serviceProvider;
+        private readonly Project _project;
+
+        public GotoDefnCommandFilter(IWpfTextView textView, SVsServiceProvider serviceProvider)
         {
+            _serviceProvider = serviceProvider;
             TextView = textView;
+            var vsProject = TextView.TextBuffer.CurrentSnapshot.GetProject(GaugePackage.DTE);
+
+            _project = new Project(vsProject);
         }
 
         private IWpfTextView TextView { get; }
@@ -32,6 +41,9 @@ namespace Gauge.VisualStudio.GotoDefn
 
         public int Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
         {
+            if (VsShellUtilities.IsInAutomationFunction(_serviceProvider))
+                return Next.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
+
             var hresult = VSConstants.S_OK;
             switch ((VSConstants.VSStd97CmdID) nCmdID)
             {
@@ -44,12 +56,12 @@ namespace Gauge.VisualStudio.GotoDefn
                     //if the current step is a concept, then open the concept file.
                     //Gauge parses and caches the concepts, its location (file + line number).
                     //The plugin's job is to simply make an api call and fetch this information.
-
                     var stepImplementation =
-                        Project.Instance.GetStepImplementation(caretBufferPosition.GetContainingLine());
+                        _project.GetStepImplementation(caretBufferPosition.GetContainingLine());
 
-                    if (stepImplementation != null)
-                        stepImplementation.NavigateToImplementation(GaugePackage.DTE);
+                    if (stepImplementation == null)
+                        return VSConstants.S_FALSE;
+                    stepImplementation.NavigateToImplementation(GaugePackage.DTE);
                     return hresult;
                 default:
                     hresult = Next.Exec(pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);

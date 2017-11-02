@@ -18,14 +18,18 @@ using Gauge.VisualStudio.Core;
 using Gauge.VisualStudio.Core.Loggers;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text.Editor;
 
 namespace Gauge.VisualStudio.Format
 {
     internal class FormatCommandFilter : IOleCommandTarget
     {
-        public FormatCommandFilter(IWpfTextView textView)
+        private readonly SVsServiceProvider _serviceProvider;
+
+        public FormatCommandFilter(IWpfTextView textView, SVsServiceProvider serviceProvider)
         {
+            _serviceProvider = serviceProvider;
             TextView = textView;
         }
 
@@ -43,6 +47,9 @@ namespace Gauge.VisualStudio.Format
 
         public int Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
         {
+            if (VsShellUtilities.IsInAutomationFunction(_serviceProvider))
+                return Next.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
+
             if ((VSConstants.VSStd2KCmdID)nCmdID != VSConstants.VSStd2KCmdID.FORMATDOCUMENT)
             {
                 return Next.Exec(pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);

@@ -31,7 +31,6 @@ namespace Gauge.VisualStudio.Highlighting
         private readonly IProject _project;
         private readonly ITextSnapshot _snapshot;
         private readonly SnapshotSpan _span;
-        private readonly IStep _step;
         private readonly StepImplementationGenerator _stepImplementationGenerator;
         private readonly ITrackingSpan _trackingSpan;
         private readonly UnimplementedStepTagger _unimplementedStepTagger;
@@ -39,7 +38,6 @@ namespace Gauge.VisualStudio.Highlighting
         public ImplementStepAction(SnapshotSpan span, UnimplementedStepTagger unimplementedStepTagger, IProject project)
         {
             _trackingSpan = span.Snapshot.CreateTrackingSpan(span, SpanTrackingMode.EdgeInclusive);
-
             _span = span;
             _unimplementedStepTagger = unimplementedStepTagger;
             _snapshot = _trackingSpan.TextBuffer.CurrentSnapshot;
@@ -47,9 +45,8 @@ namespace Gauge.VisualStudio.Highlighting
             Icon = new BitmapImage(
                 new Uri("pack://application:,,,/Gauge.VisualStudio;component/assets/glyphs/step.png"));
             _project = project;
-            var dteProject = span.Snapshot.GetProject(GaugePackage.DTE);
-            var step = new Step(dteProject, span.Start.GetContainingLine());
-            _stepImplementationGenerator = new StepImplementationGenerator(dteProject, project, step);
+            var step = new Step(_project, span.Start.GetContainingLine());
+            _stepImplementationGenerator = new StepImplementationGenerator(project, step);
         }
 
         public void Invoke()
@@ -71,7 +68,7 @@ namespace Gauge.VisualStudio.Highlighting
 
             if (!gotImplementation) return;
 
-            _project.RefreshImplementations(targetClass.ProjectItem);
+            _project.RefreshImplementations();
             Project.NavigateToFunction(implementationFunction);
             _unimplementedStepTagger.MarkTagImplemented(_span);
             IsEnabled = false;

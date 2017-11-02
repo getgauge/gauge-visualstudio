@@ -52,19 +52,19 @@ namespace Gauge.VisualStudio
                 textViewAdapter.AddCommandFilter(autoCompleteCommandFilter, out next);
                 autoCompleteCommandFilter.Next = next;
 
-                var gotoDefnCommandFilter = new GotoDefnCommandFilter(view);
+                var gotoDefnCommandFilter = new GotoDefnCommandFilter(view, ServiceProvider);
                 textViewAdapter.AddCommandFilter(gotoDefnCommandFilter, out next);
                 gotoDefnCommandFilter.Next = next;
 
-                var refactorCommandFilter = new RenameCommandFilter(view);
+                var refactorCommandFilter = new RenameCommandFilter(view, ServiceProvider);
                 textViewAdapter.AddCommandFilter(refactorCommandFilter, out next);
                 refactorCommandFilter.Next = next;
 
-                var findReferencesCommandFilter = new FindReferencesCommandFilter(view);
+                var findReferencesCommandFilter = new FindReferencesCommandFilter(view, ServiceProvider);
                 textViewAdapter.AddCommandFilter(findReferencesCommandFilter, out next);
                 findReferencesCommandFilter.Next = next;
 
-                var formatCommandFilter = new FormatCommandFilter(view);
+                var formatCommandFilter = new FormatCommandFilter(view, ServiceProvider);
                 textViewAdapter.AddCommandFilter(formatCommandFilter, out next);
                 formatCommandFilter.Next = next;
             }

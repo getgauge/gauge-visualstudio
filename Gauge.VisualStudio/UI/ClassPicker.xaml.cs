@@ -35,7 +35,7 @@ namespace Gauge.VisualStudio.UI
         {
             InitializeComponent();
             WindowStartupLocation = WindowStartupLocation.CenterScreen;
-            _classNames = Model.Project.GetAllClasses(project, false).Select(element => element.Name).Take(10);
+            _classNames = new Model.Project(project).GetAllClasses(project, false).Select(element => element.Name).Take(10);
             ClassListBox.ItemsSource = _classNames;
         }
 

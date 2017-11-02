@@ -26,8 +26,11 @@ namespace Gauge.VisualStudio.References
 {
     internal sealed class FindReferencesCommandFilter : IOleCommandTarget
     {
-        public FindReferencesCommandFilter(IWpfTextView textView)
+        private readonly SVsServiceProvider _serviceProvider;
+
+        public FindReferencesCommandFilter(IWpfTextView textView, SVsServiceProvider serviceProvider)
         {
+            _serviceProvider = serviceProvider;
             TextView = textView;
         }
 
@@ -36,6 +39,9 @@ namespace Gauge.VisualStudio.References
 
         public int Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
         {
+            if (VsShellUtilities.IsInAutomationFunction(_serviceProvider))
+                return Next.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
+
             var hresult = VSConstants.S_OK;
             switch ((VSConstants.VSStd97CmdID) nCmdID)
             {

@@ -31,10 +31,12 @@ namespace Gauge.VisualStudio.Refactor
     public class RenameCommandFilter : IOleCommandTarget
     {
         private readonly IWpfTextView _view;
+        private readonly SVsServiceProvider _serviceProvider;
 
-        public RenameCommandFilter(IWpfTextView view)
+        public RenameCommandFilter(IWpfTextView view, SVsServiceProvider serviceProvider)
         {
             _view = view;
+            _serviceProvider = serviceProvider;
         }
 
         public IOleCommandTarget Next { get; set; }
@@ -50,6 +52,9 @@ namespace Gauge.VisualStudio.Refactor
 
         public int Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
         {
+            if (VsShellUtilities.IsInAutomationFunction(_serviceProvider))
+                return Next.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
+
             var hresult = VSConstants.S_OK;
             if ((VSConstants.VSStd2KCmdID) nCmdID == VSConstants.VSStd2KCmdID.RENAME)
             {
@@ -70,7 +75,7 @@ namespace Gauge.VisualStudio.Refactor
                 var newText = refactorDialog.StepText;
                 var progressDialog = CreateProgressDialog();
                 var startWaitDialog = progressDialog.StartWaitDialogWithPercentageProgress("Gauge - Renaming",
-                    string.Format("Original: {0}\nTo: {1}", originalText, newText), "Invoking Refactor action", null,
+                    $"Original: {originalText}\nTo: {newText}", "Invoking Refactor action", null,
                     "Refactoring Step", false, 0, 4, 1);
                 if (startWaitDialog != VSConstants.S_OK)
                     return hresult;
@@ -79,8 +84,8 @@ namespace Gauge.VisualStudio.Refactor
                 undoContext.Open("GaugeRefactoring");
                 try
                 {
-                    var project = _view.TextBuffer.CurrentSnapshot.GetProject(GaugePackage.DTE);
-                    var response = RefactorUsingGaugeDaemon(newText, originalText, project);
+                    var vsProject = _view.TextBuffer.CurrentSnapshot.GetProject(GaugePackage.DTE);
+                    var response = RefactorUsingGaugeDaemon(newText, originalText, vsProject);
 
                     if (!response.PerformRefactoringResponse.Success)
                     {
@@ -101,7 +106,7 @@ namespace Gauge.VisualStudio.Refactor
                     progressDialog.UpdateProgress(null, "Building Solution..", null, 3, 4, true, out cancel);
                     GaugePackage.DTE.ExecuteCommand("Build.BuildSolution");
                     progressDialog.UpdateProgress(null, "Refreshing Cache..", null, 3, 4, true, out cancel);
-                    Model.Project.Instance.RefreshImplementationsForActiveProject();
+                    new Model.Project(vsProject).RefreshImplementations();
                     GaugePackage.DTE.ExecuteCommand("File.SaveAll");
                     GaugePackage.DTE.ActiveDocument.Save();
                 }
@@ -152,8 +157,7 @@ namespace Gauge.VisualStudio.Refactor
             foreach (var file in response.PerformRefactoringResponse.FilesChanged)
             {
                 var vsPersistDocData = runningDocumentTable.FindDocument(file) as IVsPersistDocData;
-                if (vsPersistDocData != null)
-                    vsPersistDocData.ReloadDocData((uint) _VSRELOADDOCDATA.RDD_IgnoreNextFileChange);
+                vsPersistDocData?.ReloadDocData((uint) _VSRELOADDOCDATA.RDD_IgnoreNextFileChange);
             }
         }
 

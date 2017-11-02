@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.Text;
@@ -23,14 +22,14 @@ namespace Gauge.VisualStudio.Model
     {
         private readonly IGaugeServiceClient _gaugeServiceClient;
 
-        private readonly EnvDTE.Project _project;
+        private readonly IProject _project;
 
-        public Step(EnvDTE.Project project, ITextSnapshotLine inputLine, IGaugeServiceClient gaugeServiceClient)
+        public Step(IProject project, ITextSnapshotLine inputLine, IGaugeServiceClient gaugeServiceClient)
         {
-            _gaugeServiceClient = gaugeServiceClient;
             _project = project;
+            _gaugeServiceClient = gaugeServiceClient;
             ContainingLine = inputLine;
-            var stepValueFromInput = _gaugeServiceClient.GetStepValueFromInput(_project, GetStepText(inputLine));
+            var stepValueFromInput = _gaugeServiceClient.GetStepValueFromInput(_project.VsProject, GetStepText(inputLine));
 
             if (stepValueFromInput == null)
                 return;
@@ -39,7 +38,7 @@ namespace Gauge.VisualStudio.Model
             Parameters = stepValueFromInput.Parameters.ToList();
         }
 
-        public Step(EnvDTE.Project project, ITextSnapshotLine inputLine) : this(project, inputLine,
+        public Step(IProject vsProject, ITextSnapshotLine inputLine) : this(vsProject, inputLine,
             new GaugeServiceClient())
         {
         }
@@ -54,13 +53,10 @@ namespace Gauge.VisualStudio.Model
 
         public IEnumerable<string> GetAll()
         {
-            if (_project == null)
-                throw new InvalidOperationException(
-                    "Cannot fetch steps when Project is not specified. Ensure that instance is not the Step singleton.");
-            var implementedSteps = Project.Instance.GetAllStepsForCurrentProject().ToList();
+            var implementedSteps = _project.GetAllStepsForCurrentProject().ToList();
             var parsedImplementations =
-                implementedSteps.Select(s => _gaugeServiceClient.GetParsedStepValueFromInput(_project, s));
-            var unimplementedSteps = _gaugeServiceClient.GetAllStepsFromGauge(_project)
+                implementedSteps.Select(s => _gaugeServiceClient.GetParsedStepValueFromInput(_project.VsProject, s));
+            var unimplementedSteps = _gaugeServiceClient.GetAllStepsFromGauge(_project.VsProject)
                 .Where(s => !parsedImplementations.Contains(s.StepValue))
                 .Select(value => value.ParameterizedStepValue);
             return unimplementedSteps.Union(implementedSteps);

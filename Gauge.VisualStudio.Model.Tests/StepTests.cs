@@ -33,7 +33,7 @@ namespace Gauge.VisualStudio.Model.Tests
                 _textSnapshotLines = A.CollectionOfFake<ITextSnapshotLine>(2);
                 A.CallTo(() => _textSnapshotLines[0].LineNumber).Returns(1);
                 A.CallTo(() => _textSnapshotLines[1].LineNumber).Returns(2);
-                A.CallTo(() => _textSnapshotLines[0].GetText()).Returns(string.Format("* {0}", StepText));
+                A.CallTo(() => _textSnapshotLines[0].GetText()).Returns($"* {StepText}");
                 A.CallTo(() => _textSnapshotLines[1].GetText()).Returns("    |col1|col2|");
                 var textSnapshot = A.Fake<ITextSnapshot>();
                 A.CallTo(() => textSnapshot.GetLineFromLineNumber(2)).Returns(_textSnapshotLines[1]);
@@ -43,14 +43,14 @@ namespace Gauge.VisualStudio.Model.Tests
             [Test]
             public void ShouldFindTableInStep()
             {
-                var step = new Step(A.Fake<EnvDTE.Project>(), _textSnapshotLines[0], A.Fake<IGaugeServiceClient>());
+                var step = new Step(A.Fake<IProject>(), _textSnapshotLines[0], A.Fake<IGaugeServiceClient>());
                 Assert.True(step.HasInlineTable);
             }
 
             [Test]
             public void ShouldFetchStepTextForInlineTable()
             {
-                var expected = string.Format("{0} <table>", StepText);
+                var expected = $"{StepText} <table>";
                 Assert.AreEqual(expected, Step.GetStepText(_textSnapshotLines[0]));
             }
         }
@@ -58,10 +58,10 @@ namespace Gauge.VisualStudio.Model.Tests
         [Test]
         public void ShouldFetchStepTextForTableParam()
         {
-            const string StepText = "Step that takes a table <table:foo.csv>";
+            const string stepText = "Step that takes a table <table:foo.csv>";
             var snapshotLine = A.Fake<ITextSnapshotLine>();
             A.CallTo(() => snapshotLine.LineNumber).Returns(1);
-            A.CallTo(() => snapshotLine.GetText()).Returns(StepText);
+            A.CallTo(() => snapshotLine.GetText()).Returns(stepText);
 
             Step.GetStepText(snapshotLine);
             A.CallTo(() => snapshotLine.GetText()).MustHaveHappened();

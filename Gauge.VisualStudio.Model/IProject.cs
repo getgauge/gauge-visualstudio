@@ -20,12 +20,12 @@ namespace Gauge.VisualStudio.Model
 {
     public interface IProject
     {
-        void RefreshImplementations(ProjectItem projectItem);
-        void RefreshImplementationsForActiveProject();
+        void RefreshImplementations();
         Implementation GetStepImplementation(ITextSnapshotLine line);
         IEnumerable<CodeElement> GetFunctionsForClass(CodeClass codeClass);
-        CodeClass FindOrCreateClass(EnvDTE.Project project, string className);
+        CodeClass FindOrCreateClass(string className);
         bool HasDuplicateImplementation(ITextSnapshotLine line);
         IEnumerable<string> GetAllStepsForCurrentProject();
+        EnvDTE.Project VsProject { get; }
     }
 }
