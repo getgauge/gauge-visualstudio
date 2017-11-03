@@ -42,7 +42,7 @@ namespace Gauge.VisualStudio.TestAdapter
             _tests = tests.GroupBy(t => t.Source)
                 .SelectMany(spec => spec.OrderBy(t => t.LineNumber))
                 .ToList();
-            _pendingTests = _tests;
+            _pendingTests = new List<TestCase>(_tests);
             _isBeingDebugged = isBeingDebugged;
             _frameworkHandle = frameworkHandle;
             var projectRoot = _tests.First().GetPropertyValue(TestDiscoverer.GaugeProjectRoot, string.Empty);
@@ -79,6 +79,7 @@ namespace Gauge.VisualStudio.TestAdapter
             }
             catch (Exception ex)
             {
+                _frameworkHandle.SendMessage(TestMessageLevel.Error, ex.Message);
                 foreach (var testCase in _tests)
                 {
                     var result = new TestResult(testCase)

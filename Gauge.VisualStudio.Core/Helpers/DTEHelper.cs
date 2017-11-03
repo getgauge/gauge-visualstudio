@@ -16,7 +16,6 @@ using System;
 using System.Linq;
 using System.Management;
 using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
 using EnvDTE;
 using Microsoft.VisualStudio.OLE.Interop;
 using Process = System.Diagnostics.Process;
@@ -26,7 +25,7 @@ namespace Gauge.VisualStudio.Core.Helpers
 {
     public static class DTEHelper
     {
-        private static readonly string[] TestRunners = {"vstest.executionengine.x86", "te.processhost.managed"};
+        private static readonly string[] TestRunners = {"vstest.executionengine.x86", "vstest.executionengine", "te.processhost.managed"};
 
         public static DTE GetCurrent()
         {
@@ -91,11 +90,7 @@ namespace Gauge.VisualStudio.Core.Helpers
 
         public static bool IsVisualStudioProcessName(string name, int visualStudioProcessId)
         {
-            if (string.IsNullOrEmpty(name))
-                return false;
-
-            var vsProcessNameRegex = new Regex(@"^(!VisualStudio.DTE.)(\d\d?.\d):\d+$", RegexOptions.Compiled);
-            return vsProcessNameRegex.IsMatch(name);
+            return !string.IsNullOrEmpty(name) && name.Contains("VisualStudio.DTE");
         }
 
         internal static int GetRunnerProcessId(int parentProcessId)
@@ -103,9 +98,8 @@ namespace Gauge.VisualStudio.Core.Helpers
             var retries = 0;
             while (retries < 5)
             {
-                var mos = new ManagementObjectSearcher(string.Format(
-                    "Select * From Win32_Process Where ParentProcessID={0} and Name='Gauge.CSharp.Runner.exe'",
-                    parentProcessId));
+                var mos = new ManagementObjectSearcher(
+                    $"Select * From Win32_Process Where ParentProcessID={parentProcessId} and Name='Gauge.CSharp.Runner.exe'");
                 var processes = mos.Get().Cast<ManagementObject>().Select(mo => Convert.ToInt32(mo["ProcessID"]))
                     .ToList();
                 if (processes.Any())
@@ -121,11 +115,9 @@ namespace Gauge.VisualStudio.Core.Helpers
             var runnerProcessId = GetRunnerProcessId(parentProcessId);
             if (runnerProcessId == -1) return;
             var dte = GetCurrent();
-            foreach (EnvDTE.Process process in dte.Debugger.LocalProcesses)
-            {
-                if (process.ProcessID != runnerProcessId) continue;
-                process.Attach();
-            }
+            var processes = dte.Debugger.LocalProcesses.OfType<EnvDTE.Process>();
+            var process = processes.FirstOrDefault(proc => proc.ProcessID == runnerProcessId);
+            process?.Attach();
         }
 
         public static void DetachAllProcess()
@@ -135,8 +127,7 @@ namespace Gauge.VisualStudio.Core.Helpers
 
         private static int GetVisualStudioProcessId(int testRunnerProcessId)
         {
-            var mos = new ManagementObjectSearcher(string.Format("Select * From Win32_Process Where ProcessID={0}",
-                testRunnerProcessId));
+            var mos = new ManagementObjectSearcher($"Select * From Win32_Process Where ProcessID={testRunnerProcessId}");
             var processes = mos.Get().Cast<ManagementObject>().Select(mo => Convert.ToInt32(mo["ParentProcessID"]))
                 .ToList();
             if (processes.Any())
