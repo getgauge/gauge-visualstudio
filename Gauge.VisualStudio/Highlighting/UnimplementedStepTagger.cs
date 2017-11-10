@@ -15,6 +15,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Gauge.VisualStudio.Core.Exceptions;
 using Gauge.VisualStudio.Core.Extensions;
 using Gauge.VisualStudio.Model;
 using Gauge.VisualStudio.Model.Extensions;
@@ -35,7 +36,7 @@ namespace Gauge.VisualStudio.Highlighting
             _textView = textView;
             _textView.LayoutChanged += OnLayoutChanged;
             _textView.Caret.PositionChanged += OnCaretMove;
-            _project = new Project(textView.TextSnapshot.GetProject(GaugePackage.DTE));
+            _project = new Project(() => textView.TextSnapshot.GetProject(GaugePackage.DTE));
         }
 
         public void Dispose()
@@ -74,6 +75,10 @@ namespace Gauge.VisualStudio.Highlighting
                         continue;
                     }
                     tagSpan = new TagSpan<AbstractGaugeErrorTag>(unimplementedStepSpan, gaugeErrorTag);
+                }
+                catch (GaugeApiInitializationException)
+                {
+                    continue;
                 }
                 catch (ArgumentOutOfRangeException)
                 {

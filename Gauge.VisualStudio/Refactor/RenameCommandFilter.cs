@@ -95,8 +95,8 @@ namespace Gauge.VisualStudio.Refactor
                         if (response.PerformRefactoringResponse != null &&
                             response.PerformRefactoringResponse.Errors.Count > 0)
                             foreach (var error in response.PerformRefactoringResponse.Errors)
-                                errorMessage = string.Format("{0}{1}\n", errorMessage, error);
-                        GaugeService.Instance.DisplayGaugeNotStartedMessage(GaugeDisplayErrorLevel.Warning, "Refactoring failed.\nCheck Gauge output pane for details.", string.Format("Failed to refactor {0} to {1}. Error:\n{2}", originalText, newText,
+                                errorMessage = $"{errorMessage}{error}\n";
+                        GaugeService.DisplayGaugeNotStartedMessage(GaugeDisplayErrorLevel.Warning, "Refactoring failed.\nCheck Gauge output pane for details.", string.Format("Failed to refactor {0} to {1}. Error:\n{2}", originalText, newText,
                             errorMessage));
                         return VSConstants.S_FALSE;
                     }
@@ -106,7 +106,7 @@ namespace Gauge.VisualStudio.Refactor
                     progressDialog.UpdateProgress(null, "Building Solution..", null, 3, 4, true, out cancel);
                     GaugePackage.DTE.ExecuteCommand("Build.BuildSolution");
                     progressDialog.UpdateProgress(null, "Refreshing Cache..", null, 3, 4, true, out cancel);
-                    new Model.Project(vsProject).RefreshImplementations();
+                    new Model.Project(() => _view.TextBuffer.CurrentSnapshot.GetProject(GaugePackage.DTE)).RefreshImplementations();
                     GaugePackage.DTE.ExecuteCommand("File.SaveAll");
                     GaugePackage.DTE.ActiveDocument.Save();
                 }

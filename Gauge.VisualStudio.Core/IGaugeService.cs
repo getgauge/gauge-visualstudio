@@ -26,10 +26,6 @@ namespace Gauge.VisualStudio.Core
         void KillChildProcess(string slugifiedName);
         bool ContainsApiConnectionFor(string slugifiedName);
         List<GaugeProjectProperties> GetPropertiesForAllGaugeProjects();
-        GaugeVersionInfo GetInstalledGaugeVersion(IGaugeProcess gaugeProcess = null);
-        void AssertCompatibility(IGaugeProcess gaugeProcess = null);
-
-        void DisplayGaugeNotStartedMessage(GaugeDisplayErrorLevel errorLevel, string dialogMessage, string errorMessageFormat, params object[] args);
         void RegisterGaugeProject(Project project, int minPortRange, int maxPortRange);
     }
 }

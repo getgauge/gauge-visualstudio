@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
@@ -74,9 +75,16 @@ namespace Gauge.VisualStudio.Highlighting
 
             if (buffer != textView.TextBuffer) return null;
 
-            if (!_taggers.ContainsKey(textView))
-                _taggers[textView] = new UnimplementedStepTagger(textView);
-            return _taggers[textView] as ITagger<T>;
+            try
+            {
+                if (!_taggers.ContainsKey(textView))
+                    _taggers[textView] = new UnimplementedStepTagger(textView);
+                return _taggers[textView] as ITagger<T>;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         private void RefreshUsages()

@@ -22,6 +22,7 @@ using System.Linq;
 using System.Reflection;
 using EnvDTE;
 using EnvDTE80;
+using Gauge.VisualStudio.Core.Exceptions;
 using Gauge.VisualStudio.Core.Extensions;
 using Gauge.VisualStudio.Model.Extensions;
 using Microsoft.Internal.VisualStudio.Shell;
@@ -41,16 +42,11 @@ namespace Gauge.VisualStudio.Model
         private readonly DocumentEvents _documentEvents;
         private List<Implementation> _implementations;
         private readonly ProjectItemsEvents _projectItemsEvents;
-        private static EnvDTE.Project _vsProject;
+        private static Func<EnvDTE.Project> _vsProjectFunc;
 
-        public Project(EnvDTE.Project vsProject)
+        public Project(Func<EnvDTE.Project> vsProjectFuncFunc)
         {
-            Validate.IsNotNull(vsProject, "vsProject");
-            if (!vsProject.IsGaugeProject())
-            {
-                throw new ArgumentException($"Expected {vsProject.Name} to be a Gauge vsProject.");
-            }
-            _vsProject = vsProject;
+            _vsProjectFunc = vsProjectFuncFunc;
             _dte = Package.GetGlobalService(typeof(DTE)) as DTE;
             if (_events2 != null) return;
 
@@ -78,14 +74,14 @@ namespace Gauge.VisualStudio.Model
         {
             get
             {
-                _implementations = _implementations ?? GetGaugeImplementations(_vsProject);
+                _implementations = _implementations ?? GetGaugeImplementations(_vsProjectFunc.Invoke());
                 return _implementations;
             }
         }
 
         public void RefreshImplementations()
         {
-                _implementations = GetGaugeImplementations(_vsProject);
+                _implementations = GetGaugeImplementations(_vsProjectFunc.Invoke());
         }
 
         public Implementation GetStepImplementation(ITextSnapshotLine line)
@@ -114,8 +110,9 @@ namespace Gauge.VisualStudio.Model
 
         public CodeClass FindOrCreateClass(string className)
         {
-            return GetAllClasses(_vsProject, false).FirstOrDefault(element => element.Name == className) as CodeClass ??
-                   AddClass(className, _vsProject);
+            var containingProject = _vsProjectFunc.Invoke();
+            return GetAllClasses(containingProject, false).FirstOrDefault(element => element.Name == className) as CodeClass ??
+                   AddClass(className, containingProject);
         }
 
         public bool HasDuplicateImplementation(ITextSnapshotLine line)
@@ -139,7 +136,7 @@ namespace Gauge.VisualStudio.Model
                 .Select(implementation => implementation.StepText);
         }
 
-        public EnvDTE.Project VsProject => _vsProject;
+        public EnvDTE.Project VsProject => _vsProjectFunc.Invoke();
 
         private List<Implementation> GetGaugeImplementations(EnvDTE.Project containingProject)
         {
@@ -148,9 +145,15 @@ namespace Gauge.VisualStudio.Model
             var gaugeImplementations = new List<Implementation>();
             gaugeImplementations.AddRange(GetStepImplementations(allClasses));
 
-            gaugeImplementations.AddRange(new Concept(containingProject).GetAllConcepts()
-                .Select(concept => new ConceptImplementation(concept)));
-
+            try
+            {
+                gaugeImplementations.AddRange(new Concept(containingProject).GetAllConcepts()
+                    .Select(concept => new ConceptImplementation(concept)));
+            }
+            catch (GaugeApiInitializationException)
+            {
+                //do nothing, no concept implementations.
+            }
             return gaugeImplementations;
         }
 
@@ -185,7 +188,7 @@ namespace Gauge.VisualStudio.Model
         public IEnumerable<CodeElement> GetAllClasses(EnvDTE.Project containingProject,
             bool includeReferencedProjects = true)
         {
-            if (containingProject.CodeModel == null)
+            if (containingProject?.CodeModel == null)
                 return Enumerable.Empty<CodeElement>();
 
             var vsProject = containingProject.Object as VSProject;

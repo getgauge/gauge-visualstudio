@@ -26,17 +26,17 @@ namespace Gauge.VisualStudio.Model
         {
             try
             {
-                GaugeService.Instance.AssertCompatibility();
+                GaugeService.AssertCompatibility();
             }
             catch (GaugeVersionIncompatibleException ex)
             {
-                GaugeService.Instance.DisplayGaugeNotStartedMessage(GaugeDisplayErrorLevel.Error,
+                GaugeService.DisplayGaugeNotStartedMessage(GaugeDisplayErrorLevel.Error,
                     "Unable to launch Gauge Daemon.\nCheck Gauge output pane for details.", ex.Data["GaugeError"].ToString());
                 return Enumerable.Empty<string>();
             }
             catch (GaugeVersionNotFoundException ex)
             {
-                GaugeService.Instance.DisplayGaugeNotStartedMessage(GaugeDisplayErrorLevel.Error,
+                GaugeService.DisplayGaugeNotStartedMessage(GaugeDisplayErrorLevel.Error,
                     "Unable to launch Gauge Daemon.\nCheck Gauge output pane for details.", ex.Data["GaugeError"].ToString());
                 return Enumerable.Empty<string>();
             }
@@ -52,7 +52,7 @@ namespace Gauge.VisualStudio.Model
             }
             catch (GaugeApiInitializationException ex)
             {
-                GaugeService.Instance.DisplayGaugeNotStartedMessage(GaugeDisplayErrorLevel.Error,
+                GaugeService.DisplayGaugeNotStartedMessage(GaugeDisplayErrorLevel.Error,
                     "Unable to launch Gauge Daemon.\nCheck Gauge output pane for details.", $"STDOUT:\n{ex.Data["STDOUT"]}\nSTDERR:\n{ex.Data["STDERR"]}");
                 return Enumerable.Empty<string>();
             }

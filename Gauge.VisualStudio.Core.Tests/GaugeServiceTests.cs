@@ -40,7 +40,7 @@ namespace Gauge.VisualStudio.Core.Tests
             A.CallTo(() => gaugeProcess.StandardOutput).Returns(new StreamReader(outputStream));
             A.CallTo(() => gaugeProcess.StandardError).Returns(new StreamReader(errorStream));
 
-            Assert.DoesNotThrow(() => GaugeService.Instance.AssertCompatibility(gaugeProcess));
+            Assert.DoesNotThrow(() => GaugeService.AssertCompatibility(gaugeProcess));
         }
 
         [Test]
@@ -57,7 +57,7 @@ namespace Gauge.VisualStudio.Core.Tests
             A.CallTo(() => gaugeProcess.StandardOutput).Returns(new StreamReader(outputStream));
             A.CallTo(() => gaugeProcess.StandardError).Returns(new StreamReader(errorStream));
 
-            Assert.DoesNotThrow(() => GaugeService.Instance.AssertCompatibility(gaugeProcess));
+            Assert.DoesNotThrow(() => GaugeService.AssertCompatibility(gaugeProcess));
         }
 
         [Test]
@@ -79,7 +79,7 @@ namespace Gauge.VisualStudio.Core.Tests
 
             var gaugeVersionIncompatibleException =
                 Assert.Throws<GaugeVersionIncompatibleException>(() =>
-                    GaugeService.Instance.AssertCompatibility(gaugeProcess));
+                    GaugeService.AssertCompatibility(gaugeProcess));
 
             Assert.AreEqual(expectedMessage, gaugeVersionIncompatibleException.Data["GaugeError"]);
         }
@@ -97,7 +97,7 @@ namespace Gauge.VisualStudio.Core.Tests
             A.CallTo(() => gaugeProcess.StandardOutput).Returns(new StreamReader(outputStream));
             A.CallTo(() => gaugeProcess.StandardError).Returns(new StreamReader(errorStream));
 
-            var installedGaugeVersion = GaugeService.Instance.GetInstalledGaugeVersion(gaugeProcess);
+            var installedGaugeVersion = GaugeService.GetInstalledGaugeVersion(gaugeProcess);
             Assert.AreEqual("0.4.0", installedGaugeVersion.version);
             Assert.AreEqual(2, installedGaugeVersion.plugins.Length);
         }
@@ -117,7 +117,7 @@ namespace Gauge.VisualStudio.Core.Tests
             A.CallTo(() => gaugeProcess.StandardOutput).Returns(new StreamReader(outputStream));
             A.CallTo(() => gaugeProcess.StandardError).Returns(new StreamReader(errorStream));
 
-            var installedGaugeVersion = GaugeService.Instance.GetInstalledGaugeVersion(gaugeProcess);
+            var installedGaugeVersion = GaugeService.GetInstalledGaugeVersion(gaugeProcess);
             Assert.AreEqual("0.4.0", installedGaugeVersion.version);
             Assert.AreEqual(2, installedGaugeVersion.plugins.Length);
         }
@@ -137,7 +137,7 @@ namespace Gauge.VisualStudio.Core.Tests
 
             var exception =
                 Assert.Throws<GaugeVersionNotFoundException>(() =>
-                    GaugeService.Instance.GetInstalledGaugeVersion(gaugeProcess));
+                    GaugeService.GetInstalledGaugeVersion(gaugeProcess));
 
             Assert.NotNull(exception);
             Assert.NotNull(exception.Data);

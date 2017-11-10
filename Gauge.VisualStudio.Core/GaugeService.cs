@@ -62,7 +62,10 @@ namespace Gauge.VisualStudio.Core
         public IGaugeApiConnection GetApiConnectionFor(Project project)
         {
             IGaugeApiConnection apiConnection;
-            ApiConnections.TryGetValue(project.SlugifiedName(), out apiConnection);
+            if (!ApiConnections.TryGetValue(project.SlugifiedName(), out apiConnection))
+            {
+                throw new GaugeApiInitializationException();
+            }
             return apiConnection;
         }
 
@@ -110,7 +113,7 @@ namespace Gauge.VisualStudio.Core
                 }).ToList();
         }
 
-        public GaugeVersionInfo GetInstalledGaugeVersion(IGaugeProcess gaugeProcess = null)
+        public static GaugeVersionInfo GetInstalledGaugeVersion(IGaugeProcess gaugeProcess = null)
         {
             if (gaugeProcess == null)
                 gaugeProcess = GaugeProcess.ForVersion();
@@ -131,7 +134,7 @@ namespace Gauge.VisualStudio.Core
             }
         }
 
-        public void DisplayGaugeNotStartedMessage(GaugeDisplayErrorLevel errorLevel, string dialogMessage,
+        public static void DisplayGaugeNotStartedMessage(GaugeDisplayErrorLevel errorLevel, string dialogMessage,
             string errorMessageFormat, params object[] args)
         {
             var uiShell = (IVsUIShell) Package.GetGlobalService(typeof(IVsUIShell));
@@ -174,7 +177,7 @@ namespace Gauge.VisualStudio.Core
             GaugeProjects.Add(project);
         }
 
-        public void AssertCompatibility(IGaugeProcess gaugeProcess = null)
+        public static void AssertCompatibility(IGaugeProcess gaugeProcess = null)
         {
             var installedGaugeVersion = GetInstalledGaugeVersion(gaugeProcess);
 

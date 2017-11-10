@@ -27,6 +27,10 @@ namespace Gauge.VisualStudio.Core.Exceptions
             Data.Add("STDERR", stderr);
         }
 
+        public GaugeApiInitializationException() : base(ErrorMessage)
+        {
+        }
+
         protected override string ErrorCode => "GAUGE-VS-001";
     }
 }

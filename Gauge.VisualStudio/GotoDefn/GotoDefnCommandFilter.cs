@@ -25,15 +25,13 @@ namespace Gauge.VisualStudio.GotoDefn
     internal sealed class GotoDefnCommandFilter : IOleCommandTarget
     {
         private readonly SVsServiceProvider _serviceProvider;
-        private readonly Project _project;
+        private readonly Lazy<Project> _project;
 
         public GotoDefnCommandFilter(IWpfTextView textView, SVsServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
             TextView = textView;
-            var vsProject = TextView.TextBuffer.CurrentSnapshot.GetProject(GaugePackage.DTE);
-
-            _project = new Project(vsProject);
+            _project = new Lazy<Project>(() => new Project(() => TextView.TextBuffer.CurrentSnapshot.GetProject(GaugePackage.DTE)));
         }
 
         private IWpfTextView TextView { get; }
@@ -57,7 +55,7 @@ namespace Gauge.VisualStudio.GotoDefn
                     //Gauge parses and caches the concepts, its location (file + line number).
                     //The plugin's job is to simply make an api call and fetch this information.
                     var stepImplementation =
-                        _project.GetStepImplementation(caretBufferPosition.GetContainingLine());
+                        _project.Value.GetStepImplementation(caretBufferPosition.GetContainingLine());
 
                     if (stepImplementation == null)
                         return VSConstants.S_FALSE;

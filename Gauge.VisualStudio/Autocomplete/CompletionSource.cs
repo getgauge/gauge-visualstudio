@@ -38,7 +38,14 @@ namespace Gauge.VisualStudio.AutoComplete
 
             public ICompletionSource TryCreateCompletionSource(ITextBuffer textBuffer)
             {
-                return new GaugeCompletionSource(textBuffer);
+                try
+                {
+                    return new GaugeCompletionSource(textBuffer);
+                }
+                catch
+                {
+                    return null;
+                }
             }
         }
 
@@ -47,13 +54,13 @@ namespace Gauge.VisualStudio.AutoComplete
             private readonly ITextBuffer _buffer;
             private readonly Concept _concept;
             private bool _disposed;
-            private IProject _project;
+            private readonly IProject _project;
 
             public GaugeCompletionSource(ITextBuffer buffer)
             {
-                var vsProject = buffer.CurrentSnapshot.GetProject(GaugePackage.DTE);
+                var vsProject = new Func<EnvDTE.Project>(() => buffer.CurrentSnapshot.GetProject(GaugePackage.DTE));
                 _project = new Project(vsProject);
-                _concept = new Concept(vsProject);
+                _concept = new Concept(vsProject.Invoke());
                 _buffer = buffer;
             }
 
@@ -71,11 +78,10 @@ namespace Gauge.VisualStudio.AutoComplete
 
             public void Dispose()
             {
-                if (!_disposed)
-                {
-                    GC.SuppressFinalize(this);
-                    _disposed = true;
-                }
+                if (_disposed) return;
+
+                GC.SuppressFinalize(this);
+                _disposed = true;
             }
         }
     }

@@ -84,18 +84,18 @@ namespace Gauge.VisualStudio.Model.Tests
         }
 
         [Test]
-        public void ShouldGetParsedValueAsEmptyWhenApiNotInitialized()
+        public void ShouldThrowExceptionWhenGetParsedValueWithApiNotInitialized()
         {
             const string input = "foo message with <parameter>";
 
             var gaugeService = A.Fake<IGaugeService>();
             var project = A.Fake<EnvDTE.Project>();
-            A.CallTo(() => gaugeService.GetApiConnectionFor(project)).Returns(null);
+            A.CallTo(() => gaugeService.GetApiConnectionFor(project)).Throws(() => new GaugeApiInitializationException());
             var gaugeServiceClient = new GaugeServiceClient(gaugeService);
 
-            var actual = gaugeServiceClient.GetParsedStepValueFromInput(project, input);
 
-            Assert.AreEqual(string.Empty, actual);
+            Assert.Throws<GaugeApiInitializationException>(() =>
+                gaugeServiceClient.GetParsedStepValueFromInput(project, input));
         }
 
         [Test]

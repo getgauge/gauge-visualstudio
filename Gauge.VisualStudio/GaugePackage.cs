@@ -19,7 +19,6 @@ using System.Runtime.InteropServices;
 using EnvDTE;
 using Gauge.VisualStudio.Core;
 using Gauge.VisualStudio.Core.Exceptions;
-using Gauge.VisualStudio.Core.Loggers;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -29,7 +28,7 @@ namespace Gauge.VisualStudio
     [PackageRegistration(UseManagedResourcesOnly = true)]
     [InstalledProductRegistration("#110", "#112", "1.0", IconResourceID = 400)]
     [Guid(GuidList.GuidGaugeVsPackagePkgString)]
-    [ProvideAutoLoad(UIContextGuids80.SolutionExists)]
+    [ProvideAutoLoad(UIContextGuids80.NoSolution)]
     [ProvideEditorFactory(typeof(GaugeEditorFactory), 112)]
     [ProvideEditorLogicalView(typeof(GaugeEditorFactory), VSConstants.LOGVIEWID.TextView_string)]
     [ProvideEditorExtension(typeof(GaugeEditorFactory), GaugeContentTypeDefinitions.SpecFileExtension, 32)]
@@ -59,20 +58,25 @@ namespace Gauge.VisualStudio
             Debug.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", ToString()));
             try
             {
-                GaugeService.Instance.AssertCompatibility();
+                GaugeService.AssertCompatibility();
             }
             catch (GaugeVersionIncompatibleException ex)
             {
-                throw new InvalidOperationException($"{ex.Message}\n{ex.Data["GaugeError"].ToString()}");
+                var message = $"{ex.Message}\n{ex.Data["GaugeError"].ToString()}";
+                Debug.WriteLine(message);
+                throw new InvalidOperationException(message);
             }
             catch (GaugeVersionNotFoundException ex)
             {
-                throw new InvalidOperationException($"{ex.Message}\n{ex.Data["GaugeError"].ToString()}");
+                var message = $"{ex.Message}\n{ex.Data["GaugeError"].ToString()}";
+                Debug.WriteLine(message);
+                throw new InvalidOperationException(message);
             }
 
             base.Initialize();
 
             DTE = (DTE) GetService(typeof(DTE));
+
             RegisterEditorFactory(new GaugeEditorFactory(this));
             var options = GetDialogPage(typeof(GaugeDaemonOptions)) as GaugeDaemonOptions;
             _solutionsEventListener = new SolutionsEventListener(options, this);
