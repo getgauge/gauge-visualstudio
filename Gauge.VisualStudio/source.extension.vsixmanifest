@@ -31,5 +31,9 @@
            Path="|Gauge.VisualStudio.TestAdapter|" />
     <Asset Type="UnitTestExtension" d:Source="Project" d:ProjectName="%CurrentProject%.TestAdapter"
            Path="|Gauge.VisualStudio.TestAdapter|" />
+    <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="Project" d:ProjectName="Gauge.ProjectTemplates.Basic" d:TargetPath="|Gauge.ProjectTemplates.Basic;TemplateProjectOutputGroup|" Path="ProjectTemplates" d:VsixSubPath="ProjectTemplates" />
+    <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="Project" d:ProjectName="Gauge.ProjectTemplates.Webdriver" d:TargetPath="|Gauge.ProjectTemplates.Webdriver;TemplateProjectOutputGroup|" Path="ProjectTemplates" d:VsixSubPath="ProjectTemplates" />
+    <Asset Type="Microsoft.VisualStudio.ItemTemplate" d:Source="Project" d:ProjectName="Gauge.ItemTemplate.Spec" d:TargetPath="|Gauge.ItemTemplate.Spec;TemplateProjectOutputGroup|" Path="ItemTemplates" d:VsixSubPath="ItemTemplates" />
+    <Asset Type="Microsoft.VisualStudio.ItemTemplate" d:Source="Project" d:ProjectName="Gauge.ItemTemplate.Concept" d:TargetPath="|Gauge.ItemTemplate.Concept;TemplateProjectOutputGroup|" Path="ItemTemplates" d:VsixSubPath="ItemTemplates" />
   </Assets>
 </PackageManifest>
