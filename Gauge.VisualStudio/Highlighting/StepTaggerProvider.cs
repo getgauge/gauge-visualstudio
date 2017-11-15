@@ -61,7 +61,7 @@ namespace Gauge.VisualStudio.Highlighting
 
             _documentEvents.DocumentSaved += document =>
             {
-                if (document.IsGaugeConceptFile())
+                if (document.IsGaugeConceptFile() || document.IsGaugeSpecFile())
                 {
                     RefreshUsages();
                 }

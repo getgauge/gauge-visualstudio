@@ -55,10 +55,12 @@ namespace Gauge.VisualStudio.Highlighting
                     var line = span.Start.GetContainingLine();
                     var text = line.GetText();
                     var match = Parser.StepRegex.Match(text);
-                    var point = span.Start.Add(match.Index);
-                    var unimplementedStepSpan = new SnapshotSpan(span.Snapshot, new Span(point.Position, match.Length));
                     if (!match.Success)
                         continue;
+
+                    var point = span.Start.Add(match.Index);
+                    var unimplementedStepSpan = new SnapshotSpan(span.Snapshot, new Span(point.Position, match.Length));
+                    _project.RefreshImplementations();
 
                     AbstractGaugeErrorTag gaugeErrorTag;
                     if (_project.HasDuplicateImplementation(line))

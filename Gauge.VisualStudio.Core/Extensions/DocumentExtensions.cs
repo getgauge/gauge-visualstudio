@@ -37,7 +37,7 @@ namespace Gauge.VisualStudio.Core.Extensions
 
         public static bool IsGaugeConceptFile(this string filePath)
         {
-            return File.Exists(filePath) && new[] {".cpt"}.Any(filePath.EndsWith);
+            return File.Exists(filePath) && filePath.EndsWith(".cpt");
         }
     }
 }

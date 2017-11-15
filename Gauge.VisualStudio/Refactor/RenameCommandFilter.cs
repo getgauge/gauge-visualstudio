@@ -15,6 +15,7 @@
 using System;
 using Gauge.Messages;
 using Gauge.VisualStudio.Core;
+using Gauge.VisualStudio.Highlighting;
 using Gauge.VisualStudio.Model;
 using Gauge.VisualStudio.Model.Extensions;
 using Gauge.VisualStudio.UI;
@@ -23,6 +24,7 @@ using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text.Editor;
+using Microsoft.VisualStudio.Text.Tagging;
 using IServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
 using Project = EnvDTE.Project;
 
@@ -107,8 +109,10 @@ namespace Gauge.VisualStudio.Refactor
                     GaugePackage.DTE.ExecuteCommand("Build.BuildSolution");
                     progressDialog.UpdateProgress(null, "Refreshing Cache..", null, 3, 4, true, out cancel);
                     new Model.Project(() => _view.TextBuffer.CurrentSnapshot.GetProject(GaugePackage.DTE)).RefreshImplementations();
-                    GaugePackage.DTE.ExecuteCommand("File.SaveAll");
-                    GaugePackage.DTE.ActiveDocument.Save();
+
+                    var stepTaggerProvider = _serviceProvider.GetService(typeof(IViewTaggerProvider)) as StepTaggerProvider;
+                    var tagger = stepTaggerProvider?.CreateTagger<AbstractGaugeErrorTag>(_view, _view.TextBuffer) as UnimplementedStepTagger;
+                    tagger?.MarkTagImplemented(currentLine.Extent);
                 }
                 finally
                 {
