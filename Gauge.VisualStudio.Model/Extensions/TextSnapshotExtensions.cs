@@ -23,7 +23,8 @@ namespace Gauge.VisualStudio.Model.Extensions
         public static EnvDTE.Project GetProject(this ITextSnapshot snapshot, DTE dte)
         {
             ITextDocument textDoc;
-            snapshot.TextBuffer.Properties.TryGetProperty(typeof(ITextDocument), out textDoc);
+            if(!snapshot.TextBuffer.Properties.TryGetProperty(typeof(ITextDocument), out textDoc))
+                return null;
             var document = dte.Documents.Cast<Document>()
                 .FirstOrDefault(d => string.CompareOrdinal(d.FullName, textDoc.FilePath) == 0);
             return document == null ? null : document.ProjectItem.ContainingProject;
