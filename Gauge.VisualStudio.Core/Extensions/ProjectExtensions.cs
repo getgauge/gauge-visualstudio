@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using System.IO;
 using System.Text.RegularExpressions;
 using EnvDTE;
@@ -59,11 +60,20 @@ namespace Gauge.VisualStudio.Core.Extensions
         public static string GetProjectOutputPath(this Project project)
         {
             var configurationManager = project.ConfigurationManager;
-            var activeConfiguration = configurationManager.ActiveConfiguration;
-            var outputPath = activeConfiguration.Properties.Item("OutputPath").Value.ToString();
-            return Path.IsPathRooted(outputPath)
-                ? outputPath
-                : Path.GetFullPath(Path.Combine(Path.GetDirectoryName(project.FullName), outputPath));
+            try
+            {
+                var activeConfiguration = configurationManager.ActiveConfiguration;
+                var outputPath = activeConfiguration.Properties.Item("OutputPath").Value.ToString();
+                return Path.IsPathRooted(outputPath)
+                    ? outputPath
+                    : Path.GetFullPath(Path.Combine(Path.GetDirectoryName(project.FullName), outputPath));
+            }
+            catch
+            {
+                // cant read ActiveConfiguration for some reason
+                // happens at least when creating a new project via templates.
+                return Path.GetFullPath(Path.Combine(Path.GetDirectoryName(project.FullName), "bin", "Debug"));
+            }
         }
     }
 }
