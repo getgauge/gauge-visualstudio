@@ -108,9 +108,6 @@ namespace Gauge.VisualStudio.Refactor
                     progressDialog.UpdateProgress(null, "Building Solution..", null, 3, 4, true, out cancel);
                     GaugePackage.DTE.ExecuteCommand("Build.BuildSolution");
                     progressDialog.UpdateProgress(null, "Refreshing Cache..", null, 3, 4, true, out cancel);
-                    var stepTaggerProvider = _serviceProvider.GetService(typeof(IViewTaggerProvider)) as StepTaggerProvider;
-                    var tagger = stepTaggerProvider?.CreateTagger<AbstractGaugeErrorTag>(_view, _view.TextBuffer) as UnimplementedStepTagger;
-                    tagger?.RefreshProjectCache();
                 }
                 finally
                 {
