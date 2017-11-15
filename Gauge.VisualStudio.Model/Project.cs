@@ -26,6 +26,7 @@ using Gauge.VisualStudio.Core.Exceptions;
 using Gauge.VisualStudio.Core.Extensions;
 using Gauge.VisualStudio.Model.Extensions;
 using Microsoft.Internal.VisualStudio.Shell;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using VSLangProj;
@@ -43,6 +44,7 @@ namespace Gauge.VisualStudio.Model
         private List<Implementation> _implementations;
         private readonly ProjectItemsEvents _projectItemsEvents;
         private static Func<EnvDTE.Project> _vsProjectFunc;
+        private CommandEvents _commandEvents;
 
         public Project(Func<EnvDTE.Project> vsProjectFuncFunc)
         {
@@ -52,6 +54,7 @@ namespace Gauge.VisualStudio.Model
 
             _events2 = _dte.Events as Events2;
             _codeModelEvents = _events2.CodeModelEvents;
+            _commandEvents = _events2.CommandEvents;
 
             _projectItemsEvents = _events2.ProjectItemsEvents;
             _documentEvents = _events2.DocumentEvents;
@@ -62,12 +65,21 @@ namespace Gauge.VisualStudio.Model
                     RefreshImplementations();
                 }
             };
+
             _projectItemsEvents.ItemAdded += projectItem => RefreshImplementations();
             _projectItemsEvents.ItemRemoved += projectItem => RefreshImplementations();
             _projectItemsEvents.ItemRenamed += (item, name) => RefreshImplementations();
             _codeModelEvents.ElementAdded += element => RefreshImplementations();
             _codeModelEvents.ElementChanged += (element, change) => RefreshImplementations();
             _codeModelEvents.ElementDeleted += (parent, element) => RefreshImplementations();
+
+            _commandEvents.AfterExecute += (cmdId, id, customIn, customOut) =>
+            {
+                if ((VSConstants.VSStd2KCmdID) id == VSConstants.VSStd2KCmdID.RENAME)
+                {
+                    RefreshImplementations();
+                }
+            };
         }
 
         private IEnumerable<Implementation> Implementations
