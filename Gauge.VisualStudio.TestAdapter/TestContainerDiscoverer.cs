@@ -64,10 +64,10 @@ namespace Gauge.VisualStudio.TestAdapter
 
         private void UpdateTestContainersIfGaugeSpecFile(ProjectItem projectItem)
         {
-            if (projectItem?.ContainingProject == null || projectItem.Document == null)
+            if (projectItem?.ContainingProject == null)
                 return;
             if (projectItem.ContainingProject.IsGaugeProject() 
-                && projectItem.Name.IsGaugeSpecFile())
+                && projectItem.FileNames[0].IsGaugeSpecFile())
                 TestContainersUpdated?.Invoke(this, EventArgs.Empty);
         }
     }
