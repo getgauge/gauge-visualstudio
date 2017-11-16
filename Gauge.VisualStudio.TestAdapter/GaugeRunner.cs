@@ -31,6 +31,8 @@ namespace Gauge.VisualStudio.TestAdapter
     {
         private const string ScenarioEndEvent = "scenarioEnd";
         private const string ErrorEvent = "error";
+        private const string SuiteEndEvent = "suiteEnd";
+        private const string SpecEndEvent = "specEnd";
         private readonly IFrameworkHandle _frameworkHandle;
         private readonly bool _isBeingDebugged;
         private readonly List<TestCase> _tests;
@@ -111,37 +113,60 @@ namespace Gauge.VisualStudio.TestAdapter
             using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(args.Data)))
             {
                 var e = (TestExecutionEvent) serializer.ReadObject(ms);
-                if (e.EventType == ErrorEvent)
+                switch (e.EventType)
                 {
-                    foreach (var test in _tests)
-                    {
-                        var result = new TestResult(test) {Outcome = TestOutcome.None};
-                        foreach (var testExecutionError in e.Result.Errors)
-                            result.Messages.Add(new TestResultMessage(TestResultMessage.StandardErrorCategory,
-                                $"{testExecutionError.Text}\n{testExecutionError.StackTrace}"));
-                        _frameworkHandle.RecordResult(result);
-                        _frameworkHandle.RecordEnd(test, result.Outcome);
-                    }
-                    return;
+                    case ErrorEvent:
+                        MarkAllTestsFailed(e.Result.Errors);
+                        return;
+                    case SuiteEndEvent:
+                    case SpecEndEvent:
+                        if (e.Result.Errors?.Length>0)
+                        {
+                            MarkAllTestsFailed(e.Result.Errors);
+                        }
+                        if (e.Result.BeforeHookFailure!=null)
+                        {
+                            MarkAllTestsFailed(e.Result.BeforeHookFailure);
+                        }
+                        if (e.Result.AfterHookFailure!=null)
+                        {
+                            MarkAllTestsFailed(e.Result.AfterHookFailure);
+                        }
+                        break;
+                    case ScenarioEndEvent:
+                        var targetTestCase = _tests.FirstOrDefault(t => $"{t.Source}:{t.LineNumber}" == e.Id);
+                        if (targetTestCase == null)
+                            return;
+                        var testResult = new TestResult(targetTestCase) { Outcome = ParseOutcome(e.Result.Status) };
+                        if (!string.IsNullOrEmpty(e.Result.Stdout))
+                            testResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, e.Result.Stdout));
+                        if (e.Result.Errors != null && e.Result.Errors.Length > 0)
+                        {
+                            foreach (var error in e.Result.Errors)
+                            {
+                                testResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardErrorCategory, error.ToString()));
+                            }
+                        }
+                        _frameworkHandle.RecordResult(testResult);
+                        _frameworkHandle.RecordEnd(targetTestCase, testResult.Outcome);
+                        _pendingTests.Remove(targetTestCase);
+                        break;
+                    default:
+                        return;
                 }
-                if (e.EventType != ScenarioEndEvent)
-                    return;
-                var targetTestCase = _tests.FirstOrDefault(t => $"{t.Source}:{t.LineNumber}" == e.Id);
-                if (targetTestCase == null)
-                    return;
-                var testResult = new TestResult(targetTestCase) {Outcome = ParseOutcome(e.Result.Status)};
-                if (!string.IsNullOrEmpty(e.Result.Stdout))
-                    testResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, e.Result.Stdout));
-                if (e.Result.Errors!=null && e.Result.Errors.Length>0)
-                {
-                    foreach (var error in e.Result.Errors)
-                    {
-                        testResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardErrorCategory, error.ToString()));
-                    }
-                }
-                _frameworkHandle.RecordResult(testResult);
-                _frameworkHandle.RecordEnd(targetTestCase, testResult.Outcome);
-                _pendingTests.Remove(targetTestCase);
+            }
+        }
+
+        private void MarkAllTestsFailed(params TestExecutionError[] errors)
+        {
+            foreach (var test in _tests)
+            {
+                var result = new TestResult(test) {Outcome = TestOutcome.Failed};
+                foreach (var testExecutionError in errors)
+                    result.Messages.Add(new TestResultMessage(TestResultMessage.StandardErrorCategory,
+                        $"{testExecutionError.Text}\n{testExecutionError.StackTrace}"));
+                _frameworkHandle.RecordResult(result);
+                _frameworkHandle.RecordEnd(test, result.Outcome);
             }
         }
 
