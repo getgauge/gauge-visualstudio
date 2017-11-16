@@ -53,7 +53,7 @@ namespace Gauge.VisualStudio.TestAdapter
                 _frameworkHandle.RecordStart(testCase);
                 _frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Executing Test: {testCase}");
 
-                scenarios.Add($"{testCase.Source}:{testCase.LineNumber}");
+                scenarios.Add($"\"{testCase.Source}:{testCase.LineNumber}\"");
             }
 
             _gaugeProcess = GaugeProcess.ForExecution(projectRoot, scenarios, gaugeCustomBuildPath, _isBeingDebugged, isParallelRun);
