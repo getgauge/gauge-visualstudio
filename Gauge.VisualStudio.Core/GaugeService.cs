@@ -22,7 +22,6 @@ using System.Runtime.Serialization.Json;
 using System.Text;
 using EnvDTE;
 using Gauge.CSharp.Core;
-using Gauge.Messages;
 using Gauge.VisualStudio.Core.Exceptions;
 using Gauge.VisualStudio.Core.Extensions;
 using Gauge.VisualStudio.Core.Helpers;
@@ -46,7 +45,8 @@ namespace Gauge.VisualStudio.Core
         private static readonly Dictionary<string, int> ApiPorts = new Dictionary<string, int>();
 
         private static readonly List<Project> GaugeProjects = new List<Project>();
-        public static readonly GaugeVersion MinGaugeVersion = new GaugeVersion("0.9.4");
+        public static readonly GaugeVersion MinGaugeVersion = new GaugeVersion("0.9.6");
+        private bool _initialized;
 
         private GaugeService()
         {
@@ -241,13 +241,23 @@ namespace Gauge.VisualStudio.Core
                 OutputPaneLogger.Error(
                     $"PID {gaugeProcess.Id} has exited with exit code {gaugeProcess.ExitCode}.\nSTDOUT:\n{gaugeProcess.StandardOutput.ReadToEnd()}\nSTDERR\n{gaugeProcess.StandardError.ReadToEnd()}");
 
+            gaugeProcess.OutputDataReceived += (sender, args) =>
+            {
+                if (args.Data.StartsWith("Gauge daemon initialized"))
+                {
+                    _initialized = true;
+                }
+            };
+
             if (!gaugeProcess.Start())
                 throw new GaugeApiInitializationException(gaugeProcess.StandardOutput.ReadToEnd(),
                     gaugeProcess.StandardError.ReadToEnd());
 
+            gaugeProcess.BeginOutputReadLine();
             OutputPaneLogger.Debug("Opening Gauge Daemon with PID: {0}", gaugeProcess.Id);
+
+            WaitForColdStart();
             var tcpClientWrapper = new TcpClientWrapper(port);
-            WaitForColdStart(tcpClientWrapper);
             ApiPorts.Add(slugifiedName, port);
             ChildProcesses.Add(slugifiedName, gaugeProcess.BaseProcess);
             OutputPaneLogger.Debug("PID: {0} ready, waiting for messages..", gaugeProcess.Id);
@@ -259,36 +269,17 @@ namespace Gauge.VisualStudio.Core
             return Path.GetDirectoryName(gaugeProject.FullName);
         }
 
-        private static void WaitForColdStart(ITcpClientWrapper tcpClientWrapper)
+        private void WaitForColdStart()
         {
-            while (!tcpClientWrapper.Connected)
-                Thread.Sleep(100);
-
-            var messageId = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
-            var specsRequest = new SpecsRequest();
-            var apiMessage = new APIMessage
-            {
-                MessageId = messageId,
-                MessageType = APIMessage.Types.APIMessageType.SpecsRequest,
-                SpecsRequest = specsRequest
-            };
-
-            var gaugeApiConnection = new GaugeApiConnection(tcpClientWrapper);
             var i = 0;
-            while (i < 10)
+            while (!_initialized)
             {
-                try
-                {
-                    var message = gaugeApiConnection.WriteAndReadApiMessage(apiMessage);
-                    if (message.SpecsResponse != null && message.SpecsResponse.Details.Count > 0)
-                        break;
-                }
-                catch
-                {
-                    //do nothing, count as a retry attempt
-                }
                 Thread.Sleep(500);
                 i++;
+                if (i>=120)
+                {
+                    throw new GaugeApiInitializationException();
+                }
             }
         }
 

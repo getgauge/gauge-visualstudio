@@ -24,7 +24,7 @@ namespace Gauge.VisualStudio.Core
     {
         public GaugeProcess(ProcessStartInfo startInfo)
         {
-            BaseProcess = new Process {StartInfo = startInfo};
+            BaseProcess = new Process {StartInfo = startInfo, EnableRaisingEvents = true};
         }
 
         public StreamReader StandardError => BaseProcess.StandardError;
@@ -39,7 +39,6 @@ namespace Gauge.VisualStudio.Core
 
         public bool Start()
         {
-            BaseProcess.EnableRaisingEvents = true;
             if (Exited != null)
                 BaseProcess.Exited += Exited;
             if (OutputDataReceived != null)
