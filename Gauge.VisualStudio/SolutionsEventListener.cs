@@ -78,7 +78,7 @@ namespace Gauge.VisualStudio
             var slugifiedName = project.SlugifiedName();
 
             GaugeService.Instance.KillChildProcess(slugifiedName);
-
+            GaugeService.Reset();
             return VSConstants.S_OK;
         }
 

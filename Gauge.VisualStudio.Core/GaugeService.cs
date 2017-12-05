@@ -35,7 +35,7 @@ namespace Gauge.VisualStudio.Core
 {
     public class GaugeService : IGaugeService
     {
-        private static readonly Lazy<GaugeService> LazyInstance = new Lazy<GaugeService>(() => new GaugeService());
+        private static Lazy<GaugeService> _lazyInstance = new Lazy<GaugeService>(() => new GaugeService());
 
         private static readonly Dictionary<string, IGaugeApiConnection> ApiConnections =
             new Dictionary<string, IGaugeApiConnection>();
@@ -52,7 +52,7 @@ namespace Gauge.VisualStudio.Core
         {
         }
 
-        public static IGaugeService Instance => LazyInstance.Value;
+        public static IGaugeService Instance => _lazyInstance.Value;
 
         public IEnumerable<IGaugeApiConnection> GetAllApiConnections()
         {
@@ -302,6 +302,11 @@ namespace Gauge.VisualStudio.Core
             OutputPaneLogger.Error("Project Output path '{0}' does not exists. Not starting Gauge Daemon",
                 projectOutputPath);
             throw new GaugeApiInitializationException("", $"Project Output path '{projectOutputPath}' does not exists");
+        }
+
+        public static void Reset()
+        {
+            _lazyInstance = new Lazy<GaugeService>(() => new GaugeService());
         }
     }
 }
