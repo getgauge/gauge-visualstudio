@@ -108,7 +108,7 @@ namespace Gauge.VisualStudio.Model.Tests
 
         public class StepTests
         {
-            private static readonly TestCaseData[] ScenarioHeadingTestCases =
+            private static readonly TestCaseData[] StepTextTestCases =
             {
                 new TestCaseData("* Say hello to gauge").Returns("* Say hello to gauge"),
                 new TestCaseData("Say hello to gauge").Returns(string.Empty),
@@ -122,8 +122,21 @@ namespace Gauge.VisualStudio.Model.Tests
                     "* Step that takes a table <table:foo.csv>")
             };
 
+            private static readonly TestCaseData[] StepValueTestCases =
+{
+                new TestCaseData("Say hello to gauge").Returns("Say hello to gauge"),
+                new TestCaseData("say \"hello\" to \"gauge\" \n \n  ").Returns("say {} to {} \n \n  "),
+                new TestCaseData("say \"hello\" and <adjka> to all").Returns("say {} and {} to all"),
+                new TestCaseData("say !@ to all").Returns("say !@ to all"),
+                new TestCaseData("Say \"{hi | bye / how  who ? <>=+-_)(*&^%$#@!~`}\" to \"[hello)\"").Returns(
+                    "Say {} to {}"),
+                new TestCaseData("Say ,./?';:\\|][=+-_)(*&^%$#@!~`").Returns("Say ,./?';:\\|][=+-_)(*&^%$#@!~`"),
+                new TestCaseData("Step that takes a table <table:foo.csv>").Returns(
+                    "Step that takes a table {}")
+            };
+
             [Test]
-            [TestCaseSource("ScenarioHeadingTestCases")]
+            [TestCaseSource(nameof(StepTextTestCases))]
             public string ShouldGetStepName(string stepText)
             {
                 return Parser.StepRegex.Match(stepText).Value.Trim();
@@ -186,6 +199,13 @@ namespace Gauge.VisualStudio.Model.Tests
                     .Select(token => token.Value);
 
                 Assert.AreEqual(new[] {"something", "someone"}, dynamicParameters);
+            }
+
+            [Test]
+            [TestCaseSource(nameof(StepValueTestCases))]
+            public string ShouldGetStepValueFromStepText(string value)
+            {
+                return Parser.StepValueRegex.Replace(value, "{}");
             }
         }
 

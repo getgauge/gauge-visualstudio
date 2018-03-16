@@ -25,7 +25,6 @@ using EnvDTE80;
 using Gauge.VisualStudio.Core.Exceptions;
 using Gauge.VisualStudio.Core.Extensions;
 using Gauge.VisualStudio.Model.Extensions;
-using Microsoft.Internal.VisualStudio.Shell;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
@@ -42,6 +41,8 @@ namespace Gauge.VisualStudio.Model
         private readonly CodeModelEvents _codeModelEvents;
         private readonly DocumentEvents _documentEvents;
         private List<Implementation> _implementations;
+        private Dictionary<string, Implementation> _implementationMap;
+        private Dictionary<string, bool> _implementationDuplicates;
         private readonly ProjectItemsEvents _projectItemsEvents;
         private static Func<EnvDTE.Project> _vsProjectFunc;
         private CommandEvents _commandEvents;
@@ -98,20 +99,11 @@ namespace Gauge.VisualStudio.Model
 
         public Implementation GetStepImplementation(ITextSnapshotLine line)
         {
-            if (Implementations == null)
-                return null;
-            try
-            {
-                var project = line.Snapshot.GetProject(_dte);
-                return project == null
-                    ? null
-                    : Implementations.FirstOrDefault(implementation =>
-                        implementation.ContainsImplememntationFor(project, Step.GetStepText(line)));
-            }
-            catch (InvalidOperationException)
-            {
-                return null;
-            }
+            if (_implementationMap == null)
+                RefreshImplementations();
+            Implementation retval = null;
+            _implementationMap.TryGetValue(Step.GetStepValue(line), out retval);
+            return retval;
         }
 
 
@@ -129,16 +121,10 @@ namespace Gauge.VisualStudio.Model
 
         public bool HasDuplicateImplementation(ITextSnapshotLine line)
         {
-            try
-            {
-                var project = line.Snapshot.GetProject(_dte);
-                return Implementations.Count(implementation =>
-                           implementation.ContainsImplememntationFor(project, Step.GetStepText(line))) > 1;
-            }
-            catch (InvalidOperationException)
-            {
-                return false;
-            }
+            if (_implementationDuplicates == null)
+                RefreshImplementations();
+            bool retval;
+            return _implementationDuplicates.TryGetValue(Step.GetStepValue(line), out retval) && retval;
         }
 
         public IEnumerable<string> GetAllStepsForCurrentProject()
@@ -165,6 +151,14 @@ namespace Gauge.VisualStudio.Model
             catch (GaugeApiInitializationException)
             {
                 //do nothing, no concept implementations.
+            }
+
+            _implementationMap = new Dictionary<string, Implementation>();
+            _implementationDuplicates = new Dictionary<string, bool>();
+            foreach(var i in gaugeImplementations)
+            {
+                _implementationMap.Add(i.StepValue, i);
+                _implementationDuplicates.Add(i.StepValue, _implementationDuplicates.ContainsKey(i.StepValue));
             }
             return gaugeImplementations;
         }

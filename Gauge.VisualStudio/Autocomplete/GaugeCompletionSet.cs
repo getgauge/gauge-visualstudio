@@ -35,7 +35,7 @@ namespace Gauge.VisualStudio.AutoComplete
             var concepts = concept.GetAllConcepts();
             var prefix = line.GetText().TrimStart('*').TrimStart(' ');
             var steps = step.GetAll().Where(s =>
-                concepts.All(c => string.CompareOrdinal(c.StepValue, s) != 0) && !string.IsNullOrEmpty(s));
+                concepts.All(c => string.CompareOrdinal(c.StepText, s) != 0) && !string.IsNullOrEmpty(s));
             var applicableCompletions = prefix.Length < 1
                 ? steps
                 : steps.Where(s => s.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
@@ -48,9 +48,9 @@ namespace Gauge.VisualStudio.AutoComplete
                     new Uri("pack://application:,,,/Gauge.VisualStudio;component/assets/glyphs/concept.png"));
             var applicableConceptCompletions = prefix.Length < 1
                 ? concepts
-                : concepts.Where(s => s.StepValue.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
+                : concepts.Where(s => s.StepText.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
             _gaugeCompletions.AddRange(applicableConceptCompletions.Select(x =>
-                new Completion(x.StepValue, x.StepValue, "Concept", conceptImageSource, "Concept")));
+                new Completion(x.StepText, x.StepText, "Concept", conceptImageSource, "Concept")));
 
             if (_gaugeCompletions.Count <= 0) return;
 

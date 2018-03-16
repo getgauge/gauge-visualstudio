@@ -15,7 +15,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using EnvDTE;
 using Gauge.VisualStudio.Model;
 using Gauge.VisualStudio.Model.Extensions;
 using Microsoft.VisualStudio.Language.Intellisense;

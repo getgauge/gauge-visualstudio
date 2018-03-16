@@ -18,7 +18,6 @@ using System.Linq;
 using Gauge.CSharp.Core;
 using Gauge.Messages;
 using Gauge.VisualStudio.Core;
-using Gauge.VisualStudio.Core.Exceptions;
 
 namespace Gauge.VisualStudio.Model
 {
@@ -55,7 +54,7 @@ namespace Gauge.VisualStudio.Model
         public ProtoStepValue GetStepValueFromInput(EnvDTE.Project project, string input)
         {
             var gaugeApiConnection = _gaugeService.GetApiConnectionFor(project);
-            var stepsRequest = new GetStepValueRequest {StepText = input};
+            var stepsRequest = new GetStepValueRequest { StepText = input };
             var apiMessage = new APIMessage
             {
                 MessageId = GenerateMessageId(),

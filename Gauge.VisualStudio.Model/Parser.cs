@@ -54,6 +54,10 @@ namespace Gauge.VisualStudio.Model
                 @"[ ]*\*(?<stepText>(([^{}""\<\>\n\r]*)(?<stat>""(?<statValue>.*?)"")*(?<dyn>\<(?<dynValue>(?!(table|file)).*?)\>)*((?<table><table:(?<tableValue>[^>]*)>)|(?<file><file:(?<fileValue>[^>]*)>))?)*)",
                 RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace | RegexOptions.IgnoreCase);
 
+        public static readonly Regex StepValueRegex =
+            new Regex(
+                @"(\""[^\""]*\"")|(\<[^\>]*\>)",
+                RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace | RegexOptions.IgnoreCase);
         private static readonly Regex TagsRegex = new Regex(@"tags\s*:\s*(?<tag>[^(,|\n)]*)(,(?<tag>[^(,|\n)]*))*",
             RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace | RegexOptions.Multiline);
 

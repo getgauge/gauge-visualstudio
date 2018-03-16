@@ -20,15 +20,13 @@ namespace Gauge.VisualStudio.Model
     public abstract class Implementation
     {
         public string StepText;
+        public string StepValue;
 
         internal bool ContainsImplememntationFor(EnvDTE.Project project, string givenText)
         {
             try
             {
-                var gaugeServiceClient = new GaugeServiceClient();
-                return string.Compare(gaugeServiceClient.GetParsedStepValueFromInput(project, StepText),
-                           gaugeServiceClient.GetParsedStepValueFromInput(project, givenText),
-                           StringComparison.Ordinal) == 0;
+                return string.Compare(StepText, givenText, StringComparison.Ordinal) == 0;
             }
             catch
             {

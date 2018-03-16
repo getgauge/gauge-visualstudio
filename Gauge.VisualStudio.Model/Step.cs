@@ -71,6 +71,11 @@ namespace Gauge.VisualStudio.Model
             return CheckForInlineTable(line) ? string.Concat(stepText, " <table>") : stepText;
         }
 
+        public static string GetStepValue(ITextSnapshotLine line)
+        {
+            return Parser.StepValueRegex.Replace(GetStepText(line), "{}");
+        }
+
         private static bool CheckForInlineTable(ITextSnapshotLine line)
         {
             if (line == null)

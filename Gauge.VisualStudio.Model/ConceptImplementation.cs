@@ -23,7 +23,8 @@ namespace Gauge.VisualStudio.Model
         public ConceptImplementation(Concept concept)
         {
             _concept = concept;
-            StepText = _concept.StepValue;
+            StepText = _concept.StepText;
+            StepValue = _concept.StepValue;
         }
 
         public override void NavigateToImplementation(DTE dte)
