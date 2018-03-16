@@ -22,6 +22,7 @@ namespace Gauge.VisualStudio.Model
         {
             Function = function;
             StepText = stepText;
+            StepValue = Parser.StepValueRegex.Replace(stepText, "{}");
         }
 
         public CodeFunction Function { get; }

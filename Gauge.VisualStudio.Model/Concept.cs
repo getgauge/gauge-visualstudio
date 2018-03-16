@@ -30,6 +30,7 @@ namespace Gauge.VisualStudio.Model
             _project = project;
         }
 
+        public string StepText { get; set; }
         public string StepValue { get; set; }
         public string FilePath { get; set; }
         public int LineNumber { get; set; }
@@ -59,7 +60,8 @@ namespace Gauge.VisualStudio.Model
 
             return bytes.AllConceptsResponse.Concepts.Select(info => new Concept(_project)
             {
-                StepValue = info.StepValue.ParameterizedStepValue,
+                StepText = info.StepValue.ParameterizedStepValue,
+                StepValue = info.StepValue.StepValue,
                 FilePath = info.Filepath,
                 LineNumber = info.LineNumber
             });
@@ -77,7 +79,7 @@ namespace Gauge.VisualStudio.Model
                 var gaugeServiceClient = new GaugeServiceClient();
                 return GetAllConcepts().FirstOrDefault(
                     concept => string.CompareOrdinal(
-                                   gaugeServiceClient.GetParsedStepValueFromInput(_project, concept.StepValue),
+                                   gaugeServiceClient.GetParsedStepValueFromInput(_project, concept.StepText),
                                    gaugeServiceClient.GetParsedStepValueFromInput(_project, lineText)) == 0);
             }
             catch
