@@ -15,6 +15,7 @@
 using System.Collections.Generic;
 using EnvDTE;
 using Microsoft.VisualStudio.Text;
+using System;
 
 namespace Gauge.VisualStudio.Model
 {
@@ -27,5 +28,8 @@ namespace Gauge.VisualStudio.Model
         bool HasDuplicateImplementation(ITextSnapshotLine line);
         IEnumerable<string> GetAllStepsForCurrentProject();
         EnvDTE.Project VsProject { get; }
+        IEnumerable<Tuple<string, string>> GetAllStepText();
+        IEnumerable<CodeElement> GetAllClasses(EnvDTE.Project containingProject,
+            bool includeReferencedProjects = true);
     }
 }

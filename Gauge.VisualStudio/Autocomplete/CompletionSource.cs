@@ -57,9 +57,10 @@ namespace Gauge.VisualStudio.AutoComplete
 
             public GaugeCompletionSource(ITextBuffer buffer)
             {
-                var vsProject = new Func<EnvDTE.Project>(() => buffer.CurrentSnapshot.GetProject(GaugePackage.DTE));
-                _project = new Project(vsProject);
-                _concept = new Concept(vsProject.Invoke());
+                var vsProject = buffer.CurrentSnapshot.GetProject(GaugePackage.DTE);
+                var vsProjectFunc = new Func<EnvDTE.Project>(() => vsProject);
+                _project = ProjectFactory.Get(vsProject);
+                _concept = new Concept(vsProjectFunc.Invoke());
                 _buffer = buffer;
             }
 
@@ -71,8 +72,7 @@ namespace Gauge.VisualStudio.AutoComplete
                 var snapshot = _buffer.CurrentSnapshot;
                 var snapshotPoint = session.GetTriggerPoint(snapshot);
                 if (!snapshotPoint.HasValue) return;
-                var step = new Step(_project, snapshotPoint.Value.GetContainingLine());
-                completionSets.Add(new GaugeCompletionSet(snapshotPoint.Value, step, _concept));
+                completionSets.Add(new GaugeCompletionSet(snapshotPoint.Value, _project, _concept));
             }
 
             public void Dispose()

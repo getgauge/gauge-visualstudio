@@ -19,6 +19,7 @@ using Gauge.VisualStudio.Core.Loggers;
 using Gauge.VisualStudio.Loggers;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
+using Gauge.VisualStudio.Model;
 
 namespace Gauge.VisualStudio
 {
@@ -57,6 +58,8 @@ namespace Gauge.VisualStudio
                 StatusBarLogger.Log($"Initializing Gauge daemon for Project: {project.Name}");
                 GaugeService.Instance.RegisterGaugeProject(project, _gaugeDaemonOptions.MinPortRange,
                     _gaugeDaemonOptions.MaxPortRange);
+                StatusBarLogger.Log($"Initializing Gauge Project Cache: {project.Name}");
+                ProjectFactory.Initialize(project);
             }
             catch (Exception ex)
             {
@@ -77,6 +80,8 @@ namespace Gauge.VisualStudio
             var project = pHierarchy.ToProject();
             var slugifiedName = project.SlugifiedName();
 
+            StatusBarLogger.Log($"Initializing Gauge Project Cache: {project.Name}");
+            ProjectFactory.Delete(project.SlugifiedName());
             GaugeService.Instance.KillChildProcess(slugifiedName);
             GaugeService.Reset();
             return VSConstants.S_OK;

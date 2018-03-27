@@ -15,6 +15,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.Text;
+using System;
+using Gauge.Messages;
 
 namespace Gauge.VisualStudio.Model
 {
@@ -23,19 +25,22 @@ namespace Gauge.VisualStudio.Model
         private readonly IGaugeServiceClient _gaugeServiceClient;
 
         private readonly IProject _project;
+        private Lazy<ProtoStepValue> _stepValueFromInput;
+        private readonly Lazy<List<string>> _parameters;
+        private Lazy<string> _text;
 
         public Step(IProject project, ITextSnapshotLine inputLine, IGaugeServiceClient gaugeServiceClient)
         {
             _project = project;
             _gaugeServiceClient = gaugeServiceClient;
             ContainingLine = inputLine;
-            var stepValueFromInput = _gaugeServiceClient.GetStepValueFromInput(_project.VsProject, GetStepText(inputLine));
+            _stepValueFromInput = new Lazy<ProtoStepValue>(() => _gaugeServiceClient.GetStepValueFromInput(_project.VsProject, GetStepText(inputLine)));
 
-            if (stepValueFromInput == null)
+            if (_stepValueFromInput == null)
                 return;
 
-            Text = stepValueFromInput.ParameterizedStepValue;
-            Parameters = stepValueFromInput.Parameters.ToList();
+            _text = new Lazy<string>(() => _stepValueFromInput.IsValueCreated ? _stepValueFromInput.Value.ParameterizedStepValue : null);
+            _parameters = new Lazy<List<string>>(() => _stepValueFromInput.IsValueCreated ? _stepValueFromInput.Value.Parameters.ToList() : null);
         }
 
         public Step(IProject vsProject, ITextSnapshotLine inputLine) : this(vsProject, inputLine,
@@ -45,22 +50,11 @@ namespace Gauge.VisualStudio.Model
 
         public ITextSnapshotLine ContainingLine { get; }
 
-        public string Text { get; }
+        public string Text => _text.Value;
 
-        public List<string> Parameters { get; }
+        public List<string> Parameters => _parameters.Value;
 
         public bool HasInlineTable => CheckForInlineTable(ContainingLine);
-
-        public IEnumerable<string> GetAll()
-        {
-            var implementedSteps = _project.GetAllStepsForCurrentProject().ToList();
-            var parsedImplementations =
-                implementedSteps.Select(s => _gaugeServiceClient.GetParsedStepValueFromInput(_project.VsProject, s));
-            var unimplementedSteps = _gaugeServiceClient.GetAllStepsFromGauge(_project.VsProject)
-                .Where(s => !parsedImplementations.Contains(s.StepValue))
-                .Select(value => value.ParameterizedStepValue);
-            return unimplementedSteps.Union(implementedSteps);
-        }
 
         public static string GetStepText(ITextSnapshotLine line)
         {
