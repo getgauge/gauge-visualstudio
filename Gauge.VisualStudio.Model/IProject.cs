@@ -26,7 +26,6 @@ namespace Gauge.VisualStudio.Model
         IEnumerable<CodeElement> GetFunctionsForClass(CodeClass codeClass);
         CodeClass FindOrCreateClass(string className);
         bool HasDuplicateImplementation(ITextSnapshotLine line);
-        IEnumerable<string> GetAllStepsForCurrentProject();
         EnvDTE.Project VsProject { get; }
         IEnumerable<Tuple<string, string>> GetAllStepText();
         IEnumerable<CodeElement> GetAllClasses(EnvDTE.Project containingProject,

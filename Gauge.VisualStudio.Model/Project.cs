@@ -127,13 +127,6 @@ namespace Gauge.VisualStudio.Model
             return _implementationDuplicates.TryGetValue(Step.GetStepValue(line), out retval) && retval;
         }
 
-        public IEnumerable<string> GetAllStepsForCurrentProject()
-        {
-            return Implementations
-                .Where(implementation => implementation is StepImplementation)
-                .Select(implementation => implementation.StepText);
-        }
-
         public EnvDTE.Project VsProject => _vsProjectFunc.Invoke();
 
 

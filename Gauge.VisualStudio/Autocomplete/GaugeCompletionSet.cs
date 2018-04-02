@@ -26,7 +26,7 @@ namespace Gauge.VisualStudio.AutoComplete
     {
         private readonly List<Completion> _gaugeCompletions = new List<Completion>();
 
-        public GaugeCompletionSet(SnapshotPoint triggerPoint, IProject project, Concept concept)
+        public GaugeCompletionSet(SnapshotPoint triggerPoint, IProject project)
         {
             var line = triggerPoint.GetContainingLine();
             var prefix = line.GetText().TrimStart('*', ' ');

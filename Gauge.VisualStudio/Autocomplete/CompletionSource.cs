@@ -21,7 +21,6 @@ using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.Utilities;
-using Project = Gauge.VisualStudio.Model.Project;
 
 namespace Gauge.VisualStudio.AutoComplete
 {
@@ -51,7 +50,6 @@ namespace Gauge.VisualStudio.AutoComplete
         private class GaugeCompletionSource : ICompletionSource
         {
             private readonly ITextBuffer _buffer;
-            private readonly Concept _concept;
             private bool _disposed;
             private readonly IProject _project;
 
@@ -60,7 +58,6 @@ namespace Gauge.VisualStudio.AutoComplete
                 var vsProject = buffer.CurrentSnapshot.GetProject(GaugePackage.DTE);
                 var vsProjectFunc = new Func<EnvDTE.Project>(() => vsProject);
                 _project = ProjectFactory.Get(vsProject);
-                _concept = new Concept(vsProjectFunc.Invoke());
                 _buffer = buffer;
             }
 
@@ -72,7 +69,7 @@ namespace Gauge.VisualStudio.AutoComplete
                 var snapshot = _buffer.CurrentSnapshot;
                 var snapshotPoint = session.GetTriggerPoint(snapshot);
                 if (!snapshotPoint.HasValue) return;
-                completionSets.Add(new GaugeCompletionSet(snapshotPoint.Value, _project, _concept));
+                completionSets.Add(new GaugeCompletionSet(snapshotPoint.Value, _project));
             }
 
             public void Dispose()

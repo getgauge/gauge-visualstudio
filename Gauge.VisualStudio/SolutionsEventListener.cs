@@ -80,7 +80,7 @@ namespace Gauge.VisualStudio
             var project = pHierarchy.ToProject();
             var slugifiedName = project.SlugifiedName();
 
-            StatusBarLogger.Log($"Initializing Gauge Project Cache: {project.Name}");
+            StatusBarLogger.Log($"Clearing Gauge Project Cache: {project.Name}");
             ProjectFactory.Delete(project.SlugifiedName());
             GaugeService.Instance.KillChildProcess(slugifiedName);
             GaugeService.Reset();

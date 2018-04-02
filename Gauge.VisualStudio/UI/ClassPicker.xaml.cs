@@ -18,7 +18,6 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
-using EnvDTE;
 using Microsoft.CSharp;
 using Gauge.VisualStudio.Model;
 
