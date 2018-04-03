@@ -23,6 +23,5 @@ namespace Gauge.VisualStudio.Model
         string Text { get; }
         List<string> Parameters { get; }
         bool HasInlineTable { get; }
-        IEnumerable<string> GetAll();
     }
 }

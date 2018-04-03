@@ -24,7 +24,6 @@ using EnvDTE;
 using EnvDTE80;
 using Gauge.VisualStudio.Core.Exceptions;
 using Gauge.VisualStudio.Core.Extensions;
-using Gauge.VisualStudio.Model.Extensions;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
@@ -44,8 +43,9 @@ namespace Gauge.VisualStudio.Model
         private Dictionary<string, Implementation> _implementationMap;
         private Dictionary<string, bool> _implementationDuplicates;
         private readonly ProjectItemsEvents _projectItemsEvents;
-        private static Func<EnvDTE.Project> _vsProjectFunc;
+        private Func<EnvDTE.Project> _vsProjectFunc;
         private CommandEvents _commandEvents;
+        private IEnumerable<Tuple<string, string>> _stepTextCache;
 
         public Project(Func<EnvDTE.Project> vsProjectFuncFunc)
         {
@@ -127,14 +127,18 @@ namespace Gauge.VisualStudio.Model
             return _implementationDuplicates.TryGetValue(Step.GetStepValue(line), out retval) && retval;
         }
 
-        public IEnumerable<string> GetAllStepsForCurrentProject()
-        {
-            return Implementations
-                .Where(implementation => implementation is StepImplementation)
-                .Select(implementation => implementation.StepText);
-        }
-
         public EnvDTE.Project VsProject => _vsProjectFunc.Invoke();
+
+
+        public IEnumerable<Tuple<string, string>> GetAllStepText()
+        {
+            if (_stepTextCache == null)
+            {
+                System.Threading.Tasks.Task.Run(() => RefreshImplementations());
+                return Enumerable.Empty<Tuple<string, string>>();
+            }
+            return _stepTextCache;
+        }
 
         private List<Implementation> GetGaugeImplementations(EnvDTE.Project containingProject)
         {
@@ -155,12 +159,29 @@ namespace Gauge.VisualStudio.Model
 
             _implementationMap = new Dictionary<string, Implementation>();
             _implementationDuplicates = new Dictionary<string, bool>();
-            foreach(var i in gaugeImplementations)
+            foreach (var i in gaugeImplementations)
             {
                 _implementationMap.Add(i.StepValue, i);
                 _implementationDuplicates.Add(i.StepValue, _implementationDuplicates.ContainsKey(i.StepValue));
             }
+
+            PopulateStepTextCache();
+
             return gaugeImplementations;
+        }
+
+        private void PopulateStepTextCache()
+        {
+            var gaugeServiceClient = new GaugeServiceClient();
+            var implementedSteps = _implementationMap.Select(x => x.Value.StepText);
+            var unimplementedSteps = gaugeServiceClient.GetAllStepsFromGauge(VsProject)
+                .Where(s => !_implementationMap.ContainsKey(s.StepValue))
+                .Select(value => value.ParameterizedStepValue);
+            var concepts = new Concept(VsProject).GetAllConcepts();
+            var steps = unimplementedSteps.Union(implementedSteps);
+            _stepTextCache = concepts.Select(c => Tuple.Create("Concept", c.StepText))
+                .Union(steps.Where(s => concepts.All(c => string.CompareOrdinal(c.StepText, s) != 0) && !string.IsNullOrEmpty(s))
+                .Select(s => Tuple.Create("Step", s)));
         }
 
         private IEnumerable<StepImplementation> GetStepImplementations(IEnumerable<CodeElement> allClasses)

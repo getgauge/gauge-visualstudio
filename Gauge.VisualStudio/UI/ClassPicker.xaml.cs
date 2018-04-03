@@ -18,8 +18,8 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
-using EnvDTE;
 using Microsoft.CSharp;
+using Gauge.VisualStudio.Model;
 
 namespace Gauge.VisualStudio.UI
 {
@@ -31,11 +31,11 @@ namespace Gauge.VisualStudio.UI
         private readonly SolidColorBrush _redColor = new SolidColorBrush(Color.FromRgb(255, 0, 0));
         private bool _disposed;
 
-        public ClassPicker(Project project)
+        public ClassPicker(EnvDTE.Project project)
         {
             InitializeComponent();
             WindowStartupLocation = WindowStartupLocation.CenterScreen;
-            _classNames = new Model.Project(() => project).GetAllClasses(project, false).Select(element => element.Name).Take(10);
+            _classNames = ProjectFactory.Get(project).GetAllClasses(project, false).Select(element => element.Name).Take(10);
             ClassListBox.ItemsSource = _classNames;
         }
 

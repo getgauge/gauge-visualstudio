@@ -26,33 +26,29 @@ namespace Gauge.VisualStudio.AutoComplete
     {
         private readonly List<Completion> _gaugeCompletions = new List<Completion>();
 
-        public GaugeCompletionSet(SnapshotPoint triggerPoint, IStep step, Concept concept)
+        public GaugeCompletionSet(SnapshotPoint triggerPoint, IProject project)
         {
             var line = triggerPoint.GetContainingLine();
+            var prefix = line.GetText().TrimStart('*', ' ');
+            var completions = project.GetAllStepText();
+            var applicableCompletions = prefix.Length < 1
+                ? completions
+                : completions.Where(c => c.Item2.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
+
+            if (applicableCompletions.Count() <= 0) return;
             BitmapSource stepImageSource =
                 new BitmapImage(new Uri("pack://application:,,,/Gauge.VisualStudio;component/assets/glyphs/step.png"));
-
-            var concepts = concept.GetAllConcepts();
-            var prefix = line.GetText().TrimStart('*').TrimStart(' ');
-            var steps = step.GetAll().Where(s =>
-                concepts.All(c => string.CompareOrdinal(c.StepText, s) != 0) && !string.IsNullOrEmpty(s));
-            var applicableCompletions = prefix.Length < 1
-                ? steps
-                : steps.Where(s => s.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
-            var stepCompletions =
-                applicableCompletions.Select(x => new Completion(x, x, "Step", stepImageSource, "Step"));
-            _gaugeCompletions.AddRange(stepCompletions);
-
             BitmapSource conceptImageSource =
                 new BitmapImage(
                     new Uri("pack://application:,,,/Gauge.VisualStudio;component/assets/glyphs/concept.png"));
-            var applicableConceptCompletions = prefix.Length < 1
-                ? concepts
-                : concepts.Where(s => s.StepText.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
-            _gaugeCompletions.AddRange(applicableConceptCompletions.Select(x =>
-                new Completion(x.StepText, x.StepText, "Concept", conceptImageSource, "Concept")));
 
-            if (_gaugeCompletions.Count <= 0) return;
+            _gaugeCompletions.AddRange(applicableCompletions.Select(c => {
+                if (c.Item1 == "Step")
+                {
+                    return new Completion(c.Item2, c.Item2, "Step", stepImageSource, "Step");
+                }
+                return new Completion(c.Item2, c.Item2, "Concept", conceptImageSource, "Concept");
+            }));
 
             var start = triggerPoint;
             while (start > line.Start && !char.IsWhiteSpace((start - 1).GetChar()))

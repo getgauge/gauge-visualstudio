@@ -36,7 +36,7 @@ namespace Gauge.VisualStudio.Highlighting
             _textView = textView;
             _textView.LayoutChanged += OnLayoutChanged;
             _textView.Caret.PositionChanged += OnCaretMove;
-            _project = new Project(() => textView.TextSnapshot.GetProject(GaugePackage.DTE));
+            _project = ProjectFactory.Get(textView.TextSnapshot.GetProject(GaugePackage.DTE));
         }
 
         public void Dispose()

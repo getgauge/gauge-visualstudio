@@ -25,13 +25,13 @@ namespace Gauge.VisualStudio.GotoDefn
     internal sealed class GotoDefnCommandFilter : IOleCommandTarget
     {
         private readonly SVsServiceProvider _serviceProvider;
-        private readonly Lazy<Project> _project;
+        private readonly Lazy<IProject> _project;
 
         public GotoDefnCommandFilter(IWpfTextView textView, SVsServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
             TextView = textView;
-            _project = new Lazy<Project>(() => new Project(() => TextView.TextBuffer.CurrentSnapshot.GetProject(GaugePackage.DTE)));
+            _project = new Lazy<IProject>(() => ProjectFactory.Get(TextView.TextBuffer.CurrentSnapshot.GetProject(GaugePackage.DTE)));
         }
 
         private IWpfTextView TextView { get; }
