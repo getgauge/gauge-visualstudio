@@ -46,6 +46,6 @@ if($env:NIGHTLY)
 }
 
 $manifest = [xml](Get-Content .\Gauge.VisualStudio\source.extension.vsixmanifest)
-$manifest.PackageManifest.Metadata.Identity | %{$_.Version} | Out-File "artifacts\version.txt"
+$manifest.PackageManifest.Metadata.Identity | %{$_.Version} | Out-File -encoding ASCII "artifacts\version.txt"
 
 &$msbuild $sln /m /nologo "/p:configuration=release;OutDir=$($outputPath);VisualStudioVersion=14.0;RestorePackages=false;DeployExtension=false" /t:rebuild /verbosity:$($verbosity)
