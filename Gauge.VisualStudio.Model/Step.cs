@@ -35,10 +35,6 @@ namespace Gauge.VisualStudio.Model
             _gaugeServiceClient = gaugeServiceClient;
             ContainingLine = inputLine;
             _stepValueFromInput = new Lazy<ProtoStepValue>(() => _gaugeServiceClient.GetStepValueFromInput(_project.VsProject, GetStepText(inputLine)));
-
-            if (_stepValueFromInput == null)
-                return;
-
             _text = new Lazy<string>(() => _stepValueFromInput.IsValueCreated ? _stepValueFromInput.Value.ParameterizedStepValue : null);
             _parameters = new Lazy<List<string>>(() => _stepValueFromInput.IsValueCreated ? _stepValueFromInput.Value.Parameters.ToList() : null);
         }
@@ -50,9 +46,9 @@ namespace Gauge.VisualStudio.Model
 
         public ITextSnapshotLine ContainingLine { get; }
 
-        public string Text => _text.Value;
+        public string Text => _text.Value ?? _stepValueFromInput.Value.ParameterizedStepValue;
 
-        public List<string> Parameters => _parameters.Value;
+        public List<string> Parameters => _parameters.Value ?? _stepValueFromInput.Value.Parameters.ToList();
 
         public bool HasInlineTable => CheckForInlineTable(ContainingLine);
 
