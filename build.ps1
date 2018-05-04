@@ -45,4 +45,7 @@ if($env:NIGHTLY)
   & "$(Split-Path $MyInvocation.MyCommand.Path)\version_nightly.ps1" -nightly $nightly
 }
 
+$manifext = [xml](Get-Content .\Gauge.VisualStudio\source.extension.vsixmanifest)
+$manifest.PackageManifest.Metadata.Identity | %{$_.Version} | Out-File "$($outputPath)\version.txt"
+
 &$msbuild $sln /m /nologo "/p:configuration=release;OutDir=$($outputPath);VisualStudioVersion=14.0;RestorePackages=false;DeployExtension=false" /t:rebuild /verbosity:$($verbosity)
