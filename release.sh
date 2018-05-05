@@ -10,4 +10,9 @@ release_description=$(ruby -e "$(curl -sSfL https://github.com/getgauge/gauge/ra
 
 $GOPATH/bin/github-release release -u $githubUser -r $repoName --draft -t "v$version" -d "$release_description" -n "$repoName $version"
 
-$GOPATH/bin/github-release -v upload -u $githubUser -r $repoName -t "v$version" -n $i -f "Gauge.VisualStudio.vsix"
+for i in `ls *.vsix`; do
+    $GOPATH/bin/github-release -v upload -u $githubUser -r $repoName -t "v$version" -n $i -f $i
+    if [ $? -ne 0 ];then
+        exit 1
+    fi
+done
