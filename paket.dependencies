@@ -3,9 +3,9 @@ framework: net46
 source https://www.nuget.org/api/v2/
 
 nuget NuGet.CommandLine
-nuget Gauge.CSharp.Core 0.2.1 framework: >= net45
-nuget Gauge.CSharp.Lib 0.6.1 framework: >= net45
-nuget Google.Protobuf 3.1.0 framework: >= net45
+nuget Gauge.CSharp.Core framework: >= net45
+nuget Gauge.CSharp.Lib framework: >= net45
+nuget Google.Protobuf framework: >= net45
 nuget Microsoft.CSharp 4.0.0
 nuget VSSDK.ComponentModelHost 12.0.4 framework: >= net45
 nuget VSSDK.CoreUtility 12.0.4
@@ -26,9 +26,9 @@ nuget VSSDK.Threading.12 12.0.4
 nuget VSSDK.VSLangProj 7.0.4 framework: >= net45
 nuget EnvDTE80 8.0.0
 nuget Microsoft.VSSDK.BuildTools 14.3.25420
-nuget Microsoft.VisualStudio.TestPlatform.objectmodel 14.0.0
+nuget Microsoft.TestPlatform.objectmodel 11.0.0
 nuget Microsoft.VisualStudio.TestWindow.Interfaces 11.0.61030
-nuget Microsoft.Net.Compilers
+nuget Microsoft.Net.Compilers 2.4.0
 
 group Test
     framework: net46

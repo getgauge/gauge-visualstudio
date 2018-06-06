@@ -105,7 +105,7 @@
     <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v4.6'">
       <ItemGroup>
         <Reference Include="Gauge.CSharp.Core">
-          <HintPath>..\packages\Gauge.CSharp.Core\lib\net45\Gauge.CSharp.Core.dll</HintPath>
+          <HintPath>..\packages\Gauge.CSharp.Core\lib\net46\Gauge.CSharp.Core.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>
@@ -116,7 +116,7 @@
     <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v4.6'">
       <ItemGroup>
         <Reference Include="Gauge.CSharp.Lib">
-          <HintPath>..\packages\Gauge.CSharp.Lib\lib\net45\Gauge.CSharp.Lib.dll</HintPath>
+          <HintPath>..\packages\Gauge.CSharp.Lib\lib\net46\Gauge.CSharp.Lib.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>
