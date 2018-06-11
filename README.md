@@ -92,6 +92,7 @@ Usage: `Right Click` -> `Go to Declaration` or hit F12
 
 
 A specification file can be formatted easily using `Right Click` -> `Format File`
+Or use the command: `Ctrl+K, Ctrl+D`
 
 This formats the specification including indentation of tables and
 steps.
