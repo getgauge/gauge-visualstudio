@@ -11,3 +11,4 @@ artifacts
 Gauge.VisualStudio.sln.ide/
 .paket/paket.exe
 paket-files
+.vs

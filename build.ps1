@@ -18,7 +18,7 @@ If (Test-Path $outputPath)
   Remove-Item $outputPath -recurse
 }
 New-Item -Itemtype directory $outputPath -Force
-$msbuild="$($env:systemroot)\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe"
+$msbuild="${env:ProgramFiles(x86)}\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\MSBuild.exe"
 
 $paketBootstraper=Resolve-path -Relative ".paket\paket.bootstrapper.exe"
 
@@ -48,4 +48,4 @@ if($env:NIGHTLY)
 $manifest = [xml](Get-Content .\Gauge.VisualStudio\source.extension.vsixmanifest)
 $manifest.PackageManifest.Metadata.Identity | %{$_.Version} | Out-File -encoding ASCII "artifacts\version.txt"
 
-&$msbuild $sln /m /nologo "/p:configuration=release;OutDir=$($outputPath);VisualStudioVersion=14.0;RestorePackages=false;DeployExtension=false" /t:rebuild /verbosity:$($verbosity)
+&$msbuild $sln /m /nologo "/p:configuration=release;OutDir=$($outputPath);VisualStudioVersion=15.0;RestorePackages=false;DeployExtension=false" /t:rebuild /verbosity:$($verbosity)
