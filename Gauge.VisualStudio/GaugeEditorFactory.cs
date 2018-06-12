@@ -58,6 +58,7 @@ namespace Gauge.VisualStudio
             if (pTextBuffer == null)
                 return VSConstants.E_FAIL;
 
+            ThreadHelper.ThrowIfNotOnUIThread();
             var textBufferSite = pTextBuffer as IObjectWithSite;
             if (textBufferSite != null)
                 textBufferSite.SetSite(_serviceProvider);
@@ -107,6 +108,7 @@ namespace Gauge.VisualStudio
 
         private IVsTextLines GetTextBuffer(IntPtr docDataExisting)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
             IVsTextLines textLines;
             if (docDataExisting == IntPtr.Zero)
             {
@@ -140,6 +142,7 @@ namespace Gauge.VisualStudio
 
             public TextBufferEventListener(IVsTextLines textLines)
             {
+                ThreadHelper.ThrowIfNotOnUIThread();
                 _textLines = textLines;
                 var connectionPointContainer = textLines as IConnectionPointContainer;
                 var bufferEventsGuid = typeof(IVsTextBufferDataEvents).GUID;
@@ -153,6 +156,7 @@ namespace Gauge.VisualStudio
 
             public int OnLoadCompleted(int fReload)
             {
+                ThreadHelper.ThrowIfNotOnUIThread();
                 _connectionPoint.Unadvise(_cookie);
 
                 var languageServiceId = typeof(GaugeLanguageInfo).GUID;

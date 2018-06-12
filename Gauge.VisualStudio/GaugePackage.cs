@@ -55,6 +55,7 @@ namespace Gauge.VisualStudio
 
         protected override void Initialize()
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
             Debug.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", ToString()));
             try
             {

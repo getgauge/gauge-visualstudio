@@ -39,6 +39,7 @@ namespace Gauge.VisualStudio.GotoDefn
 
         public int Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
             if (VsShellUtilities.IsInAutomationFunction(_serviceProvider))
                 return Next.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
 
@@ -71,6 +72,7 @@ namespace Gauge.VisualStudio.GotoDefn
 
         public int QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
             if ((VSConstants.VSStd97CmdID) prgCmds[0].cmdID != VSConstants.VSStd97CmdID.GotoDefn)
                 return Next.QueryStatus(pguidCmdGroup, cCmds, prgCmds, pCmdText);
 

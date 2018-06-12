@@ -45,6 +45,7 @@ namespace Gauge.VisualStudio.AutoComplete
 
         public int Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
             if (VsShellUtilities.IsInAutomationFunction(_serviceProvider))
                 return Next.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
             var commandID = nCmdID;
@@ -98,6 +99,7 @@ namespace Gauge.VisualStudio.AutoComplete
 
         public int QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
             switch ((VSConstants.VSStd2KCmdID) prgCmds[0].cmdID)
             {
                 case VSConstants.VSStd2KCmdID.AUTOCOMPLETE:

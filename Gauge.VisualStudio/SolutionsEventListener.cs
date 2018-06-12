@@ -20,6 +20,7 @@ using Gauge.VisualStudio.Loggers;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 using Gauge.VisualStudio.Model;
+using Microsoft.VisualStudio.Shell;
 
 namespace Gauge.VisualStudio
 {
@@ -32,6 +33,7 @@ namespace Gauge.VisualStudio
 
         public SolutionsEventListener(GaugeDaemonOptions gaugeDaemonOptions, IServiceProvider serviceProvider)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
             _gaugeDaemonOptions = gaugeDaemonOptions;
             _solution = serviceProvider.GetService(typeof(SVsSolution)) as IVsSolution;
             ErrorHandler.ThrowOnFailure(_solution.AdviseSolutionEvents(this, out _solutionCookie));
@@ -124,6 +126,7 @@ namespace Gauge.VisualStudio
 
         private void Dispose(bool disposing)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
             if (_disposed || _solution == null || _solutionCookie == 0)
                 return;
 

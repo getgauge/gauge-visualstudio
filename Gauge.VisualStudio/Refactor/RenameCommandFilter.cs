@@ -45,6 +45,7 @@ namespace Gauge.VisualStudio.Refactor
 
         public int QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
             if ((VSConstants.VSStd2KCmdID) prgCmds[0].cmdID != VSConstants.VSStd2KCmdID.RENAME)
                 return Next.QueryStatus(pguidCmdGroup, cCmds, prgCmds, pCmdText);
 
@@ -54,6 +55,7 @@ namespace Gauge.VisualStudio.Refactor
 
         public int Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
             if (VsShellUtilities.IsInAutomationFunction(_serviceProvider))
                 return Next.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
 
@@ -150,6 +152,7 @@ namespace Gauge.VisualStudio.Refactor
 
         private static void ReloadChangedDocuments(APIMessage response)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
             var serviceProvider = Package.GetGlobalService(typeof(IServiceProvider)) as IServiceProvider;
             var runningDocumentTable = new RunningDocumentTable(new ServiceProvider(serviceProvider));
 
@@ -162,6 +165,7 @@ namespace Gauge.VisualStudio.Refactor
 
         private static IVsThreadedWaitDialog2 CreateProgressDialog()
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
             IVsThreadedWaitDialog2 dialog;
             var oleServiceProvider = Package.GetGlobalService(typeof(IServiceProvider)) as IServiceProvider;
             var dialogFactory = new ServiceProvider(oleServiceProvider)
