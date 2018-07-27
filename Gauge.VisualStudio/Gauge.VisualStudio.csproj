@@ -201,13 +201,6 @@
     <TemplateBuilderTargets Condition=" '$(TemplateBuilderTargets)'=='' ">$(SolutionDir)\packages\TemplateBuilder.1.1.4.6-beta\tools\ligershark.templates.targets</TemplateBuilderTargets>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <Choose>
-    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v4.6'">
-      <PropertyGroup>
-        <__paket__Grpc_Core_targets>net45\Grpc.Core</__paket__Grpc_Core_targets>
-      </PropertyGroup>
-    </When>
-  </Choose>
   <Import Project="$(VsSDKInstall)\Microsoft.VSSDK.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
@@ -298,19 +291,6 @@
       </ItemGroup>
     </When>
   </Choose>
-  <Choose>
-    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v4.6'">
-      <ItemGroup>
-        <Reference Include="Grpc.Core">
-          <HintPath>..\packages\Grpc.Core\lib\net45\Grpc.Core.dll</HintPath>
-          <Private>True</Private>
-          <Paket>True</Paket>
-        </Reference>
-      </ItemGroup>
-    </When>
-  </Choose>
-  <Import Project="..\packages\Grpc.Core\build\$(__paket__Grpc_Core_targets).targets" Condition="Exists('..\packages\Grpc.Core\build\$(__paket__Grpc_Core_targets).targets')" Label="Paket" />
-  <Import Project="..\packages\Microsoft.VisualStudio.SDK.Analyzers\build\Microsoft.VisualStudio.SDK.Analyzers.targets" Condition="Exists('..\packages\Microsoft.VisualStudio.SDK.Analyzers\build\Microsoft.VisualStudio.SDK.Analyzers.targets')" Label="Paket" />
   <ItemGroup>
     <Analyzer Include="..\packages\Microsoft.VisualStudio.SDK.Analyzers\analyzers\cs\Microsoft.VisualStudio.SDK.Analyzers.dll">
       <Paket>True</Paket>
@@ -367,17 +347,6 @@
       <ItemGroup>
         <Reference Include="stdole">
           <HintPath>..\packages\stdole\lib\net10\stdole.dll</HintPath>
-          <Private>True</Private>
-          <Paket>True</Paket>
-        </Reference>
-      </ItemGroup>
-    </When>
-  </Choose>
-  <Choose>
-    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v4.6'">
-      <ItemGroup>
-        <Reference Include="System.Interactive.Async">
-          <HintPath>..\packages\System.Interactive.Async\lib\net46\System.Interactive.Async.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>

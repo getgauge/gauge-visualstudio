@@ -26,7 +26,7 @@ nuget VSSDK.Threading.12 12.0.4
 nuget VSSDK.VSLangProj 7.0.4 framework: >= net45
 nuget EnvDTE80 8.0.0
 nuget Microsoft.VSSDK.BuildTools
-nuget Microsoft.TestPlatform.ObjectModel
+nuget Microsoft.TestPlatform.objectmodel 11.0.0
 nuget Microsoft.VisualStudio.TestWindow.Interfaces 11.0.61030
 nuget Microsoft.Net.Compilers
 
