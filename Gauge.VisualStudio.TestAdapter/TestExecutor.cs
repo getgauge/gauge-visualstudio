@@ -29,14 +29,9 @@ namespace Gauge.VisualStudio.TestAdapter
 
         public void RunTests(IEnumerable<TestCase> tests, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
-            dynamic runConfiguration =
-                runContext.RunSettings.GetSettings(Constants.RunConfigurationSettingsName);
-
             // "Run tests in parallel" option from the UI sets MaxCpuCount in RunConfiguration
-            // By default the MaxCpuCount=0, which is ambiguous with default(int)
-            // Use MaxCpuCountSet property to determine if user initiated the test run in parallel.
             // Ref: https://blogs.msdn.microsoft.com/devops/2016/10/10/parallel-test-execution/
-            bool isParallelRun = runConfiguration !=null && runConfiguration.Settings.MaxCpuCountSet;
+            var isParallelRun = runContext.RunSettings.SettingsXml.Contains("<MaxCpuCount>");
             if (isParallelRun && runContext.IsBeingDebugged)
             {
                 frameworkHandle.SendMessage(TestMessageLevel.Error, "Cannot debug specs in parallel, disable parallel run to debug specs.");
