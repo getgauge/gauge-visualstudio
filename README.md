@@ -148,7 +148,7 @@ This Test Explorer feature can be used as mentioned in [Search and filter the te
 Debugging can be performed the same way spec execution works.
 
 `Right click` -> `Debug Selected Tests` on a scenario(s) in the Test explorer. Execution
-will halt on marked [breakpoints](https://msdn.microsoft.com/en-us/library/5557y8b4.aspx>).
+will halt on marked [breakpoints](https://docs.microsoft.com/en-us/visualstudio/debugger/using-breakpoints>).
 
 ## Rephrase Steps
 
