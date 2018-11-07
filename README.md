@@ -13,7 +13,7 @@ Visual Studio plugin for Gauge - wires up Visual Studio features to Gauge.
 -  Click on `Download` and select `Install` option.
 -  Restart Visual Studio in order for the changes to take effect.
 
-The extension resides on the [Visual Studio Gallery](https://marketplace.visualstudio.com/itemsitemName=vs-publisher-1071478.GaugepluginforVisualStudio)
+The extension resides on the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=vs-publisher-1071478.GaugepluginforVisualStudio)
 
 ![install plugin](images/VS_Installation.png)
 
@@ -23,7 +23,7 @@ The extension resides on the [Visual Studio Gallery](https://marketplace.visuals
 
 ###  Install project and item templates from Visual Studio Marketplace
 
--  Download the templates from [Visual Studio MarketPlace](https://marketplace.visualstudio.com/items?itemName=vs-publisher-1071478.gauge-visualstudio-templates>).
+-  Download the templates from [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=vs-publisher-1071478.gauge-visualstudio-templates).
 -  Install the Gauge VisualStudio Templates - vsix
 
 ### Create Gauge Project
