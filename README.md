@@ -174,11 +174,7 @@ will halt on marked [breakpoints](https://docs.microsoft.com/en-us/visualstudio/
 ![Create FileType](images/Create_FileType.png)
 
 ## Development Environment Setup
-
-- Use [BoxStarter](http://boxstarter.org/) to setup Windows box. 
-  - Install Windows
-  - Hit http://bit.ly/20pMrXY from Internet Explorer/Edge.
-  - Install Visual Studio and Resharper separately (You could consider installing from an ISO).
+Refer [here](https://github.com/getgauge/gauge-visualstudio/wiki) for development setup.
 
 ## License
 
