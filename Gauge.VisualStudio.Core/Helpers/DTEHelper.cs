@@ -25,7 +25,7 @@ namespace Gauge.VisualStudio.Core.Helpers
 {
     public static class DTEHelper
     {
-        private static readonly string[] TestRunners = {"vstest.executionengine.x86", "vstest.executionengine", "te.processhost.managed"};
+        private static readonly string[] TestRunners = {"vstest.executionengine.x86", "vstest.executionengine", "te.processhost.managed", "testhost.x86", "testhost"};
 
         public static DTE GetCurrent()
         {
