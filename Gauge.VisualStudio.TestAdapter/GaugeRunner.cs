@@ -19,6 +19,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Json;
 using System.Text;
+using System.Threading;
 using Gauge.VisualStudio.Core;
 using Gauge.VisualStudio.Core.Helpers;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
@@ -38,6 +39,7 @@ namespace Gauge.VisualStudio.TestAdapter
         private readonly List<TestCase> _tests;
         private readonly IGaugeProcess _gaugeProcess;
         private readonly List<TestCase> _pendingTests;
+        private bool _gaugeProcessExited;
 
         public GaugeRunner(IEnumerable<TestCase> tests, bool isBeingDebugged, bool isParallelRun, IFrameworkHandle frameworkHandle)
         {
@@ -60,6 +62,7 @@ namespace Gauge.VisualStudio.TestAdapter
 
             _gaugeProcess = GaugeProcess.ForExecution(projectRoot, scenarios, gaugeCustomBuildPath, _isBeingDebugged, isParallelRun);
             _gaugeProcess.OutputDataReceived += OnOutputDataReceived;
+            _gaugeProcess.Exited += exitHandler;
         }
 
         public void Run()
@@ -77,7 +80,7 @@ namespace Gauge.VisualStudio.TestAdapter
                     _frameworkHandle.SendMessage(TestMessageLevel.Informational,
                         $"Attaching to ProcessID {_gaugeProcess.Id}");
                 }
-                _gaugeProcess.WaitForExit();
+                waitForGaugeProcessExit();
             }
             catch (Exception ex)
             {
@@ -96,6 +99,22 @@ namespace Gauge.VisualStudio.TestAdapter
             }
         }
 
+        private void waitForGaugeProcessExit()
+        {
+            const int SleepAmount = 100;
+            int elapsedTime = 0;
+            while (!_gaugeProcessExited)
+            {
+                elapsedTime += SleepAmount;
+                if (elapsedTime > 30000)
+                {
+                    break;
+                }
+
+                Thread.Sleep(SleepAmount);
+            }
+        }
+
         public void Cancel()
         {
             _gaugeProcess.Kill();
@@ -103,6 +122,11 @@ namespace Gauge.VisualStudio.TestAdapter
             {
                 _frameworkHandle.RecordEnd(pendingTest, TestOutcome.None);
             }
+        }
+
+        private void exitHandler(object sender, System.EventArgs e)
+        {
+            _gaugeProcessExited = true;
         }
 
         private void OnOutputDataReceived(object sender, DataReceivedEventArgs args)
