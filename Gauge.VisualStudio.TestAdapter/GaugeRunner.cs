@@ -80,7 +80,7 @@ namespace Gauge.VisualStudio.TestAdapter
                     _frameworkHandle.SendMessage(TestMessageLevel.Informational,
                         $"Attaching to ProcessID {_gaugeProcess.Id}");
                 }
-                waitForGaugeProcessExit();
+                _waitForGaugeProcessExit();
             }
             catch (Exception ex)
             {
@@ -99,7 +99,7 @@ namespace Gauge.VisualStudio.TestAdapter
             }
         }
 
-        private void waitForGaugeProcessExit()
+        private void _waitForGaugeProcessExit()
         {
             const int SleepAmount = 100;
             int elapsedTime = 0;
