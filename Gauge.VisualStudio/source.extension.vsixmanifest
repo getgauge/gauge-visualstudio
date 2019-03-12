@@ -3,7 +3,7 @@
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011"
                  xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="Gauge.VS2013.ThoughtWorks.9731a722-d394-4c99-9df7-758867938fd6" Version="0.3.7" Language="en-US"
+        <Identity Id="Gauge.VS2013.ThoughtWorks.9731a722-d394-4c99-9df7-758867938fd6" Version="0.3.8" Language="en-US"
                   Publisher="ThoughtWorks Inc." />
         <DisplayName>Gauge plugin for VisualStudio</DisplayName>
         <Description xml:space="preserve">Visual Studio Extension for Gauge.</Description>
