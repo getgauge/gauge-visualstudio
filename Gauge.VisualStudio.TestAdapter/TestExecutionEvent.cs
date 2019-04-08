@@ -40,6 +40,9 @@ namespace Gauge.VisualStudio.TestAdapter
         [DataMember(Name="stream")]
         public int Stream { get; set; }
 
+        [DataMember(Name = "message")]
+        public string Message { get; set; }
+
         [DataMember(Name = "result")]
         public TestExecutionResult Result { get; set; }
     }

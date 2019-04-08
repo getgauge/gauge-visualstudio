@@ -34,6 +34,7 @@ namespace Gauge.VisualStudio.TestAdapter
         private const string ErrorEvent = "error";
         private const string SuiteEndEvent = "suiteEnd";
         private const string SpecEndEvent = "specEnd";
+        private const string OutEvent = "out";
         private readonly IFrameworkHandle _frameworkHandle;
         private readonly bool _isBeingDebugged;
         private readonly List<TestCase> _tests;
@@ -175,6 +176,13 @@ namespace Gauge.VisualStudio.TestAdapter
                         _frameworkHandle.RecordEnd(targetTestCase, testResult.Outcome);
                         _pendingTests.Remove(targetTestCase);
                         break;
+                    case OutEvent:
+                        if (e.Message.Contains("Unable to create Sandbox"))
+                        {
+                            MarkAllTestsFailed(e.Message);
+                            return;
+                        }
+                        break;
                     default:
                         return;
                 }
@@ -189,6 +197,20 @@ namespace Gauge.VisualStudio.TestAdapter
                 foreach (var testExecutionError in errors)
                     result.Messages.Add(new TestResultMessage(TestResultMessage.StandardErrorCategory,
                         $"{testExecutionError.Text}\n{testExecutionError.StackTrace}"));
+                _frameworkHandle.RecordResult(result);
+                _frameworkHandle.RecordEnd(test, result.Outcome);
+            }
+        }
+
+        private void MarkAllTestsFailed(string message)
+        {
+            foreach (var test in _tests)
+            {
+                var result = new TestResult(test) { Outcome = TestOutcome.Failed };
+                    result.Messages.Add(new TestResultMessage(TestResultMessage.StandardErrorCategory,
+                        message));
+                    result.Messages.Add(new TestResultMessage(TestResultMessage.StandardErrorCategory,
+                    "\nTry running your test after building your project."));
                 _frameworkHandle.RecordResult(result);
                 _frameworkHandle.RecordEnd(test, result.Outcome);
             }
