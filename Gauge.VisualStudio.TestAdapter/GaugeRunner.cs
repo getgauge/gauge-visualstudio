@@ -137,7 +137,17 @@ namespace Gauge.VisualStudio.TestAdapter
                 return;
             using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(args.Data)))
             {
-                var e = (TestExecutionEvent) serializer.ReadObject(ms);
+                TestExecutionEvent e;
+                try
+                {
+                    e = (TestExecutionEvent)serializer.ReadObject(ms);
+                }
+                catch (Exception err)
+                {
+                    _frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Failed to deserialize : {args.Data}\n Error : {err}");
+                    MarkAllTestsFailed();
+                    return;
+                }
                 switch (e.EventType)
                 {
                     case ErrorEvent:
