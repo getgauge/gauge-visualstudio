@@ -19,7 +19,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Json;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using Gauge.VisualStudio.Core;
 using Gauge.VisualStudio.Core.Helpers;
@@ -136,8 +135,7 @@ namespace Gauge.VisualStudio.TestAdapter
             var serializer = new DataContractJsonSerializer(typeof(TestExecutionEvent));
             if (args?.Data == null || !args.Data.Trim().StartsWith("{"))
                 return;
-            string data = EscapeCharacterSequence(args.Data);
-            using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(data)))
+            using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(args.Data)))
             {
                 TestExecutionEvent e;
                 try
@@ -146,7 +144,7 @@ namespace Gauge.VisualStudio.TestAdapter
                 }
                 catch (Exception err)
                 {
-                    _frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Failed to deserialize : {data}\n Error : {err}");
+                    _frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Failed to deserialize : {args.Data}\n Error : {err}");
                     return;
                 }
                 switch (e.EventType)
@@ -198,18 +196,6 @@ namespace Gauge.VisualStudio.TestAdapter
                         return;
                 }
             }
-        }
-
-        private static string EscapeCharacterSequence(string data)
-        {
-            data = Regex.Replace(data, @"([^\\])\\([^\\])", "$1\\\\$2");
-            data = Regex.Replace(data, "\t", "\\t");
-            data = Regex.Replace(data, "\n", "\\n");
-            data = Regex.Replace(data, "\r", "\\r");
-            data = Regex.Replace(data, "\b", "\\b");
-            data = Regex.Replace(data, "\f", "\\f");
-            data = Regex.Replace(data, "\v", "\\v");
-            return data;
         }
 
         private void MarkAllTestsFailed(params TestExecutionError[] errors)
