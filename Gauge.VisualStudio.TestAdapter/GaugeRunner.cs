@@ -146,8 +146,7 @@ namespace Gauge.VisualStudio.TestAdapter
                 }
                 catch (Exception err)
                 {
-                    _frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Failed to deserialize : {args.Data}\n Error : {err}");
-                    MarkAllTestsFailed();
+                    _frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Failed to deserialize : {data}\n Error : {err}");
                     return;
                 }
                 switch (e.EventType)
