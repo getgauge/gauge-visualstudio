@@ -5,6 +5,11 @@ Visual Studio plugin for Gauge - wires up Visual Studio features to Gauge.
  
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v1.4%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
 
+## Deprecation Notice
+*[VS Code](https://code.visualstudio.com/) has good support for .Net Core and the [Gauge VS Code](https://github.com/getgauge/gauge-vscode/) works great with the [Gauge dotnet plugin](https://github.com/getgauge/gauge-dotnet). We are deprecating the Visual Studio Gauge plugin in favour of the [Gauge VS Code plugin](https://github.com/getgauge/gauge-vscode/).*
+
+*The Gauge team will stop addding new features to the Visual Studio Gauge plugin, only bug fixes will be done henceforth. The Gauge team will officially end support for Visual Studio Gauge plugin in October 2020.*
+
 ## Installation
 
 -  Open Visual Studio Extension Manager from `Tools` ->
