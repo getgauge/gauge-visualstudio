@@ -10,6 +10,8 @@ Visual Studio plugin for Gauge - wires up Visual Studio features to Gauge.
 
 *The Gauge team will stop addding new features to the Visual Studio Gauge plugin, only bug fixes will be done henceforth. The Gauge team will officially end support for Visual Studio Gauge plugin in October 2020.*
 
+*If you wish to take up owership of this plugin, please contact us. We would be happy to transfer the plugin ownwership*
+
 ## Installation
 
 -  Open Visual Studio Extension Manager from `Tools` ->
